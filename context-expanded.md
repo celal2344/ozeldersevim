@@ -69,14 +69,16 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 
 ## Visual References In Repo
 
-- `image.png`: lesson request first step, lesson/category selection.
-- `image copy.png`: lesson request location step with city/district fields.
-- `image copy 2.png`: lesson request contact details and consent step.
-- `image copy 3.png`: search results page with SEO heading, breadcrumbs, filters, sorting, and teacher cards.
-- `image copy 4.png`: teacher detail/profile page with profile summary, reviews, price, CTA, and verification signals.
-- `image copy 5.png`: role choice/registration entry page.
-- `ornek-anasayfa.jpeg`: homepage visual direction.
-- `ornek-dashboardlar-ve-anasayfa.jpeg`: homepage plus student/teacher dashboard visual direction.
+These files are design references only. Do not use them directly as website images or production assets.
+
+- `docs/design-references/image.png`: lesson request first step, lesson/category selection.
+- `docs/design-references/image copy.png`: lesson request location step with city/district fields.
+- `docs/design-references/image copy 2.png`: lesson request contact details and consent step.
+- `docs/design-references/image copy 3.png`: search results page with SEO heading, breadcrumbs, filters, sorting, and teacher cards.
+- `docs/design-references/image copy 4.png`: teacher detail/profile page with profile summary, reviews, price, CTA, and verification signals.
+- `docs/design-references/image copy 5.png`: role choice/registration entry page.
+- `docs/design-references/örnek-anasayfa.jpeg`: homepage visual direction.
+- `docs/design-references/örnek-dashboardlar-ve-anasayfa.jpeg`: homepage plus student/teacher dashboard visual direction.
 
 ## Main User Roles
 

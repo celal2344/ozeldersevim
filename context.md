@@ -22,10 +22,10 @@ https://www.ozeldersalani.com/ bu siteyle neredeyse aynı olan bir özel ders si
 öğretmenler için yorum yapma ve puanlama sistemleri olacak 
 seo ve google görünürlüğü çok önemli olabildiğince googledan öğretmen veya ders ismi aratıldığında sitemiziin görünmesini istiyoruz
 öğretmenlerin konumları, kazançları, verdiği dersler, tecrübe süresi vb. detaylar olmalı bu detaylar özeldersalani sitesindekine benzer olmalı
-öğrenci öğretmene yapacağı ders isteği formu adımlarının bazılırının ekran görüntüleri mevcut image, image copy, image copy 2, bunlardan ilham alınabilir bu özel ders başvuru adımları
-arama sonucu ekran görüntüsü paylaştım image copy 3 sonuç listesini, image copy 4 ilanı veren öğretmene tıklanınca açılan detay sayfasını gösteriyor, görsel kısımlarını şimdilik atlayabilirsin görsel eklemeyi daha sonraya bırakacağız
+öğrenci öğretmene yapacağı ders isteği formu adımlarının bazılırının ekran görüntüleri docs/design-references klasöründe mevcut image, image copy, image copy 2, bunlardan sadece tasarım referansı olarak ilham alınabilir bu özel ders başvuru adımları, bu görseller website içinde asset olarak kullanılmamalı
+arama sonucu ekran görüntüsü docs/design-references/image copy 3 sonuç listesini, docs/design-references/image copy 4 ilanı veren öğretmene tıklanınca açılan detay sayfasını gösteriyor, görsel kısımlarını şimdilik atlayabilirsin görsel eklemeyi daha sonraya bırakacağız
 öğretmenler ve öğrenciler için farklı hesap oluşturma olması gerekiyor, öğrencilerin ve öğretmenlerin kendi dashboardları olucak, öğretmenler derslerini ve öğrencilerini dashboard üzerinden takip edebilecek, öğrenciler de aynı şekilde aldığı dersler vb. görebilecek, dashboard implementasyonu 2. aşama da ilk aşama arama arayüzü vb. olmalı
-dashboard ve anasayfa için de klasör içine resim yükledim  örnek-anasayfa.png ve örnek-dashboardlar-ve-anasayfa 
+dashboard ve anasayfa için de docs/design-references klasörü içine referans resimler yüklendi örnek-anasayfa ve örnek-dashboardlar-ve-anasayfa; bunlar doğrudan sitede kullanılmamalı
 öğretmenlerin ve öğrencilerin konumu önemli yakın konuma göre arama yapma, değerlendirme sırasına göre vb filtreler olmalı bu filtreler backend de handle edilmeli pagination ile eberaber burada tanstack query kullanılmalı
 feature-based architecture kullan
 tüm sayfalar mobil uyumlu dinamik olmalı

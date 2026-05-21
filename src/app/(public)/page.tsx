@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import {
   CalendarClockIcon,
+  CheckCircle2Icon,
   MapPinIcon,
   SearchIcon,
   ShieldCheckIcon,
@@ -76,15 +76,70 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-lg border bg-muted">
-            <Image
-              src="/hero-home.jpeg"
-              alt="Online özel ders alan öğrenci arayüzü"
-              width={1536}
-              height={1024}
-              priority
-              className="aspect-[4/3] h-auto w-full object-cover"
-            />
+          <div className="rounded-lg border bg-card p-4 shadow-sm">
+            <div className="rounded-lg border bg-muted/40 p-4">
+              <div className="flex items-center justify-between gap-3 border-b pb-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Öğretmen Arama
+                  </p>
+                  <p className="text-2xl font-semibold">Erzurum Matematik</p>
+                </div>
+                <span className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
+                  18 sonuç
+                </span>
+              </div>
+              <div className="grid gap-3 py-4 sm:grid-cols-3">
+                <div className="rounded-lg border bg-background p-3">
+                  <p className="text-xs text-muted-foreground">Ders</p>
+                  <p className="font-medium">Matematik</p>
+                </div>
+                <div className="rounded-lg border bg-background p-3">
+                  <p className="text-xs text-muted-foreground">Konum</p>
+                  <p className="font-medium">Yakutiye</p>
+                </div>
+                <div className="rounded-lg border bg-background p-3">
+                  <p className="text-xs text-muted-foreground">Ders türü</p>
+                  <p className="font-medium">Online + Yüz yüze</p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                {[
+                  ["Ayşe Demir", "Matematik Öğretmeni", "₺650 / saat", "4.9"],
+                  ["Burak Çelik", "Kimya ve TYT / AYT", "₺700 / saat", "4.3"],
+                  ["Zeynep Acar", "İngilizce Öğretmeni", "₺450 / saat", "4.6"],
+                ].map(([name, title, price, rating]) => (
+                  <div
+                    key={name}
+                    className="grid gap-3 rounded-lg border bg-background p-4 sm:grid-cols-[1fr_auto]"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-11 items-center justify-center rounded-lg bg-muted font-semibold">
+                        {name
+                          .split(" ")
+                          .map((part) => part[0])
+                          .join("")}
+                      </div>
+                      <div>
+                        <p className="font-semibold">{name}</p>
+                        <p className="text-sm text-muted-foreground">{title}</p>
+                        <span className="mt-2 inline-flex items-center gap-1 text-sm text-muted-foreground">
+                          <CheckCircle2Icon aria-hidden="true" />
+                          Başvuru sonrası iletişim paylaşımı
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-5 sm:flex-col sm:items-end">
+                      <span className="font-semibold">{price}</span>
+                      <span className="inline-flex items-center gap-1 text-sm">
+                        <StarIcon aria-hidden="true" />
+                        {rating}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
