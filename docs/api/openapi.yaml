@@ -5,8 +5,107 @@ info:
   description: MVP API contract. Feature branches must update this file with implemented endpoints.
 servers:
   - url: /api
-paths: {}
+paths:
+  /search/teachers:
+    get:
+      summary: Search published teacher listings
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: "#/components/parameters/SearchQueryParam"
+        - $ref: "#/components/parameters/TeacherSortParam"
+        - $ref: "#/components/parameters/LessonFilterParam"
+        - $ref: "#/components/parameters/CityFilterParam"
+        - $ref: "#/components/parameters/DistrictFilterParam"
+        - $ref: "#/components/parameters/DeliveryModeFilterParam"
+        - in: query
+          name: lat
+          schema:
+            type: number
+        - in: query
+          name: lng
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Paginated teacher search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherSearchResponse"
 components:
+  parameters:
+    PageParam:
+      in: query
+      name: page
+      description: 1-based page number for list endpoints.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSizeParam:
+      in: query
+      name: pageSize
+      description: Number of records per page. List endpoints may choose a smaller default.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 12
+    SearchQueryParam:
+      in: query
+      name: q
+      description: Free-text search query.
+      schema:
+        type: string
+    SortParam:
+      in: query
+      name: sort
+      description: Endpoint-specific sort key.
+      schema:
+        type: string
+    OrderParam:
+      in: query
+      name: order
+      description: Sort direction for list endpoints that support generic ordering.
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+    TeacherSortParam:
+      in: query
+      name: sort
+      description: Teacher search sort key.
+      schema:
+        type: string
+        enum: [recommended, nearest, highest_rated, lowest_price, most_reviewed]
+        default: recommended
+    LessonFilterParam:
+      in: query
+      name: lesson
+      description: Lesson/category slug or search value.
+      schema:
+        type: string
+    CityFilterParam:
+      in: query
+      name: city
+      description: City filter.
+      schema:
+        type: string
+    DistrictFilterParam:
+      in: query
+      name: district
+      description: District filter.
+      schema:
+        type: string
+    DeliveryModeFilterParam:
+      in: query
+      name: deliveryMode
+      description: Online, face-to-face, or all delivery modes.
+      schema:
+        type: string
+        enum: [all, online, face_to_face, both]
+        default: all
   schemas:
     ErrorResponse:
       type: object
@@ -15,3 +114,100 @@ components:
       properties:
         message:
           type: string
+    ListMeta:
+      type: object
+      required: [total, page, pageSize, totalPages]
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+        sort:
+          type: string
+        order:
+          type: string
+          enum: [asc, desc]
+        filters:
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: string
+              - type: number
+              - type: boolean
+    PaginatedResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: {}
+        meta:
+          $ref: "#/components/schemas/ListMeta"
+    TeacherSearchResponse:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/TeacherSearchResult"
+    TeacherSearchResult:
+      type: object
+      required:
+        - id
+        - slug
+        - fullName
+        - headline
+        - shortBio
+        - city
+        - district
+        - latitude
+        - longitude
+        - lessons
+        - deliveryMode
+        - hourlyPrice
+        - ratingAverage
+        - reviewCount
+        - experienceYears
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        fullName:
+          type: string
+        headline:
+          type: string
+        shortBio:
+          type: string
+        city:
+          type: string
+        district:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        lessons:
+          type: array
+          items:
+            type: string
+        deliveryMode:
+          type: string
+          enum: [online, face_to_face, both]
+        hourlyPrice:
+          type: number
+        ratingAverage:
+          type: number
+        reviewCount:
+          type: integer
+        experienceYears:
+          type: integer
+        distanceKm:
+          type: number
