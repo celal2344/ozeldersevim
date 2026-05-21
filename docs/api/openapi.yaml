@@ -1,0 +1,17 @@
+openapi: 3.1.0
+info:
+  title: Ozel Ders Evim API
+  version: 0.1.0
+  description: MVP API contract. Feature branches must update this file with implemented endpoints.
+servers:
+  - url: /api
+paths: {}
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
