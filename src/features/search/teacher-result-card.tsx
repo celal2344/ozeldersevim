@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { MapPinIcon, StarIcon, VideoIcon } from "lucide-react";
 
+import {
+  distanceLabel,
+  initialsFromTeacherName,
+  reviewLabel,
+  teacherDeliveryLabels,
+} from "@/features/search/search-formatters";
 import type { TeacherSearchResult } from "@/features/search/types";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/shared/components/ui/card";
-
-const deliveryLabels = {
-  online: "Online",
-  face_to_face: "Yüz yüze",
-  both: "Online + Yüz yüze",
-};
 
 export function TeacherResultCard({ teacher }: { teacher: TeacherSearchResult }) {
   return (
@@ -22,11 +22,7 @@ export function TeacherResultCard({ teacher }: { teacher: TeacherSearchResult })
             <p className="mt-1 text-sm text-white/58">{teacher.headline}</p>
           </div>
           <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/10 font-semibold">
-            {teacher.fullName
-              .split(" ")
-              .map((part) => part[0])
-              .join("")
-              .slice(0, 2)}
+            {initialsFromTeacherName(teacher.fullName)}
           </div>
         </div>
       </CardHeader>
@@ -46,11 +42,11 @@ export function TeacherResultCard({ teacher }: { teacher: TeacherSearchResult })
           </span>
           <span className="inline-flex items-center gap-2">
             <VideoIcon aria-hidden="true" />
-            {deliveryLabels[teacher.deliveryMode]}
+            {teacherDeliveryLabels[teacher.deliveryMode]}
           </span>
           <span className="inline-flex items-center gap-2">
             <StarIcon aria-hidden="true" className="text-brand-orange" />
-            {teacher.reviewCount > 0 ? `${teacher.ratingAverage.toFixed(1)} (${teacher.reviewCount})` : "Yeni öğretmen"}
+            {reviewLabel(teacher)}
           </span>
           <span>{teacher.experienceYears} yıl deneyim</span>
         </div>
@@ -60,7 +56,7 @@ export function TeacherResultCard({ teacher }: { teacher: TeacherSearchResult })
           <p className="text-lg font-semibold text-brand-orange">₺{teacher.hourlyPrice}</p>
           <p className="text-xs text-white/55">60 dakikalık ders</p>
           {teacher.distanceKm !== undefined ? (
-            <p className="text-xs text-white/55">{teacher.distanceKm.toFixed(1)} km yakında</p>
+            <p className="text-xs text-white/55">{distanceLabel(teacher.distanceKm)}</p>
           ) : null}
         </div>
         <Button

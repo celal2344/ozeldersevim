@@ -1,4 +1,4 @@
-# Ozel Ders Evim - Expanded Project Context
+# Ozel Ders Evim - Project Context
 
 Last updated: 2026-05-21
 
@@ -31,6 +31,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Delivery modes: both online and face-to-face are supported. For online lessons, teachers/students manage their own meeting links externally.
 - Search location model: support both city/district filtering and location-based nearby search.
 - Seed data: include Erzurum and random test data covering different cases.
+- Vocabulary split: use this file for product/domain vocabulary and `LANGUAGE.md` for architecture vocabulary and rules.
 
 ## Branch Workflow
 

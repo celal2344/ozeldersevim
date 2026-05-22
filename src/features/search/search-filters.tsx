@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { LocateFixedIcon, SearchIcon } from "lucide-react";
-import { useState } from "react";
 
 import { cityOptions, districtOptions, lessonOptions } from "@/features/search/mock-data";
+import { optionValue } from "@/features/search/search-formatters";
+import { useSearchFilterNavigation } from "@/features/search/use-search-filter-navigation";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import {
@@ -16,46 +16,9 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 
-function optionValue(value: string) {
-  return value.toLocaleLowerCase("tr-TR");
-}
-
 export function SearchFilters() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [locationPending, setLocationPending] = useState(false);
-
-  function updateParam(key: string, value: string | null) {
-    const params = new URLSearchParams(searchParams);
-    params.delete("page");
-
-    if (!value || value === "all") {
-      params.delete(key);
-    } else {
-      params.set(key, value);
-    }
-
-    router.push(`/ogretmen-bul?${params.toString()}`);
-  }
-
-  function useCurrentLocation() {
-    if (!navigator.geolocation) return;
-
-    setLocationPending(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const params = new URLSearchParams(searchParams);
-        params.set("lat", position.coords.latitude.toFixed(6));
-        params.set("lng", position.coords.longitude.toFixed(6));
-        params.set("sort", "nearest");
-        params.delete("page");
-        router.push(`/ogretmen-bul?${params.toString()}`);
-        setLocationPending(false);
-      },
-      () => setLocationPending(false),
-      { enableHighAccuracy: false, timeout: 7000 }
-    );
-  }
+  const { locationPending, searchParams, updateParam, useCurrentLocation } =
+    useSearchFilterNavigation();
 
   return (
     <div className="rounded-2xl bg-white p-5 shadow-2xl shadow-slate-950/10 ring-1 ring-slate-200">

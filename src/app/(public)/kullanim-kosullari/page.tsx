@@ -1,8 +1,6 @@
-import type { Metadata } from "next";
+import { termsMetadata } from "@/features/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Kullanım Koşulları",
-};
+export { termsMetadata as metadata };
 
 export default function TermsPage() {
   return (

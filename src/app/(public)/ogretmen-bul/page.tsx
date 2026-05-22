@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
+import { teacherSearchMetadata } from "@/features/seo/metadata";
 import { SearchFilters } from "@/features/search/search-filters";
+import { pageSearchParamsFromRecord, searchPageHref } from "@/features/search/search-navigation";
 import { searchTeachers } from "@/features/search/search-service";
 import { TeacherResultCard } from "@/features/search/teacher-result-card";
 import { Button } from "@/shared/components/ui/button";
@@ -10,23 +11,11 @@ type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export const metadata: Metadata = {
-  title: "Öğretmen Bul",
-  description: "Ders, şehir, ilçe, ücret ve ders türüne göre özel ders öğretmeni ara.",
-};
-
-function toValue(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
+export { teacherSearchMetadata as metadata };
 
 export default async function TeacherSearchPage({ searchParams }: PageProps) {
   const rawParams = await searchParams;
-  const params = new URLSearchParams();
-
-  Object.entries(rawParams).forEach(([key, value]) => {
-    const normalized = toValue(value);
-    if (normalized) params.set(key, normalized);
-  });
+  const params = pageSearchParamsFromRecord(rawParams);
 
   const response = searchTeachers({
     q: params.get("q") ?? undefined,
@@ -40,12 +29,6 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
     lat: params.get("lat") ? Number(params.get("lat")) : undefined,
     lng: params.get("lng") ? Number(params.get("lng")) : undefined,
   });
-
-  function pageHref(page: number) {
-    const nextParams = new URLSearchParams(params);
-    nextParams.set("page", String(page));
-    return `/ogretmen-bul?${nextParams.toString()}`;
-  }
 
   return (
     <main className="bg-slate-50">
@@ -83,7 +66,7 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
             className="border-brand-navy/20 bg-white text-brand-navy hover:bg-brand-navy hover:text-white"
             disabled={response.meta.page <= 1}
             nativeButton={false}
-            render={<Link href={pageHref(Math.max(1, response.meta.page - 1))} />}
+            render={<Link href={searchPageHref(params, Math.max(1, response.meta.page - 1))} />}
           >
             Önceki
           </Button>
@@ -95,7 +78,7 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
             className="border-brand-navy/20 bg-white text-brand-navy hover:bg-brand-navy hover:text-white"
             disabled={response.meta.page >= response.meta.totalPages}
             nativeButton={false}
-            render={<Link href={pageHref(Math.min(response.meta.totalPages, response.meta.page + 1))} />}
+            render={<Link href={searchPageHref(params, Math.min(response.meta.totalPages, response.meta.page + 1))} />}
           >
             Sonraki
           </Button>

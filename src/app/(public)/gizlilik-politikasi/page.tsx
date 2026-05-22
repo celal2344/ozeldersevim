@@ -1,8 +1,6 @@
-import type { Metadata } from "next";
+import { privacyMetadata } from "@/features/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Gizlilik Politikası",
-};
+export { privacyMetadata as metadata };
 
 export default function PrivacyPage() {
   return (

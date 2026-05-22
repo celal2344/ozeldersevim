@@ -13,4 +13,4 @@ Open `http://localhost:3000`.
 
 ## Project Context
 
-See `context-expanded.md` for the product plan, branch workflow, MVP decisions, and implementation notes.
+See `CONTEXT.md` for product/domain context and `LANGUAGE.md` for architecture vocabulary and rules.

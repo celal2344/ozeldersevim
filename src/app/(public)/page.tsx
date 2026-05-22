@@ -1,46 +1,15 @@
 import Link from "next/link";
+import { ChevronRightIcon, Clock3Icon, GraduationCapIcon, MonitorPlayIcon, SearchIcon, ShieldCheckIcon, StarIcon, UsersIcon } from "lucide-react";
+
 import {
-  AtomIcon,
-  BookOpenIcon,
-  CalendarDaysIcon,
-  CheckCircle2Icon,
-  ChevronRightIcon,
-  Clock3Icon,
-  Code2Icon,
-  FlaskConicalIcon,
-  GraduationCapIcon,
-  LanguagesIcon,
-  MonitorPlayIcon,
-  SearchIcon,
-  ShieldCheckIcon,
-  StarIcon,
-  UsersIcon,
-} from "lucide-react";
-
+  featuredTeacherPreviews,
+  heroFeatures,
+  homepageStats,
+  platformBenefits,
+  popularHomepageLessons,
+} from "@/features/homepage/homepage-content";
+import { initialsFromName, lessonSearchHref } from "@/features/homepage/homepage-formatters";
 import { Button } from "@/shared/components/ui/button";
-
-const popularLessons = [
-  { name: "Matematik", count: "1.200+ öğretmen", icon: BookOpenIcon, tone: "orange" },
-  { name: "Fizik", count: "780+ öğretmen", icon: AtomIcon, tone: "navy" },
-  { name: "Kimya", count: "620+ öğretmen", icon: FlaskConicalIcon, tone: "orange" },
-  { name: "İngilizce", count: "1.500+ öğretmen", icon: LanguagesIcon, tone: "navy" },
-  { name: "Yazılım", count: "850+ öğretmen", icon: Code2Icon, tone: "orange" },
-  { name: "TYT / AYT", count: "1.100+ öğretmen", icon: GraduationCapIcon, tone: "navy" },
-];
-
-const stats = [
-  { label: "Mutlu Öğrenci", value: "10.000+", icon: UsersIcon },
-  { label: "Uzman Öğretmen", value: "1.500+", icon: GraduationCapIcon },
-  { label: "Tamamlanan Ders", value: "25.000+", icon: MonitorPlayIcon },
-  { label: "Öğrenci Memnuniyeti", value: "4.9/5", icon: StarIcon },
-];
-
-const featuredTeachers = [
-  ["Mehmet Yılmaz", "Matematik Öğretmeni", "₺450 / saat", "4.9"],
-  ["Ayşe Demir", "İngilizce Öğretmeni", "₺400 / saat", "4.8"],
-  ["Emre Kaya", "Fizik Öğretmeni", "₺500 / saat", "4.9"],
-  ["Zeynep Acar", "Yazılım Öğretmeni", "₺550 / saat", "4.9"],
-];
 
 export default function HomePage() {
   return (
@@ -97,15 +66,10 @@ export default function HomePage() {
               </Button>
             </div>
             <div className="grid gap-5 text-sm text-white/80 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                ["Esnek Ders Saatleri", CalendarDaysIcon],
-                ["Birebir İletişim", UsersIcon],
-                ["Güvenli Altyapı", ShieldCheckIcon],
-                ["Konumlu Arama", SearchIcon],
-              ].map(([label, Icon]) => (
-                <span key={label as string} className="inline-flex items-center gap-2">
+              {heroFeatures.map(({ label, icon: Icon }) => (
+                <span key={label} className="inline-flex items-center gap-2">
                   <Icon aria-hidden="true" className="text-brand-orange" />
-                  {label as string}
+                  {label}
                 </span>
               ))}
             </div>
@@ -228,10 +192,10 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-            {popularLessons.map(({ name, count, icon: Icon, tone }) => (
+            {popularHomepageLessons.map(({ name, count, icon: Icon, tone }) => (
               <Link
                 key={name}
-                href={`/ogretmen-bul?lesson=${encodeURIComponent(name.toLocaleLowerCase("tr-TR"))}`}
+                href={lessonSearchHref(name)}
                 className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-lg"
               >
                 <span
@@ -253,7 +217,7 @@ export default function HomePage() {
 
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 rounded-2xl bg-brand-navy p-7 text-white md:grid-cols-4">
-          {stats.map(({ label, value, icon: Icon }) => (
+          {homepageStats.map(({ label, value, icon: Icon }) => (
             <div key={label} className="flex items-center gap-4">
               <Icon aria-hidden="true" className="text-brand-orange" />
               <div>
@@ -281,14 +245,11 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {featuredTeachers.map(([name, title, price, rating]) => (
+            {featuredTeacherPreviews.map(({ name, title, price, rating }) => (
               <div key={name} className="rounded-2xl bg-brand-navy p-5 text-white shadow-lg">
                 <div className="flex items-center gap-3">
                   <div className="flex size-14 items-center justify-center rounded-full bg-white/10 font-semibold">
-                    {name
-                      .split(" ")
-                      .map((part) => part[0])
-                      .join("")}
+                    {initialsFromName(name)}
                   </div>
                   <div>
                     <p className="font-semibold">{name}</p>
@@ -318,17 +279,12 @@ export default function HomePage() {
 
       <section className="bg-brand-navy px-4 py-8 text-white sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-4">
-          {[
-            ["Esnek Ders Saatleri", "Dilediğin zaman planla", Clock3Icon],
-            ["Birebir İletişim", "Öğretmeninle net akış", UsersIcon],
-            ["Güvenli Altyapı", "Kontrollü başvuru süreci", ShieldCheckIcon],
-            ["Raporlama Sistemi", "Gelişimi takip et", CheckCircle2Icon],
-          ].map(([title, text, Icon]) => (
-            <div key={title as string} className="flex items-center gap-3">
+          {platformBenefits.map(({ title, text, icon: Icon }) => (
+            <div key={title} className="flex items-center gap-3">
               <Icon aria-hidden="true" className="text-brand-orange" />
               <div>
-                <p className="font-semibold">{title as string}</p>
-                <p className="text-sm text-white/58">{text as string}</p>
+                <p className="font-semibold">{title}</p>
+                <p className="text-sm text-white/58">{text}</p>
               </div>
             </div>
           ))}
