@@ -13,6 +13,11 @@ export const teacherSearchMetadata: Metadata = {
   description: "Ders, şehir, ilçe, ücret ve ders türüne göre özel ders öğretmeni ara.",
 };
 
+export const lessonRequestMetadata: Metadata = {
+  title: "Ders Talebi",
+  description: "Öğretmene özel ders talebi gönder ve öğrenci hesabını son adımda oluştur.",
+};
+
 export const privacyMetadata: Metadata = {
   title: "Gizlilik Politikası",
 };

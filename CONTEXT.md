@@ -58,6 +58,10 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - The teacher profile API is `GET /api/teachers/{slug}`.
 - Teacher search cards link to the public teacher profile route.
 - Teacher profile CTAs link to the future lesson request funnel with `teacher={slug}`.
+- Lesson request funnel uses `/ders-talebi?teacher={slug}`.
+- Lesson request submission creates a real Supabase student account and persists the lesson request.
+- Student accounts created through the lesson request funnel are active immediately; Supabase email confirmation must be disabled for this MVP flow.
+- The request completion API is `POST /api/lesson-requests/complete-with-account`.
 
 ## Netleşen Kararlar - 2026-05-21
 
