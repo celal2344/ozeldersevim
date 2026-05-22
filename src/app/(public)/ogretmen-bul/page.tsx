@@ -44,7 +44,7 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
           </p>
         </div>
       </section>
-      <section className="mx-auto -mt-8 flex w-full max-w-7xl flex-col gap-6 px-4 pb-10 sm:px-6 lg:px-8">
+      <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <SearchFilters />
         {response.data.length > 0 ? (
           <div className="grid gap-4 lg:grid-cols-2">
