@@ -5,9 +5,11 @@ export const siteConfig = {
     "Türkiye'de özel ders öğretmeni bulmak ve öğretmenlere ders talebi göndermek için geliştirilmiş özel ders platformu.",
   navItems: [
     { href: "/", label: "Ana Sayfa" },
-    { href: "/ogretmen-bul", label: "Öğretmen Bul" },
     { href: "/dersler", label: "Dersler" },
-    { href: "/nasil-calisir", label: "Nasıl Çalışır?" },
+    { href: "/ogretmen-bul", label: "Öğretmenler" },
+    { href: "/hakkimizda", label: "Hakkımızda" },
+    { href: "/sss", label: "SSS" },
+    { href: "/iletisim", label: "İletişim" },
   ],
 };
 

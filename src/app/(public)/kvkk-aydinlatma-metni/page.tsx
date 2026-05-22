@@ -1,8 +1,6 @@
-import type { Metadata } from "next";
+import { kvkkMetadata } from "@/features/seo/constants";
 
-export const metadata: Metadata = {
-  title: "KVKK Aydınlatma Metni",
-};
+export { kvkkMetadata as metadata };
 
 export default function KvkkPage() {
   return (

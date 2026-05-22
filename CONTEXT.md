@@ -1,4 +1,4 @@
-# Ozel Ders Evim - Expanded Project Context
+# Ozel Ders Evim - Project Context
 
 Last updated: 2026-05-21
 
@@ -31,6 +31,8 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Delivery modes: both online and face-to-face are supported. For online lessons, teachers/students manage their own meeting links externally.
 - Search location model: support both city/district filtering and location-based nearby search.
 - Seed data: include Erzurum and random test data covering different cases.
+- Vocabulary split: use this file for product/domain vocabulary and `LANGUAGE.md` for architecture vocabulary and rules.
+- Documentation maintenance: whenever a critical codebase rule, architecture rule, domain decision, or workflow decision is given, update the relevant Markdown documentation in the same change.
 
 ## Branch Workflow
 
@@ -49,6 +51,17 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Any API behavior change must update the OpenAPI contract in the same branch.
 - Any product or architecture decision discovered during implementation must update this context file in the same branch.
 - Branches should be pushed after their acceptance criteria pass.
+
+## Implementation Progress
+
+- Public teacher profiles use `/ogretmen/[slug]`.
+- The teacher profile API is `GET /api/teachers/{slug}`.
+- Teacher search cards link to the public teacher profile route.
+- Teacher profile CTAs link to the future lesson request funnel with `teacher={slug}`.
+- Lesson request funnel uses `/ders-talebi?teacher={slug}`.
+- Lesson request submission creates a real Supabase student account and persists the lesson request.
+- Student accounts created through the lesson request funnel are active immediately; Supabase email confirmation must be disabled for this MVP flow.
+- The request completion API is `POST /api/lesson-requests/complete-with-account`.
 
 ## Netleşen Kararlar - 2026-05-21
 
@@ -69,14 +82,16 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 
 ## Visual References In Repo
 
-- `image.png`: lesson request first step, lesson/category selection.
-- `image copy.png`: lesson request location step with city/district fields.
-- `image copy 2.png`: lesson request contact details and consent step.
-- `image copy 3.png`: search results page with SEO heading, breadcrumbs, filters, sorting, and teacher cards.
-- `image copy 4.png`: teacher detail/profile page with profile summary, reviews, price, CTA, and verification signals.
-- `image copy 5.png`: role choice/registration entry page.
-- `ornek-anasayfa.jpeg`: homepage visual direction.
-- `ornek-dashboardlar-ve-anasayfa.jpeg`: homepage plus student/teacher dashboard visual direction.
+These files are design references only. Do not use them directly as website images or production assets.
+
+- `docs/design-references/image.png`: lesson request first step, lesson/category selection.
+- `docs/design-references/image copy.png`: lesson request location step with city/district fields.
+- `docs/design-references/image copy 2.png`: lesson request contact details and consent step.
+- `docs/design-references/image copy 3.png`: search results page with SEO heading, breadcrumbs, filters, sorting, and teacher cards.
+- `docs/design-references/image copy 4.png`: teacher detail/profile page with profile summary, reviews, price, CTA, and verification signals.
+- `docs/design-references/image copy 5.png`: role choice/registration entry page.
+- `docs/design-references/örnek-anasayfa.jpeg`: homepage visual direction.
+- `docs/design-references/örnek-dashboardlar-ve-anasayfa.jpeg`: homepage plus student/teacher dashboard visual direction.
 
 ## Main User Roles
 

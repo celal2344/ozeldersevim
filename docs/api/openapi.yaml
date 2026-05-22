@@ -33,6 +33,62 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TeacherSearchResponse"
+  /teachers/{slug}:
+    get:
+      summary: Get a public teacher profile by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Public teacher profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherProfile"
+        "404":
+          description: Teacher profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /lesson-requests/complete-with-account:
+    post:
+      summary: Create a student account and submit a lesson request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompleteLessonRequestPayload"
+      responses:
+        "200":
+          description: Lesson request submitted and attached to the new student account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompleteLessonRequestResponse"
+        "400":
+          description: Invalid request payload or unsupported teacher/lesson/delivery choice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Teacher, lesson category, or location not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Supabase signup did not return a session because email confirmation is enabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   parameters:
     PageParam:
@@ -211,3 +267,122 @@ components:
           type: integer
         distanceKm:
           type: number
+    TeacherProfileReview:
+      type: object
+      required: [id, studentName, rating, comment, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentName:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date
+    TeacherProfile:
+      allOf:
+        - $ref: "#/components/schemas/TeacherSearchResult"
+        - type: object
+          required:
+            - title
+            - longBio
+            - education
+            - responseTime
+            - activeStudentCount
+            - completedLessonCount
+            - isVerified
+            - lessonDurationMinutes
+            - reviews
+          properties:
+            title:
+              type: string
+            longBio:
+              type: string
+            education:
+              type: string
+            responseTime:
+              type: string
+            activeStudentCount:
+              type: integer
+            completedLessonCount:
+              type: integer
+            isVerified:
+              type: boolean
+            lessonDurationMinutes:
+              type: integer
+            reviews:
+              type: array
+              items:
+                $ref: "#/components/schemas/TeacherProfileReview"
+    CompleteLessonRequestPayload:
+      type: object
+      required:
+        - teacherSlug
+        - lessonSlug
+        - locationSlug
+        - deliveryMode
+        - studentLevel
+        - goal
+        - studentName
+        - email
+        - phone
+        - contactPreference
+        - termsAccepted
+        - privacyAccepted
+        - password
+      properties:
+        teacherSlug:
+          type: string
+        lessonSlug:
+          type: string
+        locationSlug:
+          type: string
+        deliveryMode:
+          type: string
+          enum: [online, face_to_face]
+        studentLevel:
+          type: string
+        goal:
+          type: string
+        budgetMin:
+          type: string
+        budgetMax:
+          type: string
+        studentName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        contactPreference:
+          type: string
+          enum: [phone, both]
+        termsAccepted:
+          type: boolean
+          enum: [true]
+        privacyAccepted:
+          type: boolean
+          enum: [true]
+        password:
+          type: string
+          minLength: 8
+    CompleteLessonRequestResponse:
+      type: object
+      required: [requestId, studentProfileId, status]
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        studentProfileId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [submitted]
