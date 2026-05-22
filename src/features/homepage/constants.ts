@@ -34,6 +34,7 @@ export type FeaturedTeacherPreview = {
   title: string;
   price: string;
   rating: string;
+  slug: string;
 };
 
 export type HeroFeature = {
@@ -64,10 +65,34 @@ export const homepageStats: HomepageStat[] = [
 ];
 
 export const featuredTeacherPreviews: FeaturedTeacherPreview[] = [
-  { name: "Mehmet Yılmaz", title: "Matematik Öğretmeni", price: "₺450 / saat", rating: "4.9" },
-  { name: "Ayşe Demir", title: "İngilizce Öğretmeni", price: "₺400 / saat", rating: "4.8" },
-  { name: "Emre Kaya", title: "Fizik Öğretmeni", price: "₺500 / saat", rating: "4.9" },
-  { name: "Zeynep Acar", title: "Yazılım Öğretmeni", price: "₺550 / saat", rating: "4.9" },
+  {
+    name: "Ayşe Demir",
+    title: "Matematik Öğretmeni",
+    price: "₺650 / saat",
+    rating: "4.9",
+    slug: "ayse-demir-matematik-erzurum",
+  },
+  {
+    name: "Mehmet Yılmaz",
+    title: "Fizik Öğretmeni",
+    price: "₺900 / saat",
+    rating: "Yeni",
+    slug: "mehmet-yilmaz-fizik-online",
+  },
+  {
+    name: "Zeynep Acar",
+    title: "İngilizce Öğretmeni",
+    price: "₺450 / saat",
+    rating: "4.6",
+    slug: "zeynep-acar-ingilizce-erzurum",
+  },
+  {
+    name: "Deniz Kara",
+    title: "Yazılım Eğitmeni",
+    price: "₺1200 / saat",
+    rating: "5.0",
+    slug: "deniz-kara-yazilim-ankara",
+  },
 ];
 
 export const heroFeatures: HeroFeature[] = [

@@ -245,7 +245,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {featuredTeacherPreviews.map(({ name, title, price, rating }) => (
+            {featuredTeacherPreviews.map(({ name, title, price, rating, slug }) => (
               <div key={name} className="rounded-2xl bg-brand-navy p-5 text-white shadow-lg">
                 <div className="flex items-center gap-3">
                   <div className="flex size-14 items-center justify-center rounded-full bg-white/10 font-semibold">
@@ -267,7 +267,7 @@ export default function HomePage() {
                   variant="outline"
                   className="mt-5 w-full border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white"
                   nativeButton={false}
-                  render={<Link href="/ogretmen-bul" />}
+                  render={<Link href={`/ogretmen/${slug}`} />}
                 >
                   Profili Gör
                 </Button>
