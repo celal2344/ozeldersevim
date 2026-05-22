@@ -28,7 +28,7 @@ export function SearchFilters() {
           <Input
             name="q"
             defaultValue={searchParams.get("q") ?? ""}
-            placeholder="Ders, Ã¶ÄŸretmen veya ÅŸehir ara"
+            placeholder="Ders, öğretmen veya şehir ara"
             className="h-10 border-slate-200 pl-9"
           />
         </div>
@@ -37,7 +37,7 @@ export function SearchFilters() {
           defaultValue={searchParams.get("lesson") ?? ""}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
-          <option value="">TÃ¼m dersler</option>
+          <option value="">Tüm dersler</option>
           {lessonOptions.map((lesson) => (
             <option key={lesson} value={optionValue(lesson)}>
               {lesson}
@@ -49,7 +49,7 @@ export function SearchFilters() {
           defaultValue={searchParams.get("city") ?? ""}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
-          <option value="">TÃ¼m ÅŸehirler</option>
+          <option value="">Tüm şehirler</option>
           {cityOptions.map((city) => (
             <option key={city} value={optionValue(city)}>
               {city}
@@ -67,7 +67,7 @@ export function SearchFilters() {
           onChange={(event) => updateParam("district", event.target.value)}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
-          <option value="">TÃ¼m ilÃ§eler</option>
+          <option value="">Tüm ilçeler</option>
           {districtOptions.map((district) => (
             <option key={district} value={optionValue(district)}>
               {district}
@@ -79,27 +79,27 @@ export function SearchFilters() {
           onValueChange={(value) => updateParam("deliveryMode", value)}
         >
           <SelectTrigger className="h-10 w-full border-slate-200 bg-white text-brand-navy">
-            <SelectValue placeholder="Ders tÃ¼rÃ¼" />
+            <SelectValue placeholder="Ders türü" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="all">TÃ¼m ders tÃ¼rleri</SelectItem>
+              <SelectItem value="all">Tüm ders türleri</SelectItem>
               <SelectItem value="online">Online</SelectItem>
-              <SelectItem value="face_to_face">YÃ¼z yÃ¼ze</SelectItem>
+              <SelectItem value="face_to_face">Yüz yüze</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
         <Select value={searchParams.get("sort") ?? "recommended"} onValueChange={(value) => updateParam("sort", value)}>
           <SelectTrigger className="h-10 w-full border-slate-200 bg-white text-brand-navy">
-            <SelectValue placeholder="SÄ±ralama" />
+            <SelectValue placeholder="Sıralama" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="recommended">Ã–nerilen</SelectItem>
-              <SelectItem value="nearest">YakÄ±ndaki</SelectItem>
-              <SelectItem value="highest_rated">En yÃ¼ksek puan</SelectItem>
-              <SelectItem value="lowest_price">En dÃ¼ÅŸÃ¼k Ã¼cret</SelectItem>
-              <SelectItem value="most_reviewed">En Ã§ok yorum</SelectItem>
+              <SelectItem value="recommended">Önerilen</SelectItem>
+              <SelectItem value="nearest">Yakındaki</SelectItem>
+              <SelectItem value="highest_rated">En yüksek puan</SelectItem>
+              <SelectItem value="lowest_price">En düşük ücret</SelectItem>
+              <SelectItem value="most_reviewed">En çok yorum</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>

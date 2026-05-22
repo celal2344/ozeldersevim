@@ -22,26 +22,26 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-5 text-sm text-white/78">
               <span className="inline-flex items-center gap-2">
                 <MonitorPlayIcon aria-hidden="true" className="text-brand-orange" />
-                CanlÄ± Ders
+                Canlı Ders
               </span>
               <span className="inline-flex items-center gap-2">
                 <ShieldCheckIcon aria-hidden="true" className="text-brand-orange" />
-                GÃ¼venli Ä°letiÅŸim
+                Güvenli İletişim
               </span>
               <span className="inline-flex items-center gap-2">
                 <GraduationCapIcon aria-hidden="true" className="text-brand-orange" />
-                Uzman Ã–ÄŸretmenler
+                Uzman Öğretmenler
               </span>
             </div>
             <div className="flex flex-col gap-5">
               <h1 className="max-w-3xl text-5xl font-bold leading-[1.05] tracking-tight text-balance sm:text-6xl">
-                TÃ¼rkiye&apos;nin Yeni Nesil{" "}
-                <span className="text-brand-orange">Online Ã–zel Ders</span>{" "}
+                Türkiye&apos;nin Yeni Nesil{" "}
+                <span className="text-brand-orange">Online Özel Ders</span>{" "}
                 Platformu
               </h1>
               <p className="max-w-xl text-lg leading-8 text-white/78">
-                Uzman Ã¶ÄŸretmenlerle birebir online veya yÃ¼z yÃ¼ze ders al,
-                hedeflerine daha kolay ulaÅŸ.
+                Uzman öğretmenlerle birebir online veya yüz yüze ders al,
+                hedeflerine daha kolay ulaş.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -62,7 +62,7 @@ export default function HomePage() {
                 render={<Link href="/kayit" />}
               >
                 <UsersIcon data-icon="inline-start" aria-hidden="true" />
-                Ã–ÄŸretmen Ol
+                Öğretmen Ol
               </Button>
             </div>
             <div className="grid gap-5 text-sm text-white/80 sm:grid-cols-2 lg:grid-cols-4">
@@ -80,7 +80,7 @@ export default function HomePage() {
               <div className="rounded-[1.4rem] border border-white/10 bg-brand-navy-muted p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white/55">BugÃ¼nkÃ¼ Ders</p>
+                    <p className="text-sm text-white/55">Bugünkü Ders</p>
                     <p className="text-2xl font-semibold">Matematik</p>
                   </div>
                   <span className="rounded-lg bg-brand-orange px-3 py-2 text-sm font-semibold">
@@ -90,8 +90,8 @@ export default function HomePage() {
                 <div className="mt-6 grid gap-3">
                   <div className="rounded-lg border border-white/10 bg-white/10 p-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-white/65">Ã–ÄŸretmen</span>
-                      <span className="font-medium">AyÅŸe Demir</span>
+                      <span className="text-sm text-white/65">Öğretmen</span>
+                      <span className="font-medium">Ayşe Demir</span>
                     </div>
                     <div className="mt-3 h-2 rounded-full bg-white/10">
                       <div className="h-2 w-3/4 rounded-full bg-brand-orange" />
@@ -106,7 +106,7 @@ export default function HomePage() {
                     <div className="rounded-lg border border-white/10 bg-white/10 p-4">
                       <UsersIcon aria-hidden="true" className="text-brand-orange" />
                       <p className="mt-3 text-2xl font-semibold">12K+</p>
-                      <p className="text-xs text-white/55">Ã–ÄŸrenci</p>
+                      <p className="text-xs text-white/55">Öğrenci</p>
                     </div>
                   </div>
                 </div>
@@ -118,8 +118,8 @@ export default function HomePage() {
                   <MonitorPlayIcon aria-hidden="true" />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold">CanlÄ± Ders</p>
-                  <p className="text-xs text-muted-foreground">Matematik Â· 10:00 - 11:30</p>
+                  <p className="text-sm font-semibold">Canlı Ders</p>
+                  <p className="text-xs text-muted-foreground">Matematik · 10:00 - 11:30</p>
                 </div>
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function HomePage() {
                 </span>
                 <div>
                   <p className="text-sm font-semibold">Bir Sonraki Ders</p>
-                  <p className="text-xs text-white/55">Fizik Â· 14:00 - 15:30</p>
+                  <p className="text-xs text-white/55">Fizik · 14:00 - 15:30</p>
                 </div>
               </div>
             </div>
@@ -147,33 +147,33 @@ export default function HomePage() {
           className="mx-auto grid max-w-6xl gap-4 rounded-2xl bg-white p-5 shadow-2xl shadow-slate-950/15 ring-1 ring-slate-200 md:grid-cols-[1fr_1fr_1fr_auto]"
         >
           <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-            Ders SeÃ§in
+            Ders Seçin
             <select name="lesson" className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-muted-foreground">
-              <option value="">Ders seÃ§iniz</option>
+              <option value="">Ders seçiniz</option>
               <option value="matematik">Matematik</option>
               <option value="fizik">Fizik</option>
-              <option value="ingilizce">Ä°ngilizce</option>
+              <option value="ingilizce">İngilizce</option>
             </select>
           </label>
           <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
             Seviye
             <select name="q" className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-muted-foreground">
-              <option value="">Seviye seÃ§iniz</option>
+              <option value="">Seviye seçiniz</option>
               <option value="lgs">LGS</option>
               <option value="tyt">TYT / AYT</option>
             </select>
           </label>
           <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-            Ders TÃ¼rÃ¼
+            Ders Türü
             <select name="deliveryMode" className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-muted-foreground">
-              <option value="all">TÃ¼mÃ¼</option>
+              <option value="all">Tümü</option>
               <option value="online">Online</option>
-              <option value="face_to_face">YÃ¼z yÃ¼ze</option>
+              <option value="face_to_face">Yüz yüze</option>
             </select>
           </label>
           <Button className="self-end bg-brand-orange text-white hover:bg-brand-orange/90">
             <SearchIcon data-icon="inline-start" aria-hidden="true" />
-            Ã–ÄŸretmen Ara
+            Öğretmen Ara
           </Button>
         </form>
       </section>
@@ -183,12 +183,12 @@ export default function HomePage() {
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <h2 className="text-3xl font-bold tracking-tight text-brand-navy">
-                PopÃ¼ler Dersler
+                Popüler Dersler
               </h2>
               <div className="mt-3 h-1 w-16 rounded-full bg-brand-orange" />
             </div>
             <Link href="/ogretmen-bul" className="text-sm font-medium text-brand-navy hover:text-brand-orange">
-              TÃ¼m dersleri gÃ¶r
+              Tüm dersleri gör
             </Link>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
@@ -234,14 +234,14 @@ export default function HomePage() {
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <h2 className="text-3xl font-bold tracking-tight text-brand-navy">
-                Ã–ne Ã‡Ä±kan Ã–ÄŸretmenler
+                Öne Çıkan Öğretmenler
               </h2>
               <p className="mt-2 text-muted-foreground">
-                Referans tasarÄ±mdaki koyu kart yapÄ±sÄ± HTML/CSS ile yeniden kuruldu.
+                Referans tasarımdaki koyu kart yapısı HTML/CSS ile yeniden kuruldu.
               </p>
             </div>
             <Link href="/ogretmen-bul" className="hidden text-sm font-medium text-brand-navy hover:text-brand-orange sm:block">
-              TÃ¼m Ã¶ÄŸretmenleri gÃ¶r
+              Tüm öğretmenleri gör
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -269,7 +269,7 @@ export default function HomePage() {
                   nativeButton={false}
                   render={<Link href="/ogretmen-bul" />}
                 >
-                  Profili GÃ¶r
+                  Profili Gör
                 </Button>
               </div>
             ))}
