@@ -58,7 +58,7 @@ export function SearchFilters() {
   }
 
   return (
-    <div className="rounded-lg border bg-card p-4">
+    <div className="rounded-2xl bg-white p-5 shadow-2xl shadow-slate-950/10 ring-1 ring-slate-200">
       <form action="/ogretmen-bul" className="grid gap-3 md:grid-cols-[1.2fr_1fr_1fr_auto]">
         <div className="relative">
           <SearchIcon aria-hidden="true" className="pointer-events-none absolute left-3 top-2.5 text-muted-foreground" />
@@ -66,13 +66,13 @@ export function SearchFilters() {
             name="q"
             defaultValue={searchParams.get("q") ?? ""}
             placeholder="Ders, öğretmen veya şehir ara"
-            className="pl-9"
+            className="h-10 border-slate-200 pl-9"
           />
         </div>
         <select
           name="lesson"
           defaultValue={searchParams.get("lesson") ?? ""}
-          className="h-8 rounded-lg border border-input bg-background px-3 text-sm"
+          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
           <option value="">Tüm dersler</option>
           {lessonOptions.map((lesson) => (
@@ -84,7 +84,7 @@ export function SearchFilters() {
         <select
           name="city"
           defaultValue={searchParams.get("city") ?? ""}
-          className="h-8 rounded-lg border border-input bg-background px-3 text-sm"
+          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
           <option value="">Tüm şehirler</option>
           {cityOptions.map((city) => (
@@ -93,7 +93,7 @@ export function SearchFilters() {
             </option>
           ))}
         </select>
-        <Button type="submit">
+        <Button type="submit" className="h-10 bg-brand-orange text-white hover:bg-brand-orange/90">
           <SearchIcon data-icon="inline-start" aria-hidden="true" />
           Ara
         </Button>
@@ -102,7 +102,7 @@ export function SearchFilters() {
         <select
           value={searchParams.get("district") ?? ""}
           onChange={(event) => updateParam("district", event.target.value)}
-          className="h-8 rounded-lg border border-input bg-background px-3 text-sm"
+          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
           <option value="">Tüm ilçeler</option>
           {districtOptions.map((district) => (
@@ -115,7 +115,7 @@ export function SearchFilters() {
           value={searchParams.get("deliveryMode") ?? "all"}
           onValueChange={(value) => updateParam("deliveryMode", value)}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="h-10 w-full border-slate-200 bg-white text-brand-navy">
             <SelectValue placeholder="Ders türü" />
           </SelectTrigger>
           <SelectContent>
@@ -127,7 +127,7 @@ export function SearchFilters() {
           </SelectContent>
         </Select>
         <Select value={searchParams.get("sort") ?? "recommended"} onValueChange={(value) => updateParam("sort", value)}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="h-10 w-full border-slate-200 bg-white text-brand-navy">
             <SelectValue placeholder="Sıralama" />
           </SelectTrigger>
           <SelectContent>
@@ -140,7 +140,13 @@ export function SearchFilters() {
             </SelectGroup>
           </SelectContent>
         </Select>
-        <Button type="button" variant="outline" onClick={useCurrentLocation} disabled={locationPending}>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-10 border-brand-navy/20 bg-white text-brand-navy hover:bg-brand-navy hover:text-white"
+          onClick={useCurrentLocation}
+          disabled={locationPending}
+        >
           <LocateFixedIcon data-icon="inline-start" aria-hidden="true" />
           Konumumu Kullan
         </Button>
