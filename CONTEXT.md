@@ -52,6 +52,13 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Any product or architecture decision discovered during implementation must update this context file in the same branch.
 - Branches should be pushed after their acceptance criteria pass.
 
+## Implementation Progress
+
+- Public teacher profiles use `/ogretmen/[slug]`.
+- The teacher profile API is `GET /api/teachers/{slug}`.
+- Teacher search cards link to the public teacher profile route.
+- Teacher profile CTAs link to the future lesson request funnel with `teacher={slug}`.
+
 ## Netleşen Kararlar - 2026-05-21
 
 - Ders talebi akışı hesap oluşturma ile başlamayacak. Öğrenci önce tüm ders talebi bilgilerini girecek, en son adımda şifre belirleyerek hesap oluşturacak.

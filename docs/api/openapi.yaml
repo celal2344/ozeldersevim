@@ -33,6 +33,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TeacherSearchResponse"
+  /teachers/{slug}:
+    get:
+      summary: Get a public teacher profile by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Public teacher profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherProfile"
+        "404":
+          description: Teacher profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   parameters:
     PageParam:
@@ -211,3 +233,56 @@ components:
           type: integer
         distanceKm:
           type: number
+    TeacherProfileReview:
+      type: object
+      required: [id, studentName, rating, comment, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentName:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date
+    TeacherProfile:
+      allOf:
+        - $ref: "#/components/schemas/TeacherSearchResult"
+        - type: object
+          required:
+            - title
+            - longBio
+            - education
+            - responseTime
+            - activeStudentCount
+            - completedLessonCount
+            - isVerified
+            - lessonDurationMinutes
+            - reviews
+          properties:
+            title:
+              type: string
+            longBio:
+              type: string
+            education:
+              type: string
+            responseTime:
+              type: string
+            activeStudentCount:
+              type: integer
+            completedLessonCount:
+              type: integer
+            isVerified:
+              type: boolean
+            lessonDurationMinutes:
+              type: integer
+            reviews:
+              type: array
+              items:
+                $ref: "#/components/schemas/TeacherProfileReview"
