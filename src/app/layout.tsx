@@ -1,6 +1,6 @@
-import { rootMetadata } from "@/features/seo/metadata";
+import { rootMetadata } from "@/features/seo/constants";
 import { AppProviders } from "@/shared/providers/app-providers";
-import { geistMono, geistSans } from "@/shared/styles/fonts";
+import { geistMono, geistSans } from "@/shared/styles/constants";
 import "./globals.css";
 
 export { rootMetadata as metadata };

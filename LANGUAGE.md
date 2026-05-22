@@ -25,7 +25,10 @@ This file defines the architecture vocabulary and rules for this codebase. Use `
 - Shared infrastructure belongs in `src/shared`.
 - Component files should contain rendering and component state only.
 - Component files must not define reusable constants or utility functions.
-- Constants and utility functions must live in their own files.
-- Reusable constants and utility functions belong in a shared/global module.
+- Prefer simple folder-level `constants.ts` and `utils.ts` files instead of highly specific helper files.
+- Constants belong in the nearest relevant `constants.ts`.
+- Utility functions belong in the nearest relevant `utils.ts`.
+- Reusable constants and utility functions belong in the relevant shared/global folder.
 - Domain-specific constants and utility functions belong in the owning domain feature folder.
-- If a constant or function is only used by one component but expresses domain behavior, keep it next to that domain module, not inside the component file.
+- If a constant or function is only used by one component but expresses domain behavior, keep it in that domain module's `constants.ts` or `utils.ts`, not inside the component file.
+- When a critical codebase rule, architecture rule, domain decision, or workflow decision is given, update the relevant Markdown documentation in the same change.

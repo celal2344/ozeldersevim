@@ -2,7 +2,7 @@ import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import type { VariantProps } from "class-variance-authority"
 
-import { badgeVariants } from "@/shared/components/ui/badge-variants"
+import { badgeVariants } from "@/shared/components/ui/constants"
 import { cn } from "@/shared/lib/utils"
 
 function Badge({

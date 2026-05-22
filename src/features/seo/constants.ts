@@ -24,3 +24,11 @@ export const termsMetadata: Metadata = {
 export const kvkkMetadata: Metadata = {
   title: "KVKK Aydınlatma Metni",
 };
+
+export const sitemapStaticRoutes = [
+  "/",
+  "/ogretmen-bul",
+  "/gizlilik-politikasi",
+  "/kullanim-kosullari",
+  "/kvkk-aydinlatma-metni",
+];

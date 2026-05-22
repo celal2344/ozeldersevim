@@ -5,8 +5,8 @@ import {
   distanceLabel,
   initialsFromTeacherName,
   reviewLabel,
-  teacherDeliveryLabels,
-} from "@/features/search/search-formatters";
+} from "@/features/search/utils";
+import { teacherDeliveryLabels } from "@/features/search/constants";
 import type { TeacherSearchResult } from "@/features/search/types";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -48,13 +48,13 @@ export function TeacherResultCard({ teacher }: { teacher: TeacherSearchResult })
             <StarIcon aria-hidden="true" className="text-brand-orange" />
             {reviewLabel(teacher)}
           </span>
-          <span>{teacher.experienceYears} yıl deneyim</span>
+          <span>{teacher.experienceYears} yÄ±l deneyim</span>
         </div>
       </CardContent>
       <CardFooter className="justify-between gap-3 border-white/10 bg-white/5">
         <div>
-          <p className="text-lg font-semibold text-brand-orange">₺{teacher.hourlyPrice}</p>
-          <p className="text-xs text-white/55">60 dakikalık ders</p>
+          <p className="text-lg font-semibold text-brand-orange">â‚º{teacher.hourlyPrice}</p>
+          <p className="text-xs text-white/55">60 dakikalÄ±k ders</p>
           {teacher.distanceKm !== undefined ? (
             <p className="text-xs text-white/55">{distanceLabel(teacher.distanceKm)}</p>
           ) : null}
@@ -64,7 +64,7 @@ export function TeacherResultCard({ teacher }: { teacher: TeacherSearchResult })
           nativeButton={false}
           render={<Link href={`/ogretmen/${teacher.slug}`} />}
         >
-          Profili Gör
+          Profili GÃ¶r
         </Button>
       </CardFooter>
     </Card>

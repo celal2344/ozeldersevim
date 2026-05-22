@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-import { teacherSearchMetadata } from "@/features/seo/metadata";
+import { teacherSearchMetadata } from "@/features/seo/constants";
 import { SearchFilters } from "@/features/search/search-filters";
-import { pageSearchParamsFromRecord, searchPageHref } from "@/features/search/search-navigation";
+import { pageSearchParamsFromRecord, searchPageHref } from "@/features/search/utils";
 import { searchTeachers } from "@/features/search/search-service";
 import { TeacherResultCard } from "@/features/search/teacher-result-card";
 import { Button } from "@/shared/components/ui/button";
@@ -35,12 +35,12 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
       <section className="relative overflow-hidden border-b border-white/10 bg-brand-navy text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(251,115,22,0.26),transparent_26%)]" />
         <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-14 sm:px-6 lg:px-8">
-          <p className="text-sm text-brand-orange">Öğretmen Bul</p>
+          <p className="text-sm text-brand-orange">Ã–ÄŸretmen Bul</p>
           <h1 className="max-w-4xl text-4xl font-bold tracking-tight text-balance">
-            Özel ders öğretmenlerini ders, konum ve puana göre ara.
+            Ã–zel ders Ã¶ÄŸretmenlerini ders, konum ve puana gÃ¶re ara.
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-white/72">
-            {response.meta.total} öğretmen bulundu. Konum izni verirsen yakındaki öğretmenleri mesafeye göre sıralayabilirsin.
+            {response.meta.total} Ã¶ÄŸretmen bulundu. Konum izni verirsen yakÄ±ndaki Ã¶ÄŸretmenleri mesafeye gÃ¶re sÄ±ralayabilirsin.
           </p>
         </div>
       </section>
@@ -54,9 +54,9 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
           </div>
         ) : (
           <div className="rounded-2xl border bg-white p-8 text-center shadow-sm">
-            <h2 className="text-xl font-semibold text-brand-navy">Sonuç bulunamadı</h2>
+            <h2 className="text-xl font-semibold text-brand-navy">SonuÃ§ bulunamadÄ±</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Filtreleri azaltarak, yakın ilçeleri veya online ders seçeneğini deneyebilirsin.
+              Filtreleri azaltarak, yakÄ±n ilÃ§eleri veya online ders seÃ§eneÄŸini deneyebilirsin.
             </p>
           </div>
         )}
@@ -68,7 +68,7 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
             nativeButton={false}
             render={<Link href={searchPageHref(params, Math.max(1, response.meta.page - 1))} />}
           >
-            Önceki
+            Ã–nceki
           </Button>
           <span className="text-sm text-muted-foreground">
             Sayfa {response.meta.page} / {response.meta.totalPages}

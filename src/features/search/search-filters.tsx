@@ -3,7 +3,7 @@
 import { LocateFixedIcon, SearchIcon } from "lucide-react";
 
 import { cityOptions, districtOptions, lessonOptions } from "@/features/search/mock-data";
-import { optionValue } from "@/features/search/search-formatters";
+import { optionValue } from "@/features/search/utils";
 import { useSearchFilterNavigation } from "@/features/search/use-search-filter-navigation";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -28,7 +28,7 @@ export function SearchFilters() {
           <Input
             name="q"
             defaultValue={searchParams.get("q") ?? ""}
-            placeholder="Ders, öğretmen veya şehir ara"
+            placeholder="Ders, Ã¶ÄŸretmen veya ÅŸehir ara"
             className="h-10 border-slate-200 pl-9"
           />
         </div>
@@ -37,7 +37,7 @@ export function SearchFilters() {
           defaultValue={searchParams.get("lesson") ?? ""}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
-          <option value="">Tüm dersler</option>
+          <option value="">TÃ¼m dersler</option>
           {lessonOptions.map((lesson) => (
             <option key={lesson} value={optionValue(lesson)}>
               {lesson}
@@ -49,7 +49,7 @@ export function SearchFilters() {
           defaultValue={searchParams.get("city") ?? ""}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
-          <option value="">Tüm şehirler</option>
+          <option value="">TÃ¼m ÅŸehirler</option>
           {cityOptions.map((city) => (
             <option key={city} value={optionValue(city)}>
               {city}
@@ -67,7 +67,7 @@ export function SearchFilters() {
           onChange={(event) => updateParam("district", event.target.value)}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
-          <option value="">Tüm ilçeler</option>
+          <option value="">TÃ¼m ilÃ§eler</option>
           {districtOptions.map((district) => (
             <option key={district} value={optionValue(district)}>
               {district}
@@ -79,27 +79,27 @@ export function SearchFilters() {
           onValueChange={(value) => updateParam("deliveryMode", value)}
         >
           <SelectTrigger className="h-10 w-full border-slate-200 bg-white text-brand-navy">
-            <SelectValue placeholder="Ders türü" />
+            <SelectValue placeholder="Ders tÃ¼rÃ¼" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="all">Tüm ders türleri</SelectItem>
+              <SelectItem value="all">TÃ¼m ders tÃ¼rleri</SelectItem>
               <SelectItem value="online">Online</SelectItem>
-              <SelectItem value="face_to_face">Yüz yüze</SelectItem>
+              <SelectItem value="face_to_face">YÃ¼z yÃ¼ze</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
         <Select value={searchParams.get("sort") ?? "recommended"} onValueChange={(value) => updateParam("sort", value)}>
           <SelectTrigger className="h-10 w-full border-slate-200 bg-white text-brand-navy">
-            <SelectValue placeholder="Sıralama" />
+            <SelectValue placeholder="SÄ±ralama" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="recommended">Önerilen</SelectItem>
-              <SelectItem value="nearest">Yakındaki</SelectItem>
-              <SelectItem value="highest_rated">En yüksek puan</SelectItem>
-              <SelectItem value="lowest_price">En düşük ücret</SelectItem>
-              <SelectItem value="most_reviewed">En çok yorum</SelectItem>
+              <SelectItem value="recommended">Ã–nerilen</SelectItem>
+              <SelectItem value="nearest">YakÄ±ndaki</SelectItem>
+              <SelectItem value="highest_rated">En yÃ¼ksek puan</SelectItem>
+              <SelectItem value="lowest_price">En dÃ¼ÅŸÃ¼k Ã¼cret</SelectItem>
+              <SelectItem value="most_reviewed">En Ã§ok yorum</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>

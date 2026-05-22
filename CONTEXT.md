@@ -32,6 +32,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Search location model: support both city/district filtering and location-based nearby search.
 - Seed data: include Erzurum and random test data covering different cases.
 - Vocabulary split: use this file for product/domain vocabulary and `LANGUAGE.md` for architecture vocabulary and rules.
+- Documentation maintenance: whenever a critical codebase rule, architecture rule, domain decision, or workflow decision is given, update the relevant Markdown documentation in the same change.
 
 ## Branch Workflow
 

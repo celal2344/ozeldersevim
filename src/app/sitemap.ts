@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { sitemapStaticRoutes } from "@/features/seo/routes";
+import { sitemapStaticRoutes } from "@/features/seo/constants";
 import { absoluteUrl } from "@/features/seo/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
