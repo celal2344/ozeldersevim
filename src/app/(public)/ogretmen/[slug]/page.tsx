@@ -15,7 +15,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const teacher = getTeacherProfileBySlug(slug);
+  const teacher = await getTeacherProfileBySlug(slug);
 
   if (!teacher) {
     return {
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function TeacherProfilePage({ params }: PageProps) {
   const { slug } = await params;
-  const teacher = getTeacherProfileBySlug(slug);
+  const teacher = await getTeacherProfileBySlug(slug);
 
   if (!teacher) notFound();
 

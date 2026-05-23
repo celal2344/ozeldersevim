@@ -1,6 +1,6 @@
 # Ozel Ders Evim - Project Context
 
-Last updated: 2026-05-21
+Last updated: 2026-05-23
 
 ## Product Summary
 
@@ -62,6 +62,22 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Lesson request submission creates a real Supabase student account and persists the lesson request.
 - Student accounts created through the lesson request funnel are active immediately; Supabase email confirmation must be disabled for this MVP flow.
 - The request completion API is `POST /api/lesson-requests/complete-with-account`.
+- Teacher onboarding uses `/ogretmen-ol`.
+- Teacher eligibility test scoring API is `POST /api/teacher-eligibility/attempts`.
+- Teacher onboarding completion API is `POST /api/teachers/onboarding`.
+- The MVP teacher eligibility test is a fixed 10-question auto-scored test with a passing score of 70.
+- Failed teacher eligibility attempts are stateless and not persisted.
+- Passed teacher eligibility attempts are persisted only after the teacher account is created.
+- Teacher accounts created through onboarding are active immediately; Supabase email confirmation must be disabled for this MVP flow.
+- Teacher onboarding creates one published teacher profile/listing without admin approval.
+
+## Net New Decisions - 2026-05-23
+
+- Teacher onboarding is a two-step same-page flow: eligibility test first, then account/profile/listing form.
+- The first teacher onboarding implementation does not include service role access, admin approval, document verification, image upload, dashboard management, or request acceptance.
+- Teacher onboarding writes the app profile, passed eligibility attempt, teacher profile, teacher lessons, and public listing through authenticated Supabase RLS.
+- Public teacher profile reads can load published Supabase teacher listings; seed data remains the fallback when Supabase env is unavailable.
+- Teacher search can load published Supabase teacher listings; seed data remains the fallback when Supabase env is unavailable or returns no published listings.
 
 ## Netleşen Kararlar - 2026-05-21
 
