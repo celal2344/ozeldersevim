@@ -1,8 +1,11 @@
-import Link from "next/link";
 import { AlertCircleIcon, ArrowLeftIcon, MapPinIcon, StarIcon } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-import { lessonRequestMetadata } from "@/features/seo/constants";
+import { getCurrentAccount } from "@/features/auth/service";
+import { panelPathForRole, registerPathWithNext } from "@/features/auth/utils";
 import { LessonRequestForm } from "@/features/requests/lesson-request-form";
+import { lessonRequestMetadata } from "@/features/seo/constants";
 import { getTeacherProfileBySlug } from "@/features/teachers/service";
 import { teacherDeliveryLabel, teacherRatingLabel } from "@/features/teachers/utils";
 import { Button } from "@/shared/components/ui/button";
@@ -16,6 +19,17 @@ export { lessonRequestMetadata as metadata };
 export default async function LessonRequestPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const teacherSlug = Array.isArray(params.teacher) ? params.teacher[0] : params.teacher;
+  const nextPath = teacherSlug ? `/ders-talebi?teacher=${encodeURIComponent(teacherSlug)}` : "/ders-talebi";
+  const account = await getCurrentAccount();
+
+  if (!account) {
+    redirect(registerPathWithNext(nextPath));
+  }
+
+  if (account.role !== "student") {
+    redirect(panelPathForRole(account.role));
+  }
+
   const teacher = teacherSlug ? getTeacherProfileBySlug(teacherSlug) : null;
 
   if (!teacher) {
@@ -75,12 +89,19 @@ export default async function LessonRequestPage({ searchParams }: PageProps) {
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_320px] lg:px-8">
-        <LessonRequestForm teacher={teacher} />
+        <LessonRequestForm
+          accountContact={{
+            fullName: account.fullName,
+            email: account.email ?? "",
+            phone: account.phone ?? "",
+          }}
+          teacher={teacher}
+        />
         <aside className="h-fit rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
           <h2 className="text-lg font-semibold text-brand-navy">Talep akışı</h2>
           <div className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
-            <p>Önce ders ve iletişim bilgilerini girersin.</p>
-            <p>Son adımda şifre belirlenir ve öğrenci hesabın oluşturulur.</p>
+            <p>Önce ders ihtiyacını ve tercihlerini girersin.</p>
+            <p>İletişim bilgilerin hesabından otomatik gelir; istersen bu talep için güncelleyebilirsin.</p>
             <p>Öğretmen talebi kabul edince iletişim bilgilerin öğretmene açılır.</p>
           </div>
         </aside>

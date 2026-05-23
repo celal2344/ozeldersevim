@@ -68,12 +68,14 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Teacher search cards link to the public teacher profile route.
 - Teacher profile CTAs link to the lesson request funnel with `teacher={slug}`.
 - Lesson request funnel uses `/ders-talebi?teacher={slug}`.
-- Lesson request submission creates a real Supabase student account and persists the lesson request.
-- Student accounts created through the lesson request funnel are active immediately; Supabase email confirmation must be disabled for this MVP flow.
-- The request completion API is `POST /api/lesson-requests/complete-with-account`.
+- Lesson request submission requires a signed-in student account and persists the lesson request.
+- Student and teacher accounts are created through the normal `/kayit` registration flow; Supabase email confirmation must be disabled for MVP flows that expect an immediate session.
+- Unauthenticated visitors opening `/ders-talebi?teacher={slug}` are redirected to `/kayit?next=/ders-talebi?teacher={slug}`.
+- The request submission API is `POST /api/lesson-requests`.
+- Global auth APIs are `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/auth/me`.
 - Teacher account/listing experiments from `a7b515a` and `f528c20` were cleaned up in `feat/account-flow-cleanup`.
 - The Supabase rollback migration for the teacher account/listing experiment was applied remotely.
-- `/ogretmen-ol` is a temporary holding page until the clean teacher account flow is implemented.
+- `/ogretmen-ol` routes teachers into `/kayit?role=teacher`; teacher eligibility and listing creation remain later scope.
 - The active OpenAPI contract only documents implemented endpoints.
 - UTF-8 hygiene is being tracked in `chore/utf8-docs-and-copy-cleanup`.
 
@@ -96,8 +98,8 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 
 ## Netleşen Kararlar - 2026-05-21
 
-- Ders talebi akışı hesap oluşturma ile başlamayacak. Öğrenci önce tüm ders talebi bilgilerini girecek, en son adımda şifre belirleyerek hesap oluşturacak.
-- Öğrenci hesabı ders talebi sonunda oluşacak ve talep bu hesaba bağlanacak.
+- Öğrenci ve öğretmen hesapları normal `/kayit` akışından oluşturulur.
+- Ders talebi akışı hesap oluşturmaz; ders talebi formuna girmek için öğrenci hesabıyla giriş yapılmış olmalıdır.
 - Öğretmen profili/ilanı şimdilik admin onayı olmadan yayına alınabilecek.
 - Ödeme, ders paketi satın alma ve platform içi tahsilat MVP kapsamında değil.
 - Her öğretmenin tek bir profili/ilanı olacak.
@@ -131,13 +133,13 @@ These files are design references only. Do not use them directly as website imag
 - Can browse public pages without an account.
 - Can search teachers.
 - Can view teacher profiles.
-- Can start a lesson request without logging in.
-- Must create a student account at the final step of the lesson request by setting a password.
+- Can search and view teacher profiles without logging in.
+- Must register or log in before opening the lesson request form.
 
 ### Student
 
 - Can register/login.
-- Can be created at the end of the lesson request funnel.
+- Is created through the normal `/kayit` registration flow.
 - Can save favorite teachers.
 - Can submit lesson requests.
 - Can see submitted requests and accepted lessons in the dashboard.
@@ -233,15 +235,14 @@ These files are design references only. Do not use them directly as website imag
 4. Enter contact details.
 5. Select preferred contact method.
 6. Accept terms/privacy/KVKK consent.
-7. Set password and create student account.
-8. Submit request and attach it to the new student account.
+7. Submit request as the signed-in student.
 
 Potential additions: preferred date/time, student level, goal/need text field, and budget range.
 
 ### 5. Authentication
 
-- Separate student and teacher registration flows.
-- Student account can be created at the final step of the lesson request funnel.
+- One normal registration form supports student and teacher account creation.
+- Student account creation happens through `/kayit`; lesson request no longer creates the account.
 - Teacher account can be created before the teacher eligibility test.
 - Teacher eligibility test is required when the teacher creates a tutoring ad/listing.
 - Supabase Auth email/password.
@@ -293,8 +294,8 @@ Goal: launch an SEO-visible tutoring directory with searchable teachers and a wo
 - Search/results page.
 - Teacher profile page.
 - Lesson request funnel.
-- Student account creation at the end of the request funnel.
 - Student/teacher registration entry.
+- Authenticated lesson request submission.
 - Teacher account registration.
 - Teacher eligibility test gate before tutoring ad/listing creation.
 - Teacher listing creation form.
@@ -421,14 +422,17 @@ Currently implemented endpoints:
 
 - `GET /api/search/teachers`
 - `GET /api/teachers/{slug}`
-- `POST /api/lesson-requests/complete-with-account`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+- `POST /api/lesson-requests`
 
 Planned endpoints:
 
 - `POST /api/lesson-requests/{id}/accept`
 - `GET /api/lesson-categories`
 - `GET /api/locations`
-- `POST /api/teachers/register`
 - `POST /api/teachers/listings`
 - `PATCH /api/teachers/me`
 - `GET /api/student/requests`
@@ -490,7 +494,7 @@ Server actions can be used internally, but API shape should still be documented 
 - Public pages render on mobile and desktop.
 - Search results are server-filtered and paginated.
 - Teacher profiles are SEO-rendered and indexable.
-- Lesson request funnel creates a student account at the final password step and persists valid requests.
+- Lesson request funnel requires a signed-in student and persists valid requests.
 - Teacher eligibility test gates tutoring ad/listing creation, not teacher account registration.
 - Teacher listing creation can create a draft/published teacher profile without admin approval.
 - Teachers can accept/reject lesson requests.
