@@ -1,19 +1,30 @@
 import { NextResponse } from "next/server";
 
-import { completeLessonRequestSchema } from "@/features/requests/constants";
+import { getCurrentAccount } from "@/features/auth/service";
+import { submitLessonRequestSchema } from "@/features/requests/constants";
 import { deliveryModeAllowedForTeacher, lessonSlugFromName, optionalNumber } from "@/features/requests/utils";
 import { getTeacherProfileBySlug } from "@/features/teachers/service";
 import { createSupabaseServerClient } from "@/shared/db/supabase/server";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
-  const parsed = completeLessonRequestSchema.safeParse(body);
+  const parsed = submitLessonRequestSchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
       { message: "Ders talebi bilgileri eksik veya hatalı.", errors: parsed.error.flatten().fieldErrors },
       { status: 400 }
     );
+  }
+
+  const account = await getCurrentAccount();
+
+  if (!account) {
+    return NextResponse.json({ message: "Ders talebi göndermek için giriş yapmalısın." }, { status: 401 });
+  }
+
+  if (account.role !== "student") {
+    return NextResponse.json({ message: "Ders talebini sadece öğrenci hesapları gönderebilir." }, { status: 403 });
   }
 
   const input = parsed.data;
@@ -33,34 +44,6 @@ export async function POST(request: Request) {
 
   try {
     const supabase = await createSupabaseServerClient();
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: input.email,
-      password: input.password,
-      options: {
-        data: {
-          full_name: input.studentName,
-          phone: input.phone,
-          role: "student",
-        },
-      },
-    });
-
-    if (signUpError) {
-      return NextResponse.json({ message: signUpError.message }, { status: 400 });
-    }
-
-    if (!signUpData.user || !signUpData.session) {
-      return NextResponse.json(
-        { message: "Bu MVP akışı için Supabase email doğrulaması kapalı olmalı." },
-        { status: 409 }
-      );
-    }
-
-    await supabase.auth.setSession({
-      access_token: signUpData.session.access_token,
-      refresh_token: signUpData.session.refresh_token,
-    });
-
     const { data: teacherListing, error: teacherListingError } = await supabase
       .from("teacher_listings")
       .select("teacher_profile_id")
@@ -105,30 +88,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Konum bulunamadı." }, { status: 404 });
     }
 
-    const profileError = await supabase.from("profiles").insert({
-      id: signUpData.user.id,
-      role: "student",
-      full_name: input.studentName,
-      phone: input.phone,
-    });
-
-    if (profileError.error) {
-      return NextResponse.json({ message: profileError.error.message }, { status: 500 });
-    }
-
-    const studentProfileError = await supabase.from("student_profiles").insert({
-      profile_id: signUpData.user.id,
-    });
-
-    if (studentProfileError.error) {
-      return NextResponse.json({ message: studentProfileError.error.message }, { status: 500 });
-    }
-
     const now = new Date().toISOString();
     const { data: lessonRequest, error: lessonRequestError } = await supabase
       .from("lesson_requests")
       .insert({
-        student_profile_id: signUpData.user.id,
+        student_profile_id: account.id,
         teacher_profile_id: teacherListing.teacher_profile_id,
         lesson_category_id: lessonCategory.id,
         location_id: location.id,
@@ -161,7 +125,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       requestId: lessonRequest.id,
-      studentProfileId: signUpData.user.id,
+      studentProfileId: account.id,
       status: lessonRequest.status,
     });
   } catch (error) {

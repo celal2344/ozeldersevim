@@ -1,5 +1,5 @@
 import { deliveryPreferenceOptions } from "@/features/requests/constants";
-import type { CompleteLessonRequestPayload, LessonRequestFormValues } from "@/features/requests/types";
+import type { LessonRequestFormValues, SubmitLessonRequestPayload } from "@/features/requests/types";
 import type { TeacherProfile } from "@/features/teachers/types";
 
 export function defaultDeliveryModeForTeacher(teacher: TeacherProfile): "online" | "face_to_face" {
@@ -38,7 +38,7 @@ export function locationSlugFromTeacher(teacher: TeacherProfile) {
   return `${lessonSlugFromName(teacher.city)}-${lessonSlugFromName(teacher.district)}`;
 }
 
-export function formValuesToCompletePayload(values: LessonRequestFormValues): CompleteLessonRequestPayload {
+export function formValuesToSubmitPayload(values: LessonRequestFormValues): SubmitLessonRequestPayload {
   return {
     teacherSlug: values.teacherSlug,
     lessonSlug: values.lessonSlug,
@@ -54,7 +54,6 @@ export function formValuesToCompletePayload(values: LessonRequestFormValues): Co
     contactPreference: values.contactPreference,
     termsAccepted: values.termsAccepted,
     privacyAccepted: values.privacyAccepted,
-    password: values.password,
   };
 }
 

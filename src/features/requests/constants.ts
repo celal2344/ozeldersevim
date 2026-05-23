@@ -5,7 +5,6 @@ export const lessonRequestSteps = [
   { id: "location", title: "Konum" },
   { id: "details", title: "İhtiyaç" },
   { id: "contact", title: "İletişim" },
-  { id: "account", title: "Hesap" },
 ] as const;
 
 export const studentLevelOptions = [
@@ -51,10 +50,9 @@ export const lessonRequestFormStepFields = {
   location: ["locationSlug", "deliveryMode"],
   details: ["studentLevel", "goal", "budgetMin", "budgetMax"],
   contact: ["studentName", "email", "phone", "contactPreference", "termsAccepted", "privacyAccepted"],
-  account: ["password", "passwordConfirm"],
 } as const;
 
-export const completeLessonRequestSchema = z.object({
+export const submitLessonRequestSchema = z.object({
   teacherSlug: z.string().min(1, "Öğretmen seçimi zorunlu."),
   lessonSlug: z.string().min(1, "Ders seçimi zorunlu."),
   locationSlug: z.string().min(1, "Konum seçimi zorunlu."),
@@ -77,14 +75,6 @@ export const completeLessonRequestSchema = z.object({
   privacyAccepted: z.boolean().refine((value) => value, {
     message: "Gizlilik/KVKK metnini kabul etmelisin.",
   }),
-  password: z.string().min(8, "Şifre en az 8 karakter olmalı."),
 });
 
-export const lessonRequestFormSchema = completeLessonRequestSchema
-  .extend({
-    passwordConfirm: z.string().min(8, "Şifre tekrarını gir."),
-  })
-  .refine((values) => values.password === values.passwordConfirm, {
-    path: ["passwordConfirm"],
-    message: "Şifreler eşleşmiyor.",
-  });
+export const lessonRequestFormSchema = submitLessonRequestSchema;

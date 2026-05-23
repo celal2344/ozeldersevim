@@ -15,22 +15,31 @@ import {
   lessonRequestSteps,
   studentLevelOptions,
 } from "@/features/requests/constants";
-import type { CompleteLessonRequestResponse, LessonRequestFormValues } from "@/features/requests/types";
+import type { LessonRequestFormValues, SubmitLessonRequestResponse } from "@/features/requests/types";
 import {
   apiErrorMessage,
   defaultDeliveryModeForTeacher,
   deliveryOptionsForTeacher,
-  formValuesToCompletePayload,
+  formValuesToSubmitPayload,
   lessonSlugFromName,
   locationSlugFromTeacher,
 } from "@/features/requests/utils";
 import type { TeacherProfile } from "@/features/teachers/types";
 import { Button } from "@/shared/components/ui/button";
 
-export function LessonRequestForm({ teacher }: { teacher: TeacherProfile }) {
+type LessonRequestFormProps = {
+  accountContact: {
+    fullName: string;
+    email: string;
+    phone: string;
+  };
+  teacher: TeacherProfile;
+};
+
+export function LessonRequestForm({ accountContact, teacher }: LessonRequestFormProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [completedRequest, setCompletedRequest] = useState<CompleteLessonRequestResponse | null>(null);
+  const [completedRequest, setCompletedRequest] = useState<SubmitLessonRequestResponse | null>(null);
   const form = useForm<LessonRequestFormValues>({
     resolver: zodResolver(lessonRequestFormSchema),
     defaultValues: {
@@ -42,14 +51,12 @@ export function LessonRequestForm({ teacher }: { teacher: TeacherProfile }) {
       goal: "",
       budgetMin: "",
       budgetMax: "",
-      studentName: "",
-      email: "",
-      phone: "",
+      studentName: accountContact.fullName,
+      email: accountContact.email,
+      phone: accountContact.phone,
       contactPreference: "phone",
       termsAccepted: false,
       privacyAccepted: false,
-      password: "",
-      passwordConfirm: "",
     },
   });
 
@@ -69,12 +76,12 @@ export function LessonRequestForm({ teacher }: { teacher: TeacherProfile }) {
 
   async function submit(values: LessonRequestFormValues) {
     setSubmitError(null);
-    const response = await fetch("/api/lesson-requests/complete-with-account", {
+    const response = await fetch("/api/lesson-requests", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formValuesToCompletePayload(values)),
+      body: JSON.stringify(formValuesToSubmitPayload(values)),
     });
     const payload = await response.json().catch(() => null);
 
@@ -83,7 +90,7 @@ export function LessonRequestForm({ teacher }: { teacher: TeacherProfile }) {
       return;
     }
 
-    setCompletedRequest(payload as CompleteLessonRequestResponse);
+    setCompletedRequest(payload as SubmitLessonRequestResponse);
   }
 
   if (completedRequest) {
@@ -206,7 +213,7 @@ export function LessonRequestForm({ teacher }: { teacher: TeacherProfile }) {
               <h2 className="text-2xl font-bold text-brand-navy">İletişim bilgileri</h2>
               <p className="mt-2 text-sm text-muted-foreground">Bu bilgiler öğretmen talebi kabul edince paylaşılır.</p>
             </div>
-            <FieldError message={errors.studentName?.message ?? errors.email?.message ?? errors.phone?.message ?? errors.contactPreference?.message ?? errors.termsAccepted?.message ?? errors.privacyAccepted?.message} />
+            <FieldError message={errors.studentName?.message ?? errors.email?.message ?? errors.phone?.message ?? errors.contactPreference?.message ?? errors.termsAccepted?.message ?? errors.privacyAccepted?.message ?? submitError ?? undefined} />
             <div className="grid gap-4 md:grid-cols-2">
               <input {...form.register("studentName")} placeholder="Ad soyad" className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy" />
               <input {...form.register("email")} type="email" placeholder="Email" className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy" />
@@ -227,20 +234,6 @@ export function LessonRequestForm({ teacher }: { teacher: TeacherProfile }) {
               <input type="checkbox" {...form.register("privacyAccepted")} className="mt-1" />
               Gizlilik politikası ve KVKK aydınlatma metnini kabul ediyorum.
             </label>
-          </div>
-        ) : null}
-
-        {currentStep.id === "account" ? (
-          <div className="grid gap-5">
-            <div>
-              <h2 className="text-2xl font-bold text-brand-navy">Hesabını oluştur</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Şifre belirleyince öğrenci hesabın oluşur ve talep bu hesaba bağlanır.</p>
-            </div>
-            <FieldError message={errors.password?.message ?? errors.passwordConfirm?.message ?? submitError ?? undefined} />
-            <div className="grid gap-4 md:grid-cols-2">
-              <input {...form.register("password")} type="password" placeholder="Şifre" className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy" />
-              <input {...form.register("passwordConfirm")} type="password" placeholder="Şifre tekrar" className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy" />
-            </div>
           </div>
         ) : null}
       </div>

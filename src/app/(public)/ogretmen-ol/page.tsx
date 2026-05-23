@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowRightIcon, CheckCircle2Icon, Clock3Icon, ShieldCheckIcon } from "lucide-react";
+import Link from "next/link";
 
 import { teacherOnboardingMetadata } from "@/features/seo/constants";
 import { Button } from "@/shared/components/ui/button";
@@ -15,19 +15,19 @@ export default function TeacherOnboardingHoldingPage() {
           <div className="flex flex-col justify-center">
             <p className="text-sm font-semibold text-brand-orange">Öğretmen Ol</p>
             <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-              Öğretmen hesap akışını yeniden düzenliyoruz.
+              Önce öğretmen hesabını oluştur.
             </h1>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-white/74">
-              Bu sayfa geçici olarak başvuru almıyor. Yeni akışta öğretmen hesabı önce oluşturulacak, ders ilanı
-              yayınlanırken uygunluk testi gösterilecek.
+              Öğretmen hesabı açmak için uygunluk testi gerekmez. Ders ilanı oluşturma adımında öğretmenlik testi
+              gösterilecek ve sadece testi geçen öğretmenler ilan yayınlayabilecek.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Button className="bg-brand-orange text-white hover:bg-brand-orange/90" nativeButton={false} render={<Link href="/ogretmen-bul" />}>
-                Öğretmenleri Gör
+              <Button className="bg-brand-orange text-white hover:bg-brand-orange/90" nativeButton={false} render={<Link href="/kayit?role=teacher" />}>
+                Öğretmen Hesabı Aç
                 <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
               </Button>
-              <Button variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white" nativeButton={false} render={<Link href="/ders-talebi" />}>
-                Ders Talebi Oluştur
+              <Button variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white" nativeButton={false} render={<Link href="/giris" />}>
+                Giriş Yap
               </Button>
             </div>
           </div>
@@ -48,13 +48,13 @@ export default function TeacherOnboardingHoldingPage() {
                 <div className="rounded-xl bg-white p-4 text-brand-navy">
                   <Clock3Icon aria-hidden="true" className="text-brand-orange" />
                   <p className="mt-3 text-2xl font-bold">Sırada</p>
-                  <p className="text-xs text-muted-foreground">Temiz kayıt akışı</p>
+                  <p className="text-xs text-muted-foreground">İlan oluşturma</p>
                 </div>
               </div>
             </div>
             <div className="rounded-2xl border border-white/12 bg-brand-navy-muted p-5 text-sm leading-6 text-white/72">
-              Önce hesap kayıt akışı sadeleştirilecek. Ardından öğrenci ve öğretmen dashboardları içinde başvuru
-              yönetimi, iletişim paylaşımı ve yorum hakkı eklenecek.
+              Bu branch öğretmen hesabını açar. Öğretmenlik testi ve ilan oluşturma akışı sonraki feature branch içinde
+              panele bağlanacak.
             </div>
           </div>
         </div>
