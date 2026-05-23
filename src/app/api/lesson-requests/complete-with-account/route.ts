@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   }
 
   const input = parsed.data;
-  const teacher = await getTeacherProfileBySlug(input.teacherSlug);
+  const teacher = getTeacherProfileBySlug(input.teacherSlug);
 
   if (!teacher) {
     return NextResponse.json({ message: "Öğretmen bulunamadı." }, { status: 404 });

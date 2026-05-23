@@ -16,7 +16,7 @@ export { lessonRequestMetadata as metadata };
 export default async function LessonRequestPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const teacherSlug = Array.isArray(params.teacher) ? params.teacher[0] : params.teacher;
-  const teacher = teacherSlug ? await getTeacherProfileBySlug(teacherSlug) : null;
+  const teacher = teacherSlug ? getTeacherProfileBySlug(teacherSlug) : null;
 
   if (!teacher) {
     return (

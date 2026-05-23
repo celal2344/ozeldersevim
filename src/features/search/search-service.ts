@@ -1,5 +1,5 @@
+import { teacherSearchSeed } from "./mock-data";
 import type { TeacherSearchParams, TeacherSearchResponse, TeacherSearchResult } from "./types";
-import { getPublishedTeacherProfiles } from "@/features/teachers/service";
 import { paginateItems, parsePaginationParams } from "@/shared/api/list-query";
 
 const TEACHER_SEARCH_PAGE_SIZE = 6;
@@ -44,14 +44,13 @@ export function parseTeacherSearchParams(searchParams: URLSearchParams): Teacher
   };
 }
 
-export async function searchTeachers(params: TeacherSearchParams): Promise<TeacherSearchResponse> {
+export function searchTeachers(params: TeacherSearchParams): TeacherSearchResponse {
   const hasLocation = typeof params.lat === "number" && typeof params.lng === "number";
   const query = params.q ? normalize(params.q) : "";
   const lesson = params.lesson ? normalize(params.lesson) : "";
   const city = params.city ? normalize(params.city) : "";
   const district = params.district ? normalize(params.district) : "";
-  const teachers = await getPublishedTeacherProfiles();
-  const filtered = teachers
+  const filtered = teacherSearchSeed
     .filter((teacher) => {
       const searchable = normalize(
         [teacher.fullName, teacher.headline, teacher.shortBio, teacher.city, teacher.district, ...teacher.lessons].join(" ")

@@ -17,7 +17,7 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
   const rawParams = await searchParams;
   const params = pageSearchParamsFromRecord(rawParams);
 
-  const response = await searchTeachers({
+  const response = searchTeachers({
     q: params.get("q") ?? undefined,
     lesson: params.get("lesson") ?? undefined,
     city: params.get("city") ?? undefined,

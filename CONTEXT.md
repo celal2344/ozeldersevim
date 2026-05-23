@@ -1,6 +1,6 @@
 # Ozel Ders Evim - Project Context
 
-Last updated: 2026-05-23
+Last updated: 2026-05-24
 
 ## Product Summary
 
@@ -21,7 +21,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Deployment: Vercel for frontend/backend, Supabase for database.
 - Supabase project ref: `hhddeqgvrnyxnwetetdc`.
 - Supabase project URL: `https://hhddeqgvrnyxnwetetdc.supabase.co`.
-- Local app env uses `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and server-only `SUPABASE_SERVICE_ROLE_KEY`; do not commit `.env*` files or database credentials.
+- Local app env uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; do not commit `.env*` files or service-role/database credentials.
 - Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
 - SMS: not in MVP.
 - Architecture: feature-based architecture.
@@ -49,9 +49,11 @@ The first release should focus on SEO-visible public pages, teacher search, teac
   - `feat/search-results`
   - `feat/teacher-public-profile`
   - `feat/lesson-request-funnel`
-  - `feat/teacher-eligibility-onboarding`
-  - `feat/teacher-account-listing-gate`
-  - `feat/request-acceptance-review-gate`
+  - `feat/account-flow-cleanup`
+  - `feat/auth-account-rebuild`
+  - `feat/dashboard-foundation`
+  - `feat/dashboard-request-management`
+  - `feat/dashboard-reviews`
   - `docs/openapi-mvp-lock`
 - Any API behavior change must update the OpenAPI contract in the same branch.
 - Any product or architecture decision discovered during implementation must update this context file in the same branch.
@@ -67,29 +69,17 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Lesson request submission creates a real Supabase student account and persists the lesson request.
 - Student accounts created through the lesson request funnel are active immediately; Supabase email confirmation must be disabled for this MVP flow.
 - The request completion API is `POST /api/lesson-requests/complete-with-account`.
-- Teacher account registration uses `/ogretmen-ol`.
-- Teacher listing creation uses `/ogretmen-ilani-olustur`.
-- Teacher eligibility test scoring API is `POST /api/teacher-eligibility/attempts`.
-- Teacher account registration API is `POST /api/teachers/register`.
-- Teacher listing creation API is `POST /api/teachers/listings`.
-- The MVP teacher eligibility test is a fixed 10-question auto-scored test with a passing score of 70.
-- Failed teacher eligibility attempts are stateless and not persisted.
-- Passed teacher eligibility attempts are persisted only when a teacher account creates a tutoring ad/listing.
-- Teacher accounts can be created without passing the teacher eligibility test.
-- Teacher accounts created through registration are active immediately; Supabase email confirmation must be disabled for this MVP flow.
-- Teacher listing creation creates one published teacher profile/listing without admin approval after the test is passed.
+- Teacher account/listing experiments from `a7b515a` and `f528c20` are intentionally being cleaned up before the account flow is rebuilt.
+- `/ogretmen-ol` is a temporary holding page until the clean teacher account flow is implemented.
+- The active OpenAPI contract only documents implemented endpoints.
 
-## Net New Decisions - 2026-05-23
+## Remaining Feature Order
 
-- Teacher eligibility test is no longer required before creating a teacher account.
-- The eligibility gate happens when a teacher tries to create a tutoring ad/listing.
-- Teacher account registration creates only the app profile and auth session.
-- Teacher listing creation writes the passed eligibility attempt, teacher profile, teacher lessons, and public listing after server-side scoring.
-- Teacher eligibility attempts are no longer directly insertable by authenticated clients; the server writes passed attempts after validating the test.
-- The listing creation server path uses the server-only Supabase service role key; never expose it to client code or `NEXT_PUBLIC_*` variables.
-- The first teacher listing implementation does not include admin approval, document verification, image upload, dashboard management, or request acceptance.
-- Public teacher profile reads can load published Supabase teacher listings; seed data remains the fallback when Supabase env is unavailable.
-- Teacher search can load published Supabase teacher listings; seed data remains the fallback when Supabase env is unavailable or returns no published listings.
+1. Account flow cleanup: revert the messy teacher account/listing implementation while preserving Supabase setup and migration history.
+2. Auth account rebuild: implement clean student/teacher login and registration flows.
+3. Dashboard foundation: add role-aware private dashboard shells for students and teachers.
+4. Dashboard request management: teacher incoming requests, accept/reject actions, and student request status views.
+5. Dashboard reviews: allow reviews only after an accepted lesson request.
 
 ## Netleşen Kararlar - 2026-05-21
 
@@ -463,15 +453,15 @@ SEO is a primary business requirement, so it should be built into the URL and da
 
 Even with Next.js route handlers/server actions, keep an OpenAPI contract for external clarity and agent continuity.
 
-Initial endpoints:
+Currently implemented endpoints:
 
 - `GET /api/search/teachers`
 - `GET /api/teachers/{slug}`
-- `POST /api/lesson-requests`
 - `POST /api/lesson-requests/complete-with-account`
+
+Planned endpoints:
+
 - `POST /api/lesson-requests/{id}/accept`
-- `POST /api/teacher-eligibility/attempts`
-- `POST /api/teacher-eligibility/attempts/{id}/submit`
 - `GET /api/lesson-categories`
 - `GET /api/locations`
 - `POST /api/teachers/register`

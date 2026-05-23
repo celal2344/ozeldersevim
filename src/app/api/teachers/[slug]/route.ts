@@ -8,7 +8,7 @@ type RouteContext = {
 
 export async function GET(_request: Request, { params }: RouteContext) {
   const { slug } = await params;
-  const teacher = await getTeacherProfileBySlug(slug);
+  const teacher = getTeacherProfileBySlug(slug);
 
   if (!teacher) {
     return NextResponse.json({ message: "Öğretmen bulunamadı." }, { status: 404 });
