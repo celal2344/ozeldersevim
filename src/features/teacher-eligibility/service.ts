@@ -1,8 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type {
-  TeacherOnboardingPayload,
-  TeacherOnboardingServiceResult,
+  TeacherListingCreationPayload,
+  TeacherListingCreationServiceResult,
+  TeacherRegistrationPayload,
+  TeacherRegistrationServiceResult,
 } from "@/features/teacher-eligibility/types";
 import {
   scoreTeacherEligibilityAnswers,
@@ -10,12 +12,19 @@ import {
   teacherListingSlug,
   teacherListingSlugFallback,
 } from "@/features/teacher-eligibility/utils";
+import { createSupabaseAdminClient } from "@/shared/db/supabase/admin";
 import { createSupabaseServerClient } from "@/shared/db/supabase/server";
 
 type ActiveTeacherEligibilityTest = {
   id: string;
   passing_score: number;
   question_count: number;
+};
+
+type TeacherAccountProfile = {
+  id: string;
+  role: "student" | "teacher" | "admin";
+  full_name: string;
 };
 
 type OnboardingLocation = {
@@ -42,19 +51,9 @@ type ListingInsert = {
   is_published: boolean;
 };
 
-export async function completeTeacherOnboarding(
-  input: TeacherOnboardingPayload
-): Promise<TeacherOnboardingServiceResult> {
-  const eligibilityResult = scoreTeacherEligibilityAnswers(input.eligibilityAnswers);
-
-  if (!eligibilityResult.passed) {
-    return {
-      ok: false,
-      status: 400,
-      message: "Öğretmen hesabı oluşturmak için uygunluk testini geçmelisin.",
-    };
-  }
-
+export async function registerTeacherAccount(
+  input: TeacherRegistrationPayload
+): Promise<TeacherRegistrationServiceResult> {
   const supabase = await createSupabaseServerClient();
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email: input.email,
@@ -89,24 +88,6 @@ export async function completeTeacherOnboarding(
     return { ok: false, status: 500, message: sessionError.message };
   }
 
-  const activeTest = await getActiveTeacherEligibilityTest(supabase);
-
-  if (!activeTest.ok) {
-    return activeTest;
-  }
-
-  const location = await getOnboardingLocation(supabase, input.locationSlug);
-
-  if (!location.ok) {
-    return location;
-  }
-
-  const lessons = await getOnboardingLessons(supabase, input.lessonSlugs);
-
-  if (!lessons.ok) {
-    return lessons;
-  }
-
   const { error: profileError } = await supabase.from("profiles").insert({
     id: signUpData.user.id,
     role: "teacher",
@@ -118,8 +99,93 @@ export async function completeTeacherOnboarding(
     return { ok: false, status: 500, message: profileError.message };
   }
 
-  const { error: attemptError } = await supabase.from("teacher_eligibility_attempts").insert({
-    profile_id: signUpData.user.id,
+  return {
+    ok: true,
+    data: {
+      profileId: signUpData.user.id,
+      role: "teacher",
+      status: "registered",
+    },
+  };
+}
+
+export async function createTeacherListing(
+  input: TeacherListingCreationPayload
+): Promise<TeacherListingCreationServiceResult> {
+  const eligibilityResult = scoreTeacherEligibilityAnswers(input.eligibilityAnswers);
+
+  if (!eligibilityResult.passed) {
+    return {
+      ok: false,
+      status: 400,
+      message: "Özel ders ilanı oluşturmak için uygunluk testini geçmelisin.",
+    };
+  }
+
+  const sessionClient = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await sessionClient.auth.getUser();
+
+  if (userError || !user) {
+    return { ok: false, status: 401, message: "İlan oluşturmak için öğretmen hesabıyla giriş yapmalısın." };
+  }
+
+  const { data: profile, error: profileReadError } = await sessionClient
+    .from("profiles")
+    .select("id,role,full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileReadError) {
+    return { ok: false, status: 500, message: profileReadError.message };
+  }
+
+  if (!profile || (profile as TeacherAccountProfile).role !== "teacher") {
+    return { ok: false, status: 403, message: "Bu işlem için öğretmen hesabı gerekir." };
+  }
+
+  const teacherAccount = profile as TeacherAccountProfile;
+  const admin = createSupabaseAdminClient();
+  const existingProfile = await getExistingTeacherProfile(admin, user.id);
+
+  if (!existingProfile.ok) {
+    return existingProfile;
+  }
+
+  if (existingProfile.data) {
+    return { ok: false, status: 409, message: "Bu öğretmen hesabı için zaten bir ilan var." };
+  }
+
+  const activeTest = await getActiveTeacherEligibilityTest(admin);
+
+  if (!activeTest.ok) {
+    return activeTest;
+  }
+
+  if (eligibilityResult.score < activeTest.data.passing_score) {
+    return {
+      ok: false,
+      status: 400,
+      message: "Özel ders ilanı oluşturmak için uygunluk testini geçmelisin.",
+    };
+  }
+
+  const location = await getOnboardingLocation(admin, input.locationSlug);
+
+  if (!location.ok) {
+    return location;
+  }
+
+  const lessons = await getOnboardingLessons(admin, input.lessonSlugs);
+
+  if (!lessons.ok) {
+    return lessons;
+  }
+
+  const { error: attemptError } = await admin.from("teacher_eligibility_attempts").insert({
+    profile_id: user.id,
     test_id: activeTest.data.id,
     status: "passed",
     score: eligibilityResult.score,
@@ -130,10 +196,10 @@ export async function completeTeacherOnboarding(
     return { ok: false, status: 500, message: attemptError.message };
   }
 
-  const { data: teacherProfile, error: teacherProfileError } = await supabase
+  const { data: teacherProfile, error: teacherProfileError } = await admin
     .from("teacher_profiles")
     .insert({
-      profile_id: signUpData.user.id,
+      profile_id: user.id,
       location_id: location.data.id,
       title: input.title,
       bio: input.bio,
@@ -156,15 +222,15 @@ export async function completeTeacherOnboarding(
     teacher_profile_id: teacherProfile.id,
     lesson_category_id: lesson.id,
   }));
-  const { error: teacherLessonsError } = await supabase.from("teacher_lessons").insert(lessonInsert);
+  const { error: teacherLessonsError } = await admin.from("teacher_lessons").insert(lessonInsert);
 
   if (teacherLessonsError) {
     return { ok: false, status: 500, message: teacherLessonsError.message };
   }
 
   const primaryLesson = lessons.data.find((lesson) => lesson.slug === input.lessonSlugs[0]) ?? lessons.data[0];
-  const listingSlugBase = teacherListingSlug([input.fullName, primaryLesson.name, location.data.city]);
-  const listingResult = await insertTeacherListing(supabase, listingSlugBase, signUpData.user.id, {
+  const listingSlugBase = teacherListingSlug([teacherAccount.full_name, primaryLesson.name, location.data.city]);
+  const listingResult = await insertTeacherListing(admin, listingSlugBase, user.id, {
     teacher_profile_id: teacherProfile.id,
     headline: input.title,
     short_bio: teacherListingShortBio(input.bio),
@@ -185,6 +251,26 @@ export async function completeTeacherOnboarding(
       status: "published",
     },
   };
+}
+
+async function getExistingTeacherProfile(
+  supabase: SupabaseClient,
+  profileId: string
+): Promise<
+  | { ok: true; data: { id: string } | null }
+  | { ok: false; status: number; message: string }
+> {
+  const { data, error } = await supabase
+    .from("teacher_profiles")
+    .select("id")
+    .eq("profile_id", profileId)
+    .maybeSingle();
+
+  if (error) {
+    return { ok: false, status: 500, message: error.message };
+  }
+
+  return { ok: true, data: data as { id: string } | null };
 }
 
 async function getActiveTeacherEligibilityTest(

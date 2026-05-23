@@ -111,24 +111,64 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /teachers/onboarding:
+  /teachers/register:
     post:
-      summary: Create an active teacher account, passed test attempt, teacher profile, lessons, and published listing
+      summary: Create an active teacher account without requiring the eligibility test
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TeacherOnboardingPayload"
+              $ref: "#/components/schemas/TeacherRegistrationPayload"
       responses:
         "200":
-          description: Teacher account and listing created
+          description: Teacher account created and signed in
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TeacherOnboardingResponse"
+                $ref: "#/components/schemas/TeacherRegistrationResponse"
         "400":
-          description: Invalid request payload, failed eligibility test, or Supabase signup error
+          description: Invalid request payload or Supabase signup error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Supabase signup did not return a session because email confirmation is enabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /teachers/listings:
+    post:
+      summary: Create a published tutoring ad for the signed-in teacher after passing the eligibility test
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeacherListingCreationPayload"
+      responses:
+        "200":
+          description: Teacher eligibility attempt, profile, lessons, and public listing created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherListingCreationResponse"
+        "400":
+          description: Invalid request payload or failed eligibility test
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: The user is not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The signed-in account is not a teacher account
           content:
             application/json:
               schema:
@@ -140,7 +180,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "409":
-          description: Supabase signup did not return a session because email confirmation is enabled, or listing slug conflict remains
+          description: The teacher already has a listing, or listing slug conflict remains
           content:
             application/json:
               schema:
@@ -480,14 +520,49 @@ components:
           type: integer
           minimum: 0
           maximum: 10
-    TeacherOnboardingPayload:
+    TeacherRegistrationPayload:
       type: object
       required:
-        - eligibilityAnswers
         - fullName
         - email
         - password
         - phone
+        - termsAccepted
+        - privacyAccepted
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        phone:
+          type: string
+        termsAccepted:
+          type: boolean
+          enum: [true]
+        privacyAccepted:
+          type: boolean
+          enum: [true]
+    TeacherRegistrationResponse:
+      type: object
+      required: [profileId, role, status]
+      properties:
+        profileId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [teacher]
+        status:
+          type: string
+          enum: [registered]
+    TeacherListingCreationPayload:
+      type: object
+      required:
+        - eligibilityAnswers
         - locationSlug
         - hourlyPrice
         - title
@@ -505,16 +580,6 @@ components:
           maxItems: 10
           items:
             $ref: "#/components/schemas/TeacherEligibilityAnswer"
-        fullName:
-          type: string
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-          minLength: 8
-        phone:
-          type: string
         locationSlug:
           type: string
         hourlyPrice:
@@ -544,7 +609,7 @@ components:
         privacyAccepted:
           type: boolean
           enum: [true]
-    TeacherOnboardingResponse:
+    TeacherListingCreationResponse:
       type: object
       required: [teacherProfileId, listingSlug, status]
       properties:

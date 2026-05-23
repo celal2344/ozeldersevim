@@ -4,7 +4,8 @@ import type {
   teacherEligibilityAnswerSchema,
   teacherEligibilityAttemptSchema,
   teacherEligibilityQuestions,
-  teacherOnboardingSchema,
+  teacherListingCreationSchema,
+  teacherRegistrationSchema,
 } from "@/features/teacher-eligibility/constants";
 
 export type TeacherEligibilityQuestion = (typeof teacherEligibilityQuestions)[number];
@@ -23,18 +24,37 @@ export type TeacherEligibilityResult = {
   correctCount: number;
 };
 
-export type TeacherOnboardingPayload = z.infer<typeof teacherOnboardingSchema>;
+export type TeacherRegistrationPayload = z.infer<typeof teacherRegistrationSchema>;
 
-export type TeacherOnboardingResponse = {
+export type TeacherRegistrationResponse = {
+  profileId: string;
+  role: "teacher";
+  status: "registered";
+};
+
+export type TeacherListingCreationPayload = z.infer<typeof teacherListingCreationSchema>;
+
+export type TeacherListingCreationResponse = {
   teacherProfileId: string;
   listingSlug: string;
   status: "published";
 };
 
-export type TeacherOnboardingServiceResult =
+export type TeacherRegistrationServiceResult =
   | {
       ok: true;
-      data: TeacherOnboardingResponse;
+      data: TeacherRegistrationResponse;
+    }
+  | {
+      ok: false;
+      status: number;
+      message: string;
+    };
+
+export type TeacherListingCreationServiceResult =
+  | {
+      ok: true;
+      data: TeacherListingCreationResponse;
     }
   | {
       ok: false;

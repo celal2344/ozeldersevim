@@ -21,7 +21,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Deployment: Vercel for frontend/backend, Supabase for database.
 - Supabase project ref: `hhddeqgvrnyxnwetetdc`.
 - Supabase project URL: `https://hhddeqgvrnyxnwetetdc.supabase.co`.
-- Local app env uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; do not commit `.env*` files or service-role/database credentials.
+- Local app env uses `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and server-only `SUPABASE_SERVICE_ROLE_KEY`; do not commit `.env*` files or database credentials.
 - Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
 - SMS: not in MVP.
 - Architecture: feature-based architecture.
@@ -50,6 +50,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
   - `feat/teacher-public-profile`
   - `feat/lesson-request-funnel`
   - `feat/teacher-eligibility-onboarding`
+  - `feat/teacher-account-listing-gate`
   - `feat/request-acceptance-review-gate`
   - `docs/openapi-mvp-lock`
 - Any API behavior change must update the OpenAPI contract in the same branch.
@@ -66,20 +67,27 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Lesson request submission creates a real Supabase student account and persists the lesson request.
 - Student accounts created through the lesson request funnel are active immediately; Supabase email confirmation must be disabled for this MVP flow.
 - The request completion API is `POST /api/lesson-requests/complete-with-account`.
-- Teacher onboarding uses `/ogretmen-ol`.
+- Teacher account registration uses `/ogretmen-ol`.
+- Teacher listing creation uses `/ogretmen-ilani-olustur`.
 - Teacher eligibility test scoring API is `POST /api/teacher-eligibility/attempts`.
-- Teacher onboarding completion API is `POST /api/teachers/onboarding`.
+- Teacher account registration API is `POST /api/teachers/register`.
+- Teacher listing creation API is `POST /api/teachers/listings`.
 - The MVP teacher eligibility test is a fixed 10-question auto-scored test with a passing score of 70.
 - Failed teacher eligibility attempts are stateless and not persisted.
-- Passed teacher eligibility attempts are persisted only after the teacher account is created.
-- Teacher accounts created through onboarding are active immediately; Supabase email confirmation must be disabled for this MVP flow.
-- Teacher onboarding creates one published teacher profile/listing without admin approval.
+- Passed teacher eligibility attempts are persisted only when a teacher account creates a tutoring ad/listing.
+- Teacher accounts can be created without passing the teacher eligibility test.
+- Teacher accounts created through registration are active immediately; Supabase email confirmation must be disabled for this MVP flow.
+- Teacher listing creation creates one published teacher profile/listing without admin approval after the test is passed.
 
 ## Net New Decisions - 2026-05-23
 
-- Teacher onboarding is a two-step same-page flow: eligibility test first, then account/profile/listing form.
-- The first teacher onboarding implementation does not include service role access, admin approval, document verification, image upload, dashboard management, or request acceptance.
-- Teacher onboarding writes the app profile, passed eligibility attempt, teacher profile, teacher lessons, and public listing through authenticated Supabase RLS.
+- Teacher eligibility test is no longer required before creating a teacher account.
+- The eligibility gate happens when a teacher tries to create a tutoring ad/listing.
+- Teacher account registration creates only the app profile and auth session.
+- Teacher listing creation writes the passed eligibility attempt, teacher profile, teacher lessons, and public listing after server-side scoring.
+- Teacher eligibility attempts are no longer directly insertable by authenticated clients; the server writes passed attempts after validating the test.
+- The listing creation server path uses the server-only Supabase service role key; never expose it to client code or `NEXT_PUBLIC_*` variables.
+- The first teacher listing implementation does not include admin approval, document verification, image upload, dashboard management, or request acceptance.
 - Public teacher profile reads can load published Supabase teacher listings; seed data remains the fallback when Supabase env is unavailable.
 - Teacher search can load published Supabase teacher listings; seed data remains the fallback when Supabase env is unavailable or returns no published listings.
 
@@ -97,7 +105,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Online derslerde platform Meet/Zoom linki oluşturmayacak; taraflar kendi linklerini kullanacak.
 - Yorum yazma hakkı, öğretmenin o öğrencinin özel ders başvurusunu onaylamasından sonra verilecek.
 - SMS entegrasyonu şimdilik yok.
-- Öğretmen olmak için kullanıcıların önce bir testten geçmesi gerekiyor. Sadece testi geçen kullanıcılar öğretmen hesabı açıp ilan girebilecek.
+- Öğretmen hesabı açmak için test gerekmiyor. Test, öğretmen özel ders ilanı oluşturmak istediğinde gösterilecek ve sadece testi geçen öğretmenler ilan yayınlayabilecek.
 - Öğretmen için zorunlu ilk alanlar: ad, soyad, fiyat, konum, telefon.
 
 ## Visual References In Repo
@@ -135,7 +143,8 @@ These files are design references only. Do not use them directly as website imag
 ### Teacher
 
 - Can register/login as a teacher.
-- Must pass the teacher eligibility test before creating a teacher account/listing.
+- Can create a teacher account without passing the teacher eligibility test.
+- Must pass the teacher eligibility test before publishing a tutoring ad/listing.
 - Can create and edit teacher profile.
 - Can publish one public teacher listing/profile for now.
 - Can receive lesson requests.
@@ -248,19 +257,23 @@ Potential additions:
 
 - Separate student and teacher registration flows.
 - Student account can be created at the final step of the lesson request funnel.
-- Teacher account can only be created after passing the teacher eligibility test.
+- Teacher account can be created before the teacher eligibility test.
+- Teacher eligibility test is required when the teacher creates a tutoring ad/listing.
 - Supabase Auth email/password.
 - Phone number collection for lesson requests.
 - Email verification.
 - SMS verification is not part of MVP.
 - Role stored in application profile table, not only Supabase auth metadata.
 
-### 6. Teacher Onboarding
+### 6. Teacher Account And Listing
 
-Minimum teacher onboarding fields:
+Minimum teacher account fields:
 
 - Name and surname.
 - Phone.
+
+Minimum teacher listing fields:
+
 - City/district.
 - Hourly price.
 - Eligibility test passed state.
@@ -297,8 +310,9 @@ Goal: launch an SEO-visible tutoring directory with searchable teachers and a wo
 - Lesson request funnel.
 - Student account creation at the end of the request funnel.
 - Student/teacher registration entry.
-- Teacher eligibility test gate before teacher account/listing creation.
-- Teacher onboarding form.
+- Teacher account registration.
+- Teacher eligibility test gate before tutoring ad/listing creation.
+- Teacher listing creation form.
 - Basic teacher listing CRUD.
 - Backend filters with pagination.
 - OpenAPI spec for route handlers/server endpoints.
@@ -460,7 +474,8 @@ Initial endpoints:
 - `POST /api/teacher-eligibility/attempts/{id}/submit`
 - `GET /api/lesson-categories`
 - `GET /api/locations`
-- `POST /api/teachers/onboarding`
+- `POST /api/teachers/register`
+- `POST /api/teachers/listings`
 - `PATCH /api/teachers/me`
 - `GET /api/student/requests`
 - `GET /api/teacher/requests`
@@ -473,7 +488,7 @@ Server actions can be used internally, but API shape should still be documented 
 - Review integrity is partly defined: only accepted lesson requests can review. Still need anti-abuse rules and moderation behavior.
 - Contact ownership is now defined for MVP: contact details are shared only after teacher acceptance.
 - Monetization is intentionally out of MVP. This is simpler, but future revenue model still needs a decision.
-- Teacher eligibility is now required, but the test content, scoring, retake limits, and anti-cheat rules are undefined.
+- Teacher eligibility is required for tutoring ad/listing creation, but retake limits and anti-cheat rules are still undefined.
 - Location search needs a data strategy. Nearest-location search requires coordinates, distance calculations, and privacy decisions.
 - SEO can create duplicate pages if filters are all indexable. Indexing rules must be explicit.
 - KVKK/privacy requirements are important because the funnel collects name, phone, email, location, and education needs.
@@ -528,8 +543,8 @@ Server actions can be used internally, but API shape should still be documented 
 - Search results are server-filtered and paginated.
 - Teacher profiles are SEO-rendered and indexable.
 - Lesson request funnel creates a student account at the final password step and persists valid requests.
-- Teacher eligibility test gates teacher registration/listing creation.
-- Teacher onboarding can create a draft/published teacher profile without admin approval.
+- Teacher eligibility test gates tutoring ad/listing creation, not teacher account registration.
+- Teacher listing creation can create a draft/published teacher profile without admin approval.
 - Teachers can accept/reject lesson requests.
 - Student contact details become visible to the teacher only after request acceptance.
 - Supabase RLS protects private student/teacher data.

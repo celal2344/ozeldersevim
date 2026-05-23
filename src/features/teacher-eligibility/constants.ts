@@ -113,10 +113,16 @@ export const teacherOnboardingDeliveryModeOptions = [
   { value: "face_to_face", label: "Yüz yüze" },
 ] as const;
 
-export const teacherOnboardingSteps = [
-  { title: "Test", text: "10 soruluk uygunluk testini geç." },
-  { title: "Profil", text: "Ad, telefon, konum ve fiyat bilgilerini gir." },
-  { title: "İlan", text: "Dersleri seç ve ilanı hemen yayına al." },
+export const teacherAccountRegistrationSteps = [
+  { title: "Hesap", text: "Ad soyad, email, telefon ve şifre bilgilerini gir." },
+  { title: "Anında giriş", text: "Öğretmen hesabı test şartı olmadan oluşturulur." },
+  { title: "İlan hazırlığı", text: "Ders ilanı oluştururken uygunluk testini geçmen gerekir." },
+] as const;
+
+export const teacherListingCreationSteps = [
+  { title: "Test", text: "İlan yayınlamadan önce 10 soruluk testi geç." },
+  { title: "İlan", text: "Ders, konum, fiyat ve profil bilgilerini gir." },
+  { title: "Yayın", text: "Başarılı testten sonra ilanı yayına al." },
 ] as const;
 
 export const teacherEligibilityAnswerSchema = z.object({
@@ -130,15 +136,24 @@ export const teacherEligibilityAttemptSchema = z.object({
     .length(teacherEligibilityQuestionCount, `${teacherEligibilityQuestionCount} sorunun tamamını yanıtla.`),
 });
 
-export const teacherOnboardingSchema = z
+export const teacherRegistrationSchema = z.object({
+  fullName: z.string().trim().min(2, "Ad soyad zorunlu.").max(120, "Ad soyad 120 karakteri geçemez."),
+  email: z.email("Geçerli bir email gir."),
+  password: z.string().min(8, "Şifre en az 8 karakter olmalı."),
+  phone: z.string().trim().min(10, "Telefon zorunlu.").max(30, "Telefon 30 karakteri geçemez."),
+  termsAccepted: z.boolean().refine((value) => value, {
+    message: "Kullanım koşullarını kabul etmelisin.",
+  }),
+  privacyAccepted: z.boolean().refine((value) => value, {
+    message: "Gizlilik/KVKK metnini kabul etmelisin.",
+  }),
+});
+
+export const teacherListingCreationSchema = z
   .object({
     eligibilityAnswers: z
       .array(teacherEligibilityAnswerSchema)
-      .length(teacherEligibilityQuestionCount, "Öğretmenlik testini tamamlamalısın."),
-    fullName: z.string().trim().min(2, "Ad soyad zorunlu.").max(120, "Ad soyad 120 karakteri geçemez."),
-    email: z.email("Geçerli bir email gir."),
-    password: z.string().min(8, "Şifre en az 8 karakter olmalı."),
-    phone: z.string().trim().min(10, "Telefon zorunlu.").max(30, "Telefon 30 karakteri geçemez."),
+      .length(teacherEligibilityQuestionCount, "İlan oluşturmak için öğretmenlik testini tamamlamalısın."),
     locationSlug: z.string().min(1, "Konum seçimi zorunlu."),
     hourlyPrice: z.number().min(1, "Saatlik ücret zorunlu.").max(100000, "Saatlik ücret çok yüksek."),
     title: z.string().trim().min(5, "Profil başlığı en az 5 karakter olmalı.").max(120, "Başlık 120 karakteri geçemez."),
