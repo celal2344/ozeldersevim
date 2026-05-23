@@ -19,6 +19,10 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Package manager/runtime: Bun.
 - Language: Turkish only, no i18n for now.
 - Deployment: Vercel for frontend/backend, Supabase for database.
+- Supabase project ref: `hhddeqgvrnyxnwetetdc`.
+- Supabase project URL: `https://hhddeqgvrnyxnwetetdc.supabase.co`.
+- Local app env uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; do not commit `.env*` files or service-role/database credentials.
+- Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
 - SMS: not in MVP.
 - Architecture: feature-based architecture.
 - API documentation: OpenAPI should be maintained as backend endpoints evolve.
