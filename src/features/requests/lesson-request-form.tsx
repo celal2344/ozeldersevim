@@ -94,7 +94,8 @@ export function LessonRequestForm({ teacher }: { teacher: TeacherProfile }) {
         </div>
         <h1 className="mt-5 text-3xl font-bold text-brand-navy">Ders talebin alındı</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-          Talebin öğretmene iletilmek üzere kaydedildi. Öğretmen talebi kabul ettiğinde iletişim bilgilerin öğretmenle paylaşılır.
+          Talebin öğretmene iletilmek üzere kaydedildi. Öğretmen talebi kabul ettiğinde iletişim bilgilerin
+          öğretmenle paylaşılır.
         </p>
         <div className="mt-6 rounded-xl bg-slate-50 p-4 text-sm text-brand-navy">
           Talep numarası: <span className="font-semibold">{completedRequest.requestId}</span>

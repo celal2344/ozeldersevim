@@ -23,12 +23,12 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Supabase project URL: `https://hhddeqgvrnyxnwetetdc.supabase.co`.
 - Local app env uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; do not commit `.env*` files or service-role/database credentials.
 - Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
-- SMS: not in MVP.
+- SMS is not in MVP.
 - Architecture: feature-based architecture.
 - API documentation: OpenAPI should be maintained as backend endpoints evolve.
 - Responsive requirement: all pages must work well on mobile and desktop.
 - MVP business model: no payments and no lesson package sales for now; focus on teacher listings and student applications.
-- Institution accounts: later phase, not MVP.
+- Institution accounts are later-phase scope.
 - Teacher listing model: one public teacher profile/listing per teacher for now.
 - Teacher publishing: no admin approval for MVP; eligible teachers can publish directly.
 - Communication: no in-site chat for MVP. When a teacher accepts a lesson request, the student's contact details are shared with the teacher.
@@ -37,6 +37,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Seed data: include Erzurum and random test data covering different cases.
 - Vocabulary split: use this file for product/domain vocabulary and `LANGUAGE.md` for architecture vocabulary and rules.
 - Documentation maintenance: whenever a critical codebase rule, architecture rule, domain decision, or workflow decision is given, update the relevant Markdown documentation in the same change.
+- Turkish UI copy and documentation must stay UTF-8; run the copy check before committing.
 
 ## Branch Workflow
 
@@ -50,6 +51,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
   - `feat/teacher-public-profile`
   - `feat/lesson-request-funnel`
   - `feat/account-flow-cleanup`
+  - `chore/utf8-docs-and-copy-cleanup`
   - `feat/auth-account-rebuild`
   - `feat/dashboard-foundation`
   - `feat/dashboard-request-management`
@@ -64,22 +66,33 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Public teacher profiles use `/ogretmen/[slug]`.
 - The teacher profile API is `GET /api/teachers/{slug}`.
 - Teacher search cards link to the public teacher profile route.
-- Teacher profile CTAs link to the future lesson request funnel with `teacher={slug}`.
+- Teacher profile CTAs link to the lesson request funnel with `teacher={slug}`.
 - Lesson request funnel uses `/ders-talebi?teacher={slug}`.
 - Lesson request submission creates a real Supabase student account and persists the lesson request.
 - Student accounts created through the lesson request funnel are active immediately; Supabase email confirmation must be disabled for this MVP flow.
 - The request completion API is `POST /api/lesson-requests/complete-with-account`.
-- Teacher account/listing experiments from `a7b515a` and `f528c20` are intentionally being cleaned up before the account flow is rebuilt.
+- Teacher account/listing experiments from `a7b515a` and `f528c20` were cleaned up in `feat/account-flow-cleanup`.
+- The Supabase rollback migration for the teacher account/listing experiment was applied remotely.
 - `/ogretmen-ol` is a temporary holding page until the clean teacher account flow is implemented.
 - The active OpenAPI contract only documents implemented endpoints.
+- UTF-8 hygiene is being tracked in `chore/utf8-docs-and-copy-cleanup`.
 
 ## Remaining Feature Order
 
-1. Account flow cleanup: revert the messy teacher account/listing implementation while preserving Supabase setup and migration history.
-2. Auth account rebuild: implement clean student/teacher login and registration flows.
-3. Dashboard foundation: add role-aware private dashboard shells for students and teachers.
-4. Dashboard request management: teacher incoming requests, accept/reject actions, and student request status views.
-5. Dashboard reviews: allow reviews only after an accepted lesson request.
+1. Auth account rebuild: implement clean student/teacher login and registration flows.
+2. Dashboard foundation: add role-aware private dashboard shells for students and teachers.
+3. Dashboard request management: teacher incoming requests, accept/reject actions, and student request status views.
+4. Dashboard reviews: allow reviews only after an accepted lesson request.
+
+## Documented Findings - 2026-05-24
+
+- Auth is not yet a deep module. Supabase signup, session setting, profile insert, and student profile insert currently live inside the lesson request route.
+- The Lesson Request route is too fat. It mixes validation, teacher lookup, auth signup, profile persistence, location/category lookup, request insert, and contact insert.
+- Teacher Search and Teacher Profile reads currently use seed data, while lesson request submission expects real Supabase `teacher_listings`. This creates split truth.
+- Dashboard work should wait until the auth/session/profile seam exists.
+- Request acceptance and reviews belong in dashboard flows, not as isolated public features.
+- Legal pages are placeholder text and need proper legal review before launch.
+- No production image assets should be taken from `docs/design-references`; those files are reference-only.
 
 ## Netleşen Kararlar - 2026-05-21
 
@@ -151,7 +164,7 @@ These files are design references only. Do not use them directly as website imag
 
 ### Institution
 
-- Mentioned in the reference screenshot as "Kurumsal Uyelik".
+- Mentioned in the reference screenshot as "Kurumsal Üyelik".
 - Should be treated as later-phase scope unless confirmed as important for MVP.
 
 ## Core Public Pages
@@ -178,19 +191,11 @@ These files are design references only. Do not use them directly as website imag
 - Experience level filter.
 - Gender filter if this is a required marketplace feature.
 - Response time filter if tracked.
-- Sort options:
-  - recommended/default
-  - nearest
-  - highest rated
-  - lowest price
-  - most reviewed
-  - newest
+- Sort options: recommended/default, nearest, highest rated, lowest price, most reviewed, newest.
 - Backend-side filtering, sorting, and pagination.
 - Shareable URLs with query params for SEO and user navigation.
 
 ### 2. Teacher Cards
-
-Each result card should include:
 
 - Teacher name.
 - Profile photo placeholder until image upload is implemented.
@@ -205,8 +210,6 @@ Each result card should include:
 - CTA: profile view or lesson request.
 
 ### 3. Teacher Profile Page
-
-Profile detail should include:
 
 - Name, title, and verification status.
 - Location.
@@ -224,8 +227,6 @@ Profile detail should include:
 
 ### 4. Lesson Request Funnel
 
-Based on the screenshots, the funnel should be multi-step:
-
 1. Select lesson/category.
 2. Select city and district.
 3. Select online or face-to-face preference.
@@ -235,13 +236,7 @@ Based on the screenshots, the funnel should be multi-step:
 7. Set password and create student account.
 8. Submit request and attach it to the new student account.
 
-Potential additions:
-
-- Preferred date/time.
-- Online or face-to-face preference.
-- Student level: ilkokul, ortaokul, lise, universite, sinav hazirlik, yetiskin.
-- Goal/need text field.
-- Budget range.
+Potential additions: preferred date/time, student level, goal/need text field, and budget range.
 
 ### 5. Authentication
 
@@ -314,25 +309,13 @@ Goal: launch an SEO-visible tutoring directory with searchable teachers and a wo
 
 Goal: give students and teachers private workspaces.
 
-- Student dashboard:
-  - lesson requests
-  - favorite teachers
-  - upcoming lessons
-  - profile settings
-- Teacher dashboard:
-  - incoming requests
-  - students
-  - lessons
-  - listing management
-  - profile completion
-  - reviews
+- Student dashboard: lesson requests, favorite teachers, upcoming lessons, profile settings.
+- Teacher dashboard: incoming requests, students, lessons, listing management, profile completion, reviews.
 - Notification center.
 - Basic message/contact tracking if direct messaging is approved later.
 - Optional in-site chat can be added in this phase or later.
 
 ### Phase 3 - Trust, Moderation, and Operations
-
-Goal: make the marketplace manageable and safer.
 
 - Admin panel.
 - Teacher verification workflow.
@@ -345,8 +328,6 @@ Goal: make the marketplace manageable and safer.
 
 ### Phase 4 - Monetization and Growth
 
-Goal: add revenue features after the core marketplace works.
-
 - Premium teacher placements.
 - Lesson package sales if the business model changes.
 - Payment integration if lessons are purchased through platform in a later phase.
@@ -355,8 +336,6 @@ Goal: add revenue features after the core marketplace works.
 - Blog/guide content for organic acquisition.
 
 ## Suggested Feature-Based Architecture
-
-Example structure:
 
 ```text
 src/
@@ -392,8 +371,6 @@ Keep domain logic inside `features/*`. Keep generic UI, form utilities, and infr
 
 ## Initial Data Model
 
-Suggested Supabase tables:
-
 - `profiles`: app-level user profile linked to Supabase auth user.
 - `teacher_profiles`: teacher-specific profile data.
 - `student_profiles`: student-specific profile data.
@@ -427,26 +404,13 @@ Contact sharing rule:
 
 ## SEO Plan
 
-SEO is a primary business requirement, so it should be built into the URL and data model early.
-
 - Stable, readable Turkish slugs.
 - Dynamic metadata per lesson, city, district, and teacher.
 - Canonical URLs for filtered pages.
 - Index only useful landing pages; avoid indexing every arbitrary filter combination.
-- Sitemap generation for:
-  - public teacher profiles
-  - lesson pages
-  - city + lesson pages
-  - static pages
-- JSON-LD:
-  - `Person` or `LocalBusiness` style data for teacher profiles where appropriate.
-  - `BreadcrumbList` for SEO pages.
-  - `FAQPage` only where real FAQ content exists.
-- Internal linking:
-  - homepage to popular lessons
-  - lesson pages to city pages
-  - city pages to district pages
-  - teacher profiles to related lessons/locations
+- Sitemap generation for public teacher profiles, lesson pages, city + lesson pages, and static pages.
+- JSON-LD for teacher profiles and breadcrumbs.
+- Internal linking from homepage to popular lessons, lesson pages to city pages, city pages to district pages, and teacher profiles to related lessons/locations.
 - SSR or server-rendered public pages for crawlability.
 
 ## API and OpenAPI Notes
@@ -476,37 +440,31 @@ Server actions can be used internally, but API shape should still be documented 
 
 - MVP scope is too broad unless dashboards, payments, institution accounts, and visual/media features are delayed.
 - Review integrity is partly defined: only accepted lesson requests can review. Still need anti-abuse rules and moderation behavior.
-- Contact ownership is now defined for MVP: contact details are shared only after teacher acceptance.
+- Contact ownership is defined for MVP: contact details are shared only after teacher acceptance.
 - Monetization is intentionally out of MVP. This is simpler, but future revenue model still needs a decision.
 - Teacher eligibility is required for tutoring ad/listing creation, but retake limits and anti-cheat rules are still undefined.
 - Location search needs a data strategy. Nearest-location search requires coordinates, distance calculations, and privacy decisions.
 - SEO can create duplicate pages if filters are all indexable. Indexing rules must be explicit.
 - KVKK/privacy requirements are important because the funnel collects name, phone, email, location, and education needs.
-- Supabase RLS is not mentioned but should be part of the initial backend plan.
+- Supabase RLS exists in the baseline but needs review as new flows are added.
 - Admin approval is not required for MVP, but admin tooling will still be needed for reports, suspensions, reviews, and content quality.
-- Teacher listing relationship is now defined for MVP: one teacher, one listing/profile.
+- Teacher listing relationship is defined for MVP: one teacher, one listing/profile.
 - SMS is out of MVP, but phone ownership will remain weaker until phone verification is added.
 - Image/video upload is deferred, but the data model should leave room for it.
 - Dashboard phase needs a clear definition of what counts as a lesson, request, student, and completed lesson.
 
 ## Product Suggestions
 
-- Start with city + lesson SEO pages before advanced dashboards, because SEO is stated as a primary goal.
+- Start with city + lesson SEO pages before advanced dashboards, because SEO is a primary acquisition path.
 - Use a teacher profile completion score to improve listing quality.
 - Do not block publishing with admin approval in MVP, but keep admin suspend/report tools available as soon as practical.
 - Add saved searches or favorites for students.
 - Add "response time" only after it is tracked from real request data.
 - Use fake marketplace stats carefully. Public numbers should either be real or clearly maintainable.
-- Build seed content for top categories: Matematik, Fizik, Kimya, Ingilizce, Turkce, Yazilim, LGS, TYT/AYT.
+- Build seed content for top categories: Matematik, Fizik, Kimya, İngilizce, Türkçe, Yazılım, LGS, TYT/AYT.
 - Include Erzurum in seed data and add varied test cases: online-only teacher, face-to-face teacher, high price, low price, no reviews, many reviews, accepted/rejected lesson requests.
 - Add structured empty states for no results and suggest nearby districts or online teachers.
-- Add analytics events from day one:
-  - search submitted
-  - filter changed
-  - teacher profile viewed
-  - request funnel started
-  - request submitted
-  - registration completed
+- Add analytics events from day one: search submitted, filter changed, teacher profile viewed, request funnel started, request submitted, registration completed.
 - Add rate limiting and spam prevention to public lead forms.
 
 ## Açık Sorular

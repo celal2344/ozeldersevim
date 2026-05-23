@@ -1,6 +1,6 @@
-import type { TeacherProfile } from "@/features/teachers/types";
 import { deliveryPreferenceOptions } from "@/features/requests/constants";
 import type { CompleteLessonRequestPayload, LessonRequestFormValues } from "@/features/requests/types";
+import type { TeacherProfile } from "@/features/teachers/types";
 
 export function defaultDeliveryModeForTeacher(teacher: TeacherProfile): "online" | "face_to_face" {
   return teacher.deliveryMode === "face_to_face" ? "face_to_face" : "online";
