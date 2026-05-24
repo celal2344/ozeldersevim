@@ -73,6 +73,10 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Unauthenticated visitors opening `/ders-talebi?teacher={slug}` are redirected to `/kayit?next=/ders-talebi?teacher={slug}`.
 - The request submission API is `POST /api/lesson-requests`.
 - Global auth APIs are `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/auth/me`.
+- Private dashboard foundation uses a shared shell in `src/features/dashboard`.
+- Student dashboard routes: `/ogrenci/panel`, `/ogrenci/panel/talepler`, `/ogrenci/panel/favoriler`, `/ogrenci/panel/profil`.
+- Teacher dashboard routes: `/ogretmen/panel`, `/ogretmen/panel/talepler`, `/ogretmen/panel/ilan`, `/ogretmen/panel/ogrenciler`, `/ogretmen/panel/yorumlar`, `/ogretmen/panel/profil`, `/ogretmen/panel/ayarlar`.
+- Dashboard foundation routes are clickable empty states only; request management, reviews, teacher listing creation, and settings forms remain later scope.
 - Teacher account/listing experiments from `a7b515a` and `f528c20` were cleaned up in `feat/account-flow-cleanup`.
 - The Supabase rollback migration for the teacher account/listing experiment was applied remotely.
 - `/ogretmen-ol` routes teachers into `/kayit?role=teacher`; teacher eligibility and listing creation remain later scope.
@@ -81,17 +85,15 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 
 ## Remaining Feature Order
 
-1. Auth account rebuild: implement clean student/teacher login and registration flows.
-2. Dashboard foundation: add role-aware private dashboard shells for students and teachers.
-3. Dashboard request management: teacher incoming requests, accept/reject actions, and student request status views.
-4. Dashboard reviews: allow reviews only after an accepted lesson request.
+1. Dashboard request management: teacher incoming requests, accept/reject actions, and student request status views.
+2. Dashboard reviews: allow reviews only after an accepted lesson request.
 
 ## Documented Findings - 2026-05-24
 
-- Auth is not yet a deep module. Supabase signup, session setting, profile insert, and student profile insert currently live inside the lesson request route.
-- The Lesson Request route is too fat. It mixes validation, teacher lookup, auth signup, profile persistence, location/category lookup, request insert, and contact insert.
+- Auth now has a dedicated `src/features/auth` module; future auth/session/profile changes should use that seam.
+- Lesson request submission no longer creates accounts, but the route still mixes teacher seed validation with Supabase listing/category/location persistence.
 - Teacher Search and Teacher Profile reads currently use seed data, while lesson request submission expects real Supabase `teacher_listings`. This creates split truth.
-- Dashboard work should wait until the auth/session/profile seam exists.
+- Dashboard foundation exists as role-aware private shells and empty routes. Request actions, reviews, and listing creation should build on it.
 - Request acceptance and reviews belong in dashboard flows, not as isolated public features.
 - Legal pages are placeholder text and need proper legal review before launch.
 - No production image assets should be taken from `docs/design-references`; those files are reference-only.
