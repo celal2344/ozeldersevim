@@ -18,6 +18,11 @@ export const lessonRequestMetadata: Metadata = {
   description: "Öğretmene özel ders talebi gönder ve öğrenci hesabını son adımda oluştur.",
 };
 
+export const teacherOnboardingMetadata: Metadata = {
+  title: "Öğretmen Ol",
+  description: "Öğretmenlik uygunluk testini geç, hesabını oluştur ve özel ders ilanını yayına al.",
+};
+
 export const privacyMetadata: Metadata = {
   title: "Gizlilik Politikası",
 };
@@ -33,6 +38,7 @@ export const kvkkMetadata: Metadata = {
 export const sitemapStaticRoutes = [
   "/",
   "/ogretmen-bul",
+  "/ogretmen-ol",
   "/gizlilik-politikasi",
   "/kullanim-kosullari",
   "/kvkk-aydinlatma-metni",

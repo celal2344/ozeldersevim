@@ -1,134 +1,162 @@
 import { z } from "zod";
 
-export type EligibilityQuestion = {
-  id: number;
-  text: string;
-  options: { value: string; label: string }[];
-  correct: string;
-};
+export const teacherEligibilityPassingScore = 70;
+export const teacherEligibilityQuestionCount = 10;
+export const teacherEligibilityTestVersion = 1;
 
-export const eligibilityQuestions: EligibilityQuestion[] = [
+export const teacherEligibilityQuestions = [
   {
-    id: 1,
-    text: "Bir öğrenci konuyu anlayamadığında ilk yapmanız gereken nedir?",
+    id: "student-goal-assessment",
+    prompt: "İlk ders görüşmesinde en doğru başlangıç hangisidir?",
     options: [
-      { value: "a", label: "Aynı açıklamayı tekrar etmek" },
-      { value: "b", label: "Farklı bir yöntem veya örnekle konuya yeniden yaklaşmak" },
-      { value: "c", label: "Konuyu geçip ilerlemek" },
-      { value: "d", label: "Öğrencinin daha fazla çalışmasını söylemek" },
+      { id: "promise-fast-result", label: "Öğrenciye hızlı başarı garantisi vermek" },
+      { id: "assess-goals", label: "Seviye, hedef ve beklentiyi netleştirmek" },
+      { id: "skip-plan", label: "Plan yapmadan doğrudan konu anlatmak" },
     ],
-    correct: "b",
+    correctOptionId: "assess-goals",
   },
   {
-    id: 2,
-    text: "Etkili bir özel ders seansının temel özelliği nedir?",
+    id: "student-struggle",
+    prompt: "Öğrenci bir konuyu anlamakta zorlanıyorsa öğretmen ne yapmalıdır?",
     options: [
-      { value: "a", label: "Olabildiğince çok konu işlemek" },
-      { value: "b", label: "Öğrencinin ihtiyacına göre hedef belirlemek ve ilerlemeyi takip etmek" },
-      { value: "c", label: "Yalnızca sınav sorularını çözmek" },
-      { value: "d", label: "Öğrencinin tüm ödevlerini birlikte yapmak" },
+      { id: "adapt-method", label: "Anlatımı değiştirip örnek ve pratikle ilerlemek" },
+      { id: "blame-student", label: "Öğrencinin yeterince çalışmadığını söylemek" },
+      { id: "move-on", label: "Konuyu hızlıca geçip sonraki üniteye başlamak" },
     ],
-    correct: "b",
+    correctOptionId: "adapt-method",
   },
   {
-    id: 3,
-    text: "Öğrencinin motivasyonu düştüğünde ne yaparsınız?",
+    id: "contact-privacy",
+    prompt: "Öğrenci iletişim bilgileri ne zaman öğretmenle paylaşılır?",
     options: [
-      { value: "a", label: "Dersi biraz kısaltıp bitirmek" },
-      { value: "b", label: "Öğrenciden daha çok çalışmasını istemek" },
-      { value: "c", label: "Başarılarını hatırlatmak ve küçük, ulaşılabilir hedefler koymak" },
-      { value: "d", label: "Daha kolay konulara geçmek" },
+      { id: "always-public", label: "İlanı görüntüleyen herkesle" },
+      { id: "after-acceptance", label: "Öğretmen ders talebini kabul ettikten sonra" },
+      { id: "before-request", label: "Öğrenci talep oluşturmadan önce" },
     ],
-    correct: "c",
+    correctOptionId: "after-acceptance",
   },
   {
-    id: 4,
-    text: "Veli, öğrencinin ilerleme kaydetmediğini düşünüyorsa ne yapmalısınız?",
+    id: "online-meeting",
+    prompt: "Online derslerde toplantı linki için MVP kuralı nedir?",
     options: [
-      { value: "a", label: "Velinin kaygılarını görmezden gelmek" },
-      { value: "b", label: "Öğrencinin başarısız olduğunu açıkça belirtmek" },
-      { value: "c", label: "Mevcut durumu ve planlanan adımları şeffaf biçimde paylaşmak" },
-      { value: "d", label: "Ders ücretini düşürmeyi önermek" },
+      { id: "external-link", label: "Taraflar kendi Meet/Zoom linkini oluşturur" },
+      { id: "platform-required", label: "Platform otomatik link üretmek zorundadır" },
+      { id: "no-online", label: "Online ders desteklenmez" },
     ],
-    correct: "c",
+    correctOptionId: "external-link",
   },
   {
-    id: 5,
-    text: "Öğrencinin güçlü ve zayıf yönlerini nasıl belirlersiniz?",
+    id: "pricing-clarity",
+    prompt: "İlan fiyatı nasıl sunulmalıdır?",
     options: [
-      { value: "a", label: "Yalnızca öğrencinin sözüne güvenmek" },
-      { value: "b", label: "Kısa bir ön değerlendirme veya tanıma soruları sormak" },
-      { value: "c", label: "Başka öğrencilerle karşılaştırmak" },
-      { value: "d", label: "Konuya direkt girmek ve sorunlar çıktıkça çözmek" },
+      { id: "hidden-price", label: "Öğrenci yazana kadar fiyat gizlenmelidir" },
+      { id: "hourly-clear", label: "Saatlik ücret açık ve güncel olmalıdır" },
+      { id: "varies-only", label: "Sadece 'değişir' yazmak yeterlidir" },
     ],
-    correct: "b",
+    correctOptionId: "hourly-clear",
   },
   {
-    id: 6,
-    text: "Ders sırasında öğrencinin dikkatinin dağıldığını fark ediyorsunuz. Ne yaparsınız?",
+    id: "reschedule",
+    prompt: "Öğretmen planlanan derse katılamayacaksa ne yapmalıdır?",
     options: [
-      { value: "a", label: "Dersi bitirip eve göndermek" },
-      { value: "b", label: "Kısa bir mola vermek veya konuya ilgi çekici bir soru yöneltmek" },
-      { value: "c", label: "Daha yüksek sesle konuşmak" },
-      { value: "d", label: "Öğrenciyi uyarmak ve sınav notunu hatırlatmak" },
+      { id: "early-notice", label: "Mümkün olduğunca erken haber verip yeni zaman önermelidir" },
+      { id: "ignore", label: "Öğrencinin tekrar yazmasını beklemelidir" },
+      { id: "last-minute", label: "Ders saatinde kısa bir mesaj atması yeterlidir" },
     ],
-    correct: "b",
+    correctOptionId: "early-notice",
   },
   {
-    id: 7,
-    text: "Öğrenciye yanlış bir bilgi verdiğinizi sonradan fark ettiniz. Ne yaparsınız?",
+    id: "professional-communication",
+    prompt: "Öğrenciyle iletişimde temel beklenti nedir?",
     options: [
-      { value: "a", label: "Durumu görmezden gelmek" },
-      { value: "b", label: "Bir sonraki derste sessizce düzeltmek" },
-      { value: "c", label: "Hatayı kabul edip doğru bilgiyi mümkün olan en kısa sürede iletmek" },
-      { value: "d", label: "Konuyu bir daha işlememek" },
+      { id: "professional", label: "Saygılı, yaşa uygun ve ders odağında kalmak" },
+      { id: "casual-only", label: "Tamamen gündelik ve kayıtsız konuşmak" },
+      { id: "pressure", label: "Hızlı karar vermesi için baskı kurmak" },
     ],
-    correct: "c",
+    correctOptionId: "professional",
   },
   {
-    id: 8,
-    text: "Öğrencinin bir dersi tekrar tekrar yanlış anlıyor olması ne anlama gelir?",
+    id: "realistic-claims",
+    prompt: "Bir öğretmen başarı vaadi verirken hangi yaklaşımı seçmelidir?",
     options: [
-      { value: "a", label: "Öğrenci çalışmıyordur" },
-      { value: "b", label: "Öğrenci bu konuyu hiç öğrenemez" },
-      { value: "c", label: "Kullandığınız öğretim yöntemi bu öğrenciye uymuyor olabilir" },
-      { value: "d", label: "Konunun kendisi çok zordur" },
+      { id: "guarantee-score", label: "Kesin sınav puanı garantisi vermek" },
+      { id: "realistic-plan", label: "Öğrencinin durumuna göre gerçekçi çalışma planı sunmak" },
+      { id: "compare-students", label: "Öğrencileri birbirleriyle kıyaslamak" },
     ],
-    correct: "c",
+    correctOptionId: "realistic-plan",
   },
   {
-    id: 9,
-    text: "İlk dersten önce öğrenciye hangi bilgiyi sormalısınız?",
+    id: "feedback",
+    prompt: "Ödev ve çalışma takibi için iyi uygulama hangisidir?",
     options: [
-      { value: "a", label: "Hangi okula gittiğini" },
-      { value: "b", label: "Ne öğrenmek istediğini, mevcut seviyesini ve hedeflerini" },
-      { value: "c", label: "Ailesi hakkında genel bilgi" },
-      { value: "d", label: "Daha önce kaç özel ders aldığını" },
+      { id: "structured-feedback", label: "Hataları açıklayıp bir sonraki çalışma adımını önermek" },
+      { id: "grade-only", label: "Sadece doğru/yanlış sayısını söylemek" },
+      { id: "no-feedback", label: "Ödev takibini tamamen öğrenciye bırakmak" },
     ],
-    correct: "b",
+    correctOptionId: "structured-feedback",
   },
   {
-    id: 10,
-    text: "Öğrencinin öğrenme hızı beklediğinizden daha yavaş. Nasıl devam edersiniz?",
+    id: "review-right",
+    prompt: "Öğrenci hangi durumda öğretmene yorum yapabilmelidir?",
     options: [
-      { value: "a", label: "Ders planını değiştirmeden devam etmek" },
-      { value: "b", label: "Öğrenciye daha fazla ev ödevi vermek" },
-      { value: "c", label: "Adımları daha küçük parçalara bölmek ve pekiştirme egzersizleri eklemek" },
-      { value: "d", label: "Veliye öğrencinin ilgisiz olduğunu bildirmek" },
+      { id: "anytime", label: "Hiç ders talebi oluşturmadan" },
+      { id: "after-accepted-request", label: "Öğretmen özel ders başvurusunu kabul ettikten sonra" },
+      { id: "only-admin", label: "Sadece admin manuel izin verirse" },
     ],
-    correct: "c",
+    correctOptionId: "after-accepted-request",
   },
-];
+] as const;
 
-export const ELIGIBILITY_PASSING_SCORE = 70;
-export const ELIGIBILITY_QUESTION_COUNT = eligibilityQuestions.length;
+export const teacherOnboardingDeliveryModeOptions = [
+  { value: "both", label: "Online + yüz yüze" },
+  { value: "online", label: "Online" },
+  { value: "face_to_face", label: "Yüz yüze" },
+] as const;
 
-export const submitEligibilitySchema = z.object({
-  attemptId: z.string().uuid("Geçersiz deneme ID."),
-  answers: z
-    .record(z.string(), z.string())
-    .refine(
-      (answers) => Object.keys(answers).length === ELIGIBILITY_QUESTION_COUNT,
-      { message: `Tüm ${ELIGIBILITY_QUESTION_COUNT} soruyu cevaplamalısın.` }
-    ),
+export const teacherOnboardingSteps = [
+  { title: "Test", text: "10 soruluk uygunluk testini geç." },
+  { title: "Profil", text: "Ad, telefon, konum ve fiyat bilgilerini gir." },
+  { title: "İlan", text: "Dersleri seç ve ilanı hemen yayına al." },
+] as const;
+
+export const teacherEligibilityAnswerSchema = z.object({
+  questionId: z.string().min(1, "Soru bilgisi eksik."),
+  optionId: z.string().min(1, "Bu soruyu yanıtla."),
 });
+
+export const teacherEligibilityAttemptSchema = z.object({
+  answers: z
+    .array(teacherEligibilityAnswerSchema)
+    .length(teacherEligibilityQuestionCount, `${teacherEligibilityQuestionCount} sorunun tamamını yanıtla.`),
+});
+
+export const teacherOnboardingSchema = z
+  .object({
+    eligibilityAnswers: z
+      .array(teacherEligibilityAnswerSchema)
+      .length(teacherEligibilityQuestionCount, "Öğretmenlik testini tamamlamalısın."),
+    fullName: z.string().trim().min(2, "Ad soyad zorunlu.").max(120, "Ad soyad 120 karakteri geçemez."),
+    email: z.email("Geçerli bir email gir."),
+    password: z.string().min(8, "Şifre en az 8 karakter olmalı."),
+    phone: z.string().trim().min(10, "Telefon zorunlu.").max(30, "Telefon 30 karakteri geçemez."),
+    locationSlug: z.string().min(1, "Konum seçimi zorunlu."),
+    hourlyPrice: z.number().min(1, "Saatlik ücret zorunlu.").max(100000, "Saatlik ücret çok yüksek."),
+    title: z.string().trim().min(5, "Profil başlığı en az 5 karakter olmalı.").max(120, "Başlık 120 karakteri geçemez."),
+    bio: z.string().trim().min(40, "Biyografi en az 40 karakter olmalı.").max(1000, "Biyografi 1000 karakteri geçemez."),
+    lessonSlugs: z.array(z.string().min(1)).min(1, "En az bir ders seç.").max(6, "En fazla 6 ders seçebilirsin."),
+    education: z.string().trim().min(2, "Eğitim bilgisi zorunlu.").max(160, "Eğitim bilgisi 160 karakteri geçemez."),
+    experienceYears: z.number().min(0, "Deneyim yılı negatif olamaz.").max(60, "Deneyim yılı çok yüksek."),
+    deliveryMode: z.enum(["online", "face_to_face", "both"], {
+      error: "Ders türü seçimi zorunlu.",
+    }),
+    termsAccepted: z.boolean().refine((value) => value, {
+      message: "Kullanım koşullarını kabul etmelisin.",
+    }),
+    privacyAccepted: z.boolean().refine((value) => value, {
+      message: "Gizlilik/KVKK metnini kabul etmelisin.",
+    }),
+  })
+  .refine((values) => new Set(values.lessonSlugs).size === values.lessonSlugs.length, {
+    path: ["lessonSlugs"],
+    message: "Aynı dersi birden fazla seçemezsin.",
+  });

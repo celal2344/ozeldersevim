@@ -1,15 +1,43 @@
 import type { z } from "zod";
 
-import type { submitEligibilitySchema } from "@/features/teacher-eligibility/constants";
+import type {
+  teacherEligibilityAnswerSchema,
+  teacherEligibilityAttemptSchema,
+  teacherEligibilityQuestions,
+  teacherOnboardingSchema,
+} from "@/features/teacher-eligibility/constants";
 
-export type SubmitEligibilityPayload = z.infer<typeof submitEligibilitySchema>;
+export type TeacherEligibilityQuestion = (typeof teacherEligibilityQuestions)[number];
 
-export type StartAttemptResponse = {
-  attemptId: string;
-};
+export type PublicTeacherEligibilityQuestion = Pick<TeacherEligibilityQuestion, "id" | "prompt" | "options">;
 
-export type SubmitAttemptResponse = {
+export type TeacherEligibilityAnswer = z.infer<typeof teacherEligibilityAnswerSchema>;
+
+export type TeacherEligibilityAttemptPayload = z.infer<typeof teacherEligibilityAttemptSchema>;
+
+export type TeacherEligibilityResult = {
   passed: boolean;
   score: number;
   passingScore: number;
+  questionCount: number;
+  correctCount: number;
 };
+
+export type TeacherOnboardingPayload = z.infer<typeof teacherOnboardingSchema>;
+
+export type TeacherOnboardingResponse = {
+  teacherProfileId: string;
+  listingSlug: string;
+  status: "published";
+};
+
+export type TeacherOnboardingServiceResult =
+  | {
+      ok: true;
+      data: TeacherOnboardingResponse;
+    }
+  | {
+      ok: false;
+      status: number;
+      message: string;
+    };

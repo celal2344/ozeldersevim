@@ -1,104 +1,70 @@
-import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { CheckCircle2Icon, GraduationCapIcon, ShieldCheckIcon } from "lucide-react";
 
-import { OgretmenOlFlow } from "@/features/teachers/onboarding-flow";
-import { createSupabaseServerClient } from "@/shared/db/supabase/server";
+import { teacherOnboardingMetadata } from "@/features/seo/constants";
+import { teacherOnboardingSteps } from "@/features/teacher-eligibility/constants";
+import { TeacherEligibilityOnboardingForm } from "@/features/teacher-eligibility/teacher-eligibility-onboarding-form";
 
-export const metadata: Metadata = {
-  title: "Öğretmen Ol | ÖzelDersEvim",
-  description: "Öğretmenlik uygunluk testini geçin ve profilinizi oluşturun.",
-};
+export { teacherOnboardingMetadata as metadata };
 
-export default async function OgretmenOlPage() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/giris?redirect=/ogretmen-ol");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (!profile || profile.role !== "teacher") {
-    redirect("/kayit");
-  }
-
-  const { data: existingTeacherProfile } = await supabase
-    .from("teacher_profiles")
-    .select("id, status, teacher_listings(slug)")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-
-  if (existingTeacherProfile) {
-    const slug = (existingTeacherProfile as { teacher_listings?: { slug: string }[] | null })
-      .teacher_listings?.[0]?.slug;
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-12">
-        <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-          <h1 className="text-2xl font-bold text-brand-navy">Profiliniz Zaten Var</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Öğretmen profiliniz{" "}
-            <span className="font-medium">
-              {existingTeacherProfile.status === "published" ? "yayında" : "taslak durumunda"}
-            </span>
-            .
-          </p>
-          {slug ? (
-            <a
-              href={`/ogretmen/${slug}`}
-              className="mt-4 inline-block text-sm font-medium text-brand-orange underline"
-            >
-              Profilimi Görüntüle →
-            </a>
-          ) : null}
-        </div>
-      </div>
-    );
-  }
-
-  const { data: passedAttempt } = await supabase
-    .from("teacher_eligibility_attempts")
-    .select("id")
-    .eq("profile_id", user.id)
-    .eq("status", "passed")
-    .maybeSingle();
-
+export default function TeacherOnboardingPage() {
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-brand-navy">Öğretmen Ol</h1>
-        <p className="mt-2 text-muted-foreground">
-          {!passedAttempt
-            ? "Önce öğretmenlik uygunluk testini geçmen, ardından profilini oluşturman gerekiyor."
-            : "Testi geçtiniz! Şimdi öğretmen profilinizi oluşturun."}
-        </p>
-        <div className="mt-4 flex gap-3">
-          <StepBadge step={1} label="Uygunluk Testi" active={!passedAttempt} done={!!passedAttempt} />
-          <StepBadge step={2} label="Profil Oluştur" active={!!passedAttempt} done={false} />
+    <main className="bg-slate-50">
+      <section className="relative overflow-hidden bg-brand-navy text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_25%,rgba(251,115,22,0.28),transparent_28%),radial-gradient(circle_at_16%_70%,rgba(255,255,255,0.08),transparent_24%)]" />
+        <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+          <div className="flex flex-col justify-center">
+            <p className="text-sm font-semibold text-brand-orange">Öğretmen Ol</p>
+            <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+              Testi geç, profilini oluştur ve özel ders ilanını yayına al.
+            </h1>
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-white/75">
+              Bu MVP akışında öğretmen adayları önce uygunluk testini tamamlar. Başarılı olanlar ad soyad, telefon, konum, fiyat ve profil bilgileriyle tek ilan oluşturur.
+            </p>
+            <div className="mt-8 grid gap-3">
+              {teacherOnboardingSteps.map(({ title, text }) => (
+                <div key={title} className="flex gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand-orange text-white">
+                    <CheckCircle2Icon aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="font-semibold">{title}</p>
+                    <p className="mt-1 text-sm text-white/65">{text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-2xl shadow-slate-950/20 backdrop-blur">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="rounded-xl bg-white p-4 text-brand-navy">
+                  <ShieldCheckIcon aria-hidden="true" className="text-brand-orange" />
+                  <p className="mt-3 text-2xl font-bold">70+</p>
+                  <p className="text-xs text-muted-foreground">Geçme puanı</p>
+                </div>
+                <div className="rounded-xl bg-white p-4 text-brand-navy">
+                  <GraduationCapIcon aria-hidden="true" className="text-brand-orange" />
+                  <p className="mt-3 text-2xl font-bold">10</p>
+                  <p className="text-xs text-muted-foreground">Sabit soru</p>
+                </div>
+                <div className="rounded-xl bg-white p-4 text-brand-navy">
+                  <CheckCircle2Icon aria-hidden="true" className="text-brand-orange" />
+                  <p className="mt-3 text-2xl font-bold">Anında</p>
+                  <p className="text-xs text-muted-foreground">İlan yayını</p>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm leading-6 text-white/70">
+              Başarısız denemeler kaydedilmez. Sadece testi geçip öğretmen hesabı oluşturan kullanıcıların başarılı test sonucu Supabase üzerinde saklanır.
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <OgretmenOlFlow hasPassed={!!passedAttempt} />
-    </div>
-  );
-}
-
-function StepBadge({ step, label, active, done }: { step: number; label: string; active: boolean; done: boolean }) {
-  return (
-    <span
-      className={`rounded-full px-3 py-1 text-xs font-medium ${
-        done
-          ? "bg-green-100 text-green-700"
-          : active
-          ? "bg-brand-orange text-white"
-          : "bg-slate-100 text-slate-500"
-      }`}
-    >
-      {step}. {label} {done ? "✓" : ""}
-    </span>
+      <section className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+        <TeacherEligibilityOnboardingForm />
+      </section>
+    </main>
   );
 }
