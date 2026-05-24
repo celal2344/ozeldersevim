@@ -1,6 +1,7 @@
 import type { TeacherProfile } from "@/features/teachers/types";
 import { deliveryPreferenceOptions } from "@/features/requests/constants";
 import type { CompleteLessonRequestPayload, LessonRequestFormValues } from "@/features/requests/types";
+import { toTurkishSlug } from "@/shared/lib/utils";
 
 export function defaultDeliveryModeForTeacher(teacher: TeacherProfile): "online" | "face_to_face" {
   return teacher.deliveryMode === "face_to_face" ? "face_to_face" : "online";
@@ -20,18 +21,7 @@ export function deliveryOptionsForTeacher(teacher: TeacherProfile) {
 }
 
 export function lessonSlugFromName(lessonName: string) {
-  return lessonName
-    .toLocaleLowerCase("tr-TR")
-    .replaceAll("ı", "i")
-    .replaceAll("ğ", "g")
-    .replaceAll("ü", "u")
-    .replaceAll("ş", "s")
-    .replaceAll("ö", "o")
-    .replaceAll("ç", "c")
-    .replaceAll("/", "")
-    .replaceAll(" ", "-")
-    .replaceAll("--", "-")
-    .trim();
+  return toTurkishSlug(lessonName);
 }
 
 export function locationSlugFromTeacher(teacher: TeacherProfile) {
