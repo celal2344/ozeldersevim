@@ -22,6 +22,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Supabase project ref: `hhddeqgvrnyxnwetetdc`.
 - Supabase project URL: `https://hhddeqgvrnyxnwetetdc.supabase.co`.
 - Local app env uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; do not commit `.env*` files or service-role/database credentials.
+- Server-side eligibility grading uses `SUPABASE_SERVICE_ROLE_KEY`; it must stay server-only and must never be exposed through `NEXT_PUBLIC_*`.
 - Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
 - SMS is not in MVP.
 - Architecture: feature-based architecture.
@@ -54,6 +55,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
   - `chore/utf8-docs-and-copy-cleanup`
   - `feat/auth-account-rebuild`
   - `feat/dashboard-foundation`
+  - `feat/teacher-listing-eligibility-public-data`
   - `feat/dashboard-request-management`
   - `feat/dashboard-reviews`
   - `docs/openapi-mvp-lock`
@@ -77,6 +79,10 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Student dashboard routes: `/ogrenci/panel`, `/ogrenci/panel/talepler`, `/ogrenci/panel/favoriler`, `/ogrenci/panel/profil`.
 - Teacher dashboard routes: `/ogretmen/panel`, `/ogretmen/panel/talepler`, `/ogretmen/panel/ilan`, `/ogretmen/panel/ogrenciler`, `/ogretmen/panel/yorumlar`, `/ogretmen/panel/profil`, `/ogretmen/panel/ayarlar`.
 - Dashboard foundation routes are clickable empty states only; request management, reviews, teacher listing creation, and settings forms remain later scope.
+- Teacher listing creation is implemented in `feat/teacher-listing-eligibility-public-data`: teachers can save draft listing content before passing the test, but publishing is blocked until a passed eligibility attempt exists.
+- Public teacher search/profile pages read Supabase published listings directly; seed data is no longer used as a runtime fallback for public teacher discovery.
+- Teacher eligibility test content is database-backed with questions and choices. Scores are read only by server-side grading through the service-role client.
+- New local migration for this branch: `supabase/migrations/20260524120000_teacher_listing_eligibility_public_data.sql`. Apply it only against the documented Supabase project after confirming the target project.
 - Teacher account/listing experiments from `a7b515a` and `f528c20` were cleaned up in `feat/account-flow-cleanup`.
 - The Supabase rollback migration for the teacher account/listing experiment was applied remotely.
 - `/ogretmen-ol` routes teachers into `/kayit?role=teacher`; teacher eligibility and listing creation remain later scope.
@@ -92,7 +98,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 
 - Auth now has a dedicated `src/features/auth` module; future auth/session/profile changes should use that seam.
 - Lesson request submission no longer creates accounts, but the route still mixes teacher seed validation with Supabase listing/category/location persistence.
-- Teacher Search and Teacher Profile reads currently use seed data, while lesson request submission expects real Supabase `teacher_listings`. This creates split truth.
+- Teacher Search, Teacher Profile, and lesson request teacher validation now use Supabase published teacher listings as the single teacher read source.
 - Dashboard foundation exists as role-aware private shells and empty routes. Request actions, reviews, and listing creation should build on it.
 - Request acceptance and reviews belong in dashboard flows, not as isolated public features.
 - Legal pages are placeholder text and need proper legal review before launch.
@@ -113,6 +119,9 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Yorum yazma hakkı, öğretmenin o öğrencinin özel ders başvurusunu onaylamasından sonra verilecek.
 - SMS entegrasyonu şimdilik yok.
 - Öğretmen hesabı açmak için test gerekmiyor. Test, öğretmen özel ders ilanı oluşturmak istediğinde gösterilecek ve sadece testi geçen öğretmenler ilan yayınlayabilecek.
+- Öğretmen ilan taslağını testi geçmeden kaydedebilir; yayına alma adımı test sonucu geçmeden engellenir.
+- MVP öğretmenlik testi veritabanından gelir; QA için 3 soru ve her soruda ilk seçenek doğru olacak şekilde başlatılır.
+- Test tekrarları MVP/QA için sınırsızdır; test geçildikten sonra yeniden test gerekmez.
 - Öğretmen için zorunlu ilk alanlar: ad, soyad, fiyat, konum, telefon.
 
 ## Visual References In Repo
@@ -475,21 +484,16 @@ Server actions can be used internally, but API shape should still be documented 
 
 ## Açık Sorular
 
-1. Öğretmenlik testi kaç sorudan oluşacak ve hangi konuları ölçecek?
-2. Öğretmenlik testinde geçme puanı ne olacak?
-3. Testi geçemeyen kullanıcı tekrar deneyebilecek mi? Evetse kaç kez ve ne kadar arayla?
-4. Test cevapları manuel mi hazırlanacak, yoksa admin panelinden yönetilebilir mi olacak?
-5. Konum bazlı arama için kullanıcıdan tam adres mi, sadece il/ilçe mi, yoksa koordinat/pin mi alınacak?
-6. Yakındaki öğretmenler sıralaması ilçe merkezine göre mi, kullanıcının konumuna göre mi hesaplanacak?
-7. Öğrenci ders talebinin sonunda email ile doğrulama yapmadan hesap aktif olsun mu?
-8. Öğretmen başvuruyu kabul ettiğinde öğrenciye email bildirimi gönderilecek mi?
-9. Öğrencinin iletişim bilgilerinden hangileri öğretmene açılacak: telefon, email, ikisi de?
-10. Fiyat saatlik mi olacak, yoksa öğretmen ders süresini de seçebilecek mi?
-11. İlk seed kategoriler kesin olarak hangileri olacak?
-12. Admin panel MVP'de hiç olmayacak mı, yoksa minimum kullanıcı/ilan askıya alma eklenmeli mi?
-13. Yorumlar otomatik yayınlansın mı, yoksa admin/moderasyon beklesin mi?
-14. Öğretmen profilinde fotoğraf MVP'de zorunlu olmayacaksa varsayılan avatar stratejisi ne olacak?
-15. Erzurum dışında test için hangi şehirler eklenmeli?
+1. Gerçek öğretmenlik testi içerikleri, konu dağılımı ve soru sayısı MVP sonrasında nasıl yönetilecek?
+2. Konum bazlı arama için kullanıcıdan tam adres mi, sadece il/ilçe mi, yoksa koordinat/pin mi alınacak?
+3. Yakındaki öğretmenler sıralaması ilçe merkezine göre mi, kullanıcının konumuna göre mi hesaplanacak?
+4. Öğrenci ders talebinin sonunda email ile doğrulama yapmadan hesap aktif olsun mu?
+5. Öğretmen başvuruyu kabul ettiğinde öğrenciye email bildirimi gönderilecek mi?
+6. Öğrencinin iletişim bilgilerinden hangileri öğretmene açılacak: telefon, email, ikisi de?
+7. Fiyat saatlik mi olacak, yoksa öğretmen ders süresini de seçebilecek mi?
+8. Admin panel MVP'de hiç olmayacak mı, yoksa minimum kullanıcı/ilan askıya alma eklenmeli mi?
+9. Yorumlar otomatik yayınlansın mı, yoksa admin/moderasyon beklesin mi?
+10. Öğretmen profilinde fotoğraf MVP'de zorunlu olmayacaksa varsayılan avatar stratejisi ne olacak?
 
 ## Definition Of Done For Phase 1
 

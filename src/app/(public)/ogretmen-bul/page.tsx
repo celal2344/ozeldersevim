@@ -12,12 +12,13 @@ type PageProps = {
 };
 
 export { teacherSearchMetadata as metadata };
+export const dynamic = "force-dynamic";
 
 export default async function TeacherSearchPage({ searchParams }: PageProps) {
   const rawParams = await searchParams;
   const params = pageSearchParamsFromRecord(rawParams);
 
-  const response = searchTeachers({
+  const response = await searchTeachers({
     q: params.get("q") ?? undefined,
     lesson: params.get("lesson") ?? undefined,
     city: params.get("city") ?? undefined,
