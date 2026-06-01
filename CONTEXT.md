@@ -1,6 +1,6 @@
 # Ozel Ders Evim - Project Context
 
-Last updated: 2026-05-24
+Last updated: 2026-06-01
 
 ## Product Summary
 
@@ -78,14 +78,14 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Private dashboard foundation uses a shared shell in `src/features/dashboard`.
 - Student dashboard routes: `/ogrenci/panel`, `/ogrenci/panel/talepler`, `/ogrenci/panel/favoriler`, `/ogrenci/panel/profil`.
 - Teacher dashboard routes: `/ogretmen/panel`, `/ogretmen/panel/talepler`, `/ogretmen/panel/ilan`, `/ogretmen/panel/ogrenciler`, `/ogretmen/panel/yorumlar`, `/ogretmen/panel/profil`, `/ogretmen/panel/ayarlar`.
-- Dashboard foundation routes are clickable empty states only; request management, reviews, teacher listing creation, and settings forms remain later scope.
+- Dashboard foundation routes are clickable empty states only for request management, reviews, students, favorites, and settings forms. Teacher listing creation is now wired into `/ogretmen/panel/ilan`.
 - Teacher listing creation is implemented in `feat/teacher-listing-eligibility-public-data`: teachers can save draft listing content before passing the test, but publishing is blocked until a passed eligibility attempt exists.
 - Public teacher search/profile pages read Supabase published listings directly; seed data is no longer used as a runtime fallback for public teacher discovery.
 - Teacher eligibility test content is database-backed with questions and choices. Scores are read only by server-side grading through the service-role client.
 - New local migration for this branch: `supabase/migrations/20260524120000_teacher_listing_eligibility_public_data.sql`. Apply it only against the documented Supabase project after confirming the target project.
 - Teacher account/listing experiments from `a7b515a` and `f528c20` were cleaned up in `feat/account-flow-cleanup`.
 - The Supabase rollback migration for the teacher account/listing experiment was applied remotely.
-- `/ogretmen-ol` routes teachers into `/kayit?role=teacher`; teacher eligibility and listing creation remain later scope.
+- `/ogretmen-ol` routes teachers into `/kayit?role=teacher`; teacher eligibility and listing creation continue inside `/ogretmen/panel/ilan`.
 - The active OpenAPI contract only documents implemented endpoints.
 - UTF-8 hygiene is being tracked in `chore/utf8-docs-and-copy-cleanup`.
 
@@ -438,13 +438,16 @@ Currently implemented endpoints:
 - `POST /api/auth/logout`
 - `GET /api/auth/me`
 - `POST /api/lesson-requests`
+- `GET /api/lesson-categories`
+- `GET /api/locations`
+- `GET /api/teacher-eligibility/test`
+- `POST /api/teacher-eligibility/submissions`
+- `GET /api/teachers/me/listing`
+- `PUT /api/teachers/me/listing`
 
 Planned endpoints:
 
 - `POST /api/lesson-requests/{id}/accept`
-- `GET /api/lesson-categories`
-- `GET /api/locations`
-- `POST /api/teachers/listings`
 - `PATCH /api/teachers/me`
 - `GET /api/student/requests`
 - `GET /api/teacher/requests`
