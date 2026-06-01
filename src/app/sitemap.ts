@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import { sitemapStaticRoutes } from "@/features/seo/constants";
 import { absoluteUrl } from "@/features/seo/site";
 import { getTeacherProfileSlugs } from "@/features/teachers/service";
+import { hasSupabasePublicEnv } from "@/shared/config/env";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = sitemapStaticRoutes.map((route) => ({
@@ -12,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === "/" ? 1 : 0.6,
   }));
 
-  const slugs = await getTeacherProfileSlugs();
+  const slugs = hasSupabasePublicEnv() ? await getTeacherProfileSlugs() : [];
   const teacherRoutes: MetadataRoute.Sitemap = slugs.map((slug) => ({
     url: absoluteUrl(`/ogretmen/${slug}`),
     lastModified: new Date(),

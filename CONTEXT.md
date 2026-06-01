@@ -22,6 +22,8 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Supabase project ref: `hhddeqgvrnyxnwetetdc`.
 - Supabase project URL: `https://hhddeqgvrnyxnwetetdc.supabase.co`.
 - Local app env uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; do not commit `.env*` files or service-role/database credentials.
+- Vercel must define `NEXT_PUBLIC_SUPABASE_URL=https://hhddeqgvrnyxnwetetdc.supabase.co` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` for real auth flows.
+- Public session reads render as signed-out and sitemap omits dynamic teacher URLs when Supabase public env is missing so Vercel prerender/build does not crash; mutating auth and database flows still require the Supabase env and should fail loudly if it is missing.
 - Server-side eligibility grading uses `SUPABASE_SERVICE_ROLE_KEY`; it must stay server-only and must never be exposed through `NEXT_PUBLIC_*`.
 - Remote Supabase setup, MCP retargeting, applying unapplied migrations, QA, and test work are deferred operational/verification work. The next contributor should focus only on backend/frontend application code unless explicitly asked otherwise.
 - Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
