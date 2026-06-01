@@ -23,6 +23,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Supabase project URL: `https://hhddeqgvrnyxnwetetdc.supabase.co`.
 - Local app env uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; do not commit `.env*` files or service-role/database credentials.
 - Server-side eligibility grading uses `SUPABASE_SERVICE_ROLE_KEY`; it must stay server-only and must never be exposed through `NEXT_PUBLIC_*`.
+- Remote Supabase setup, MCP retargeting, applying unapplied migrations, QA, and test work are deferred operational/verification work. The next contributor should focus only on backend/frontend application code unless explicitly asked otherwise.
 - Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
 - SMS is not in MVP.
 - Architecture: feature-based architecture.
@@ -82,7 +83,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Teacher listing creation is implemented in `feat/teacher-listing-eligibility-public-data`: teachers can save draft listing content before passing the test, but publishing is blocked until a passed eligibility attempt exists.
 - Public teacher search/profile pages read Supabase published listings directly; seed data is no longer used as a runtime fallback for public teacher discovery.
 - Teacher eligibility test content is database-backed with questions and choices. Scores are read only by server-side grading through the service-role client.
-- New local migration for this branch: `supabase/migrations/20260524120000_teacher_listing_eligibility_public_data.sql`. Apply it only against the documented Supabase project after confirming the target project.
+- New local migration for this branch: `supabase/migrations/20260524120000_teacher_listing_eligibility_public_data.sql`. Remote application is deferred and should not block backend/frontend feature work.
 - Teacher account/listing experiments from `a7b515a` and `f528c20` were cleaned up in `feat/account-flow-cleanup`.
 - The Supabase rollback migration for the teacher account/listing experiment was applied remotely.
 - `/ogretmen-ol` routes teachers into `/kayit?role=teacher`; teacher eligibility and listing creation continue inside `/ogretmen/panel/ilan`.
@@ -93,6 +94,13 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 
 1. Dashboard request management: teacher incoming requests, accept/reject actions, and student request status views.
 2. Dashboard reviews: allow reviews only after an accepted lesson request.
+3. Favorites behavior and profile/settings forms.
+4. Admin/moderation basics.
+
+Deferred outside the next handoff scope:
+
+- Remote Supabase target confirmation and migration application.
+- QA passes, manual test plans, and automated test expansion.
 
 ## Documented Findings - 2026-05-24
 
@@ -120,8 +128,8 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - SMS entegrasyonu şimdilik yok.
 - Öğretmen hesabı açmak için test gerekmiyor. Test, öğretmen özel ders ilanı oluşturmak istediğinde gösterilecek ve sadece testi geçen öğretmenler ilan yayınlayabilecek.
 - Öğretmen ilan taslağını testi geçmeden kaydedebilir; yayına alma adımı test sonucu geçmeden engellenir.
-- MVP öğretmenlik testi veritabanından gelir; QA için 3 soru ve her soruda ilk seçenek doğru olacak şekilde başlatılır.
-- Test tekrarları MVP/QA için sınırsızdır; test geçildikten sonra yeniden test gerekmez.
+- MVP öğretmenlik testi veritabanından gelir; 3 placeholder soru ve her soruda ilk seçenek doğru olacak şekilde başlatılır.
+- Test tekrarları MVP için sınırsızdır; test geçildikten sonra yeniden test gerekmez.
 - Öğretmen için zorunlu ilk alanlar: ad, soyad, fiyat, konum, telefon.
 
 ## Visual References In Repo
