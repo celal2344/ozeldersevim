@@ -39,6 +39,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Delivery modes: both online and face-to-face are supported. For online lessons, teachers/students manage their own meeting links externally.
 - Search location model: support both city/district filtering and location-based nearby search.
 - Seed data: include Erzurum and random test data covering different cases.
+- Production seed data must not create fake users, fake teachers, fake listings, fake reviews, or fake marketplace stats. Keep production seeds to reference data such as locations, lesson categories, and teacher eligibility test content.
 - Vocabulary split: use this file for product/domain vocabulary and `LANGUAGE.md` for architecture vocabulary and rules.
 - Documentation maintenance: whenever a critical codebase rule, architecture rule, domain decision, or workflow decision is given, update the relevant Markdown documentation in the same change.
 - Turkish UI copy and documentation must stay UTF-8; run the copy check before committing.
@@ -83,7 +84,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Teacher dashboard routes: `/ogretmen/panel`, `/ogretmen/panel/talepler`, `/ogretmen/panel/ilan`, `/ogretmen/panel/ogrenciler`, `/ogretmen/panel/yorumlar`, `/ogretmen/panel/profil`, `/ogretmen/panel/ayarlar`.
 - Dashboard foundation routes are clickable empty states only for request management, reviews, students, favorites, and settings forms. Teacher listing creation is now wired into `/ogretmen/panel/ilan`.
 - Teacher listing creation is implemented in `feat/teacher-listing-eligibility-public-data`: teachers can save draft listing content before passing the test, but publishing is blocked until a passed eligibility attempt exists.
-- Public teacher search/profile pages read Supabase published listings directly; seed data is no longer used as a runtime fallback for public teacher discovery.
+- Public teacher search/profile and homepage teacher sections read Supabase published listings directly; seed/mock data is not used as a runtime fallback for public teacher discovery.
 - Teacher eligibility test content is database-backed with questions and choices. Scores are read only by server-side grading through the service-role client.
 - New local migration for this branch: `supabase/migrations/20260524120000_teacher_listing_eligibility_public_data.sql`. Remote application is deferred and should not block backend/frontend feature work.
 - Teacher account/listing experiments from `a7b515a` and `f528c20` were cleaned up in `feat/account-flow-cleanup`.
