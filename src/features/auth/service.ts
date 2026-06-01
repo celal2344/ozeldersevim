@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/shared/db/supabase/server";
+import { hasSupabasePublicEnv } from "@/shared/config/env";
 import type { AuthAccount, LoginInput, RegisterInput } from "@/features/auth/types";
 
 function profileToAccount(profile: {
@@ -17,6 +18,10 @@ function profileToAccount(profile: {
 }
 
 export async function getCurrentAccount(): Promise<AuthAccount | null> {
+  if (!hasSupabasePublicEnv()) {
+    return null;
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
 

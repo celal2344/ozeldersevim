@@ -14,6 +14,15 @@ export const publicEnv = publicEnvSchema.parse({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 });
 
+export function hasSupabasePublicEnv() {
+  return publicEnvSchema
+    .required()
+    .safeParse({
+      NEXT_PUBLIC_SUPABASE_URL: publicEnv.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    }).success;
+}
+
 export function assertSupabasePublicEnv() {
   const parsed = publicEnvSchema
     .required()

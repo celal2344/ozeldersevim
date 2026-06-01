@@ -4,6 +4,8 @@ import { LoginForm } from "@/features/auth/login-form";
 import { getCurrentAccount } from "@/features/auth/service";
 import { defaultLoginRedirectForRole, safeNextPath } from "@/features/auth/utils";
 
+export const dynamic = "force-dynamic";
+
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
