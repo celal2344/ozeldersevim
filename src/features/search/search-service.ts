@@ -1,9 +1,17 @@
 import type { TeacherSearchParams, TeacherSearchResponse, TeacherSearchResult } from "./types";
 import { getPublishedTeacherProfiles } from "@/features/teachers/service";
+import { getLessonCategoryOptions, getLocationOptions } from "@/features/teacher-listings/service";
 import { slugifyTurkish } from "@/features/teacher-listings/utils";
 import { paginateItems, parsePaginationParams } from "@/shared/api/list-query";
+import { hasSupabasePublicEnv } from "@/shared/config/env";
 
 const TEACHER_SEARCH_PAGE_SIZE = 6;
+
+export type TeacherSearchFilterOptions = {
+  lessonOptions: string[];
+  cityOptions: string[];
+  districtOptions: string[];
+};
 
 function normalize(value: string) {
   return value.toLocaleLowerCase("tr-TR").trim();
@@ -129,4 +137,24 @@ export async function searchTeachers(params: TeacherSearchParams): Promise<Teach
       },
     }
   );
+}
+
+export async function getTeacherSearchFilterOptions(): Promise<TeacherSearchFilterOptions> {
+  if (!hasSupabasePublicEnv()) {
+    return { lessonOptions: [], cityOptions: [], districtOptions: [] };
+  }
+
+  try {
+    const [lessons, locations] = await Promise.all([getLessonCategoryOptions(), getLocationOptions()]);
+
+    return {
+      lessonOptions: lessons.map((lesson) => lesson.name),
+      cityOptions: [...new Set(locations.map((location) => location.city))],
+      districtOptions: [
+        ...new Set(locations.map((location) => location.district).filter((district): district is string => Boolean(district))),
+      ],
+    };
+  } catch {
+    return { lessonOptions: [], cityOptions: [], districtOptions: [] };
+  }
 }
