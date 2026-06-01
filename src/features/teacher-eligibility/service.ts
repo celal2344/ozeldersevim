@@ -1,303 +1,261 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-import type {
-  TeacherOnboardingPayload,
-  TeacherOnboardingServiceResult,
-} from "@/features/teacher-eligibility/types";
-import {
-  scoreTeacherEligibilityAnswers,
-  teacherListingShortBio,
-  teacherListingSlug,
-  teacherListingSlugFallback,
-} from "@/features/teacher-eligibility/utils";
+import { createSupabaseServiceRoleClient } from "@/shared/db/supabase/admin";
 import { createSupabaseServerClient } from "@/shared/db/supabase/server";
+import type {
+  TeacherEligibilityState,
+  TeacherEligibilitySubmissionResult,
+  TeacherEligibilityTest,
+} from "@/features/teacher-eligibility/types";
 
-type ActiveTeacherEligibilityTest = {
-  id: string;
-  passing_score: number;
-  question_count: number;
-};
-
-type OnboardingLocation = {
-  id: string;
-  city: string;
-  district: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  slug: string;
-};
-
-type OnboardingLesson = {
-  id: string;
-  name: string;
-  slug: string;
-};
-
-type ListingInsert = {
-  teacher_profile_id: string;
-  headline: string;
-  short_bio: string;
-  rating_average: number;
-  review_count: number;
-  is_published: boolean;
-};
-
-export async function completeTeacherOnboarding(
-  input: TeacherOnboardingPayload
-): Promise<TeacherOnboardingServiceResult> {
-  const eligibilityResult = scoreTeacherEligibilityAnswers(input.eligibilityAnswers);
-
-  if (!eligibilityResult.passed) {
-    return {
-      ok: false,
-      status: 400,
-      message: "Öğretmen hesabı oluşturmak için uygunluk testini geçmelisin.",
-    };
+export class TeacherEligibilityError extends Error {
+  constructor(
+    message: string,
+    public status = 400
+  ) {
+    super(message);
   }
+}
 
+type EligibilityChoiceRow = {
+  question_id: string;
+  choice_key: string;
+  label: string;
+  score: number;
+  position: number;
+};
+
+export async function getTeacherEligibilityState(profileId: string): Promise<TeacherEligibilityState> {
   const supabase = await createSupabaseServerClient();
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: input.email,
-    password: input.password,
-    options: {
-      data: {
-        full_name: input.fullName,
-        phone: input.phone,
-        role: "teacher",
-      },
-    },
-  });
+  const { data: passedAttempt, error: passedError } = await supabase
+    .from("teacher_eligibility_attempts")
+    .select("id,score,status")
+    .eq("profile_id", profileId)
+    .eq("status", "passed")
+    .order("submitted_at", { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
 
-  if (signUpError) {
-    return { ok: false, status: 400, message: signUpError.message };
+  if (passedError) {
+    throw new TeacherEligibilityError(passedError.message, 500);
   }
 
-  if (!signUpData.user || !signUpData.session) {
+  if (passedAttempt) {
     return {
-      ok: false,
-      status: 409,
-      message: "Bu MVP akışı için Supabase email doğrulaması kapalı olmalı.",
+      status: "passed",
+      latestAttemptId: passedAttempt.id,
+      latestScore: passedAttempt.score,
+      canRetake: false,
     };
   }
 
-  const { error: sessionError } = await supabase.auth.setSession({
-    access_token: signUpData.session.access_token,
-    refresh_token: signUpData.session.refresh_token,
-  });
+  const { data: latestAttempt, error: latestError } = await supabase
+    .from("teacher_eligibility_attempts")
+    .select("id,score,status")
+    .eq("profile_id", profileId)
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  if (sessionError) {
-    return { ok: false, status: 500, message: sessionError.message };
-  }
-
-  const activeTest = await getActiveTeacherEligibilityTest(supabase);
-
-  if (!activeTest.ok) {
-    return activeTest;
-  }
-
-  const location = await getOnboardingLocation(supabase, input.locationSlug);
-
-  if (!location.ok) {
-    return location;
-  }
-
-  const lessons = await getOnboardingLessons(supabase, input.lessonSlugs);
-
-  if (!lessons.ok) {
-    return lessons;
-  }
-
-  const { error: profileError } = await supabase.from("profiles").insert({
-    id: signUpData.user.id,
-    role: "teacher",
-    full_name: input.fullName,
-    phone: input.phone,
-  });
-
-  if (profileError) {
-    return { ok: false, status: 500, message: profileError.message };
-  }
-
-  const { error: attemptError } = await supabase.from("teacher_eligibility_attempts").insert({
-    profile_id: signUpData.user.id,
-    test_id: activeTest.data.id,
-    status: "passed",
-    score: eligibilityResult.score,
-    submitted_at: new Date().toISOString(),
-  });
-
-  if (attemptError) {
-    return { ok: false, status: 500, message: attemptError.message };
-  }
-
-  const { data: teacherProfile, error: teacherProfileError } = await supabase
-    .from("teacher_profiles")
-    .insert({
-      profile_id: signUpData.user.id,
-      location_id: location.data.id,
-      title: input.title,
-      bio: input.bio,
-      education: input.education,
-      experience_years: input.experienceYears,
-      hourly_price: input.hourlyPrice,
-      delivery_mode: input.deliveryMode,
-      status: "published",
-      latitude: location.data.latitude,
-      longitude: location.data.longitude,
-    })
-    .select("id")
-    .single();
-
-  if (teacherProfileError) {
-    return { ok: false, status: 500, message: teacherProfileError.message };
-  }
-
-  const lessonInsert = lessons.data.map((lesson) => ({
-    teacher_profile_id: teacherProfile.id,
-    lesson_category_id: lesson.id,
-  }));
-  const { error: teacherLessonsError } = await supabase.from("teacher_lessons").insert(lessonInsert);
-
-  if (teacherLessonsError) {
-    return { ok: false, status: 500, message: teacherLessonsError.message };
-  }
-
-  const primaryLesson = lessons.data.find((lesson) => lesson.slug === input.lessonSlugs[0]) ?? lessons.data[0];
-  const listingSlugBase = teacherListingSlug([input.fullName, primaryLesson.name, location.data.city]);
-  const listingResult = await insertTeacherListing(supabase, listingSlugBase, signUpData.user.id, {
-    teacher_profile_id: teacherProfile.id,
-    headline: input.title,
-    short_bio: teacherListingShortBio(input.bio),
-    rating_average: 0,
-    review_count: 0,
-    is_published: true,
-  });
-
-  if (!listingResult.ok) {
-    return listingResult;
+  if (latestError) {
+    throw new TeacherEligibilityError(latestError.message, 500);
   }
 
   return {
-    ok: true,
-    data: {
-      teacherProfileId: teacherProfile.id,
-      listingSlug: listingResult.data.slug,
-      status: "published",
-    },
+    status: latestAttempt?.status ?? "not_started",
+    latestAttemptId: latestAttempt?.id ?? null,
+    latestScore: latestAttempt?.score ?? null,
+    canRetake: true,
   };
 }
 
-async function getActiveTeacherEligibilityTest(
-  supabase: SupabaseClient
-): Promise<
-  | { ok: true; data: ActiveTeacherEligibilityTest }
-  | { ok: false; status: number; message: string }
-> {
-  const { data, error } = await supabase
+export async function getActiveTeacherEligibilityTest(profileId: string): Promise<TeacherEligibilityTest> {
+  const state = await getTeacherEligibilityState(profileId);
+
+  if (state.status === "passed") {
+    throw new TeacherEligibilityError("Öğretmenlik testini zaten geçtin.", 409);
+  }
+
+  const supabase = createSupabaseServiceRoleClient();
+  const { data: test, error: testError } = await supabase
     .from("teacher_eligibility_tests")
-    .select("id,passing_score,question_count")
+    .select("id,version,title,passing_score,question_count")
     .eq("is_active", true)
     .order("version", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (error) {
-    return { ok: false, status: 500, message: error.message };
+  if (testError) {
+    throw new TeacherEligibilityError(testError.message, 500);
   }
 
-  if (!data) {
-    return { ok: false, status: 404, message: "Aktif öğretmenlik testi bulunamadı." };
+  if (!test) {
+    throw new TeacherEligibilityError("Aktif öğretmenlik testi bulunamadı.", 404);
   }
 
-  return { ok: true, data: data as ActiveTeacherEligibilityTest };
-}
+  const { data: questions, error: questionError } = await supabase
+    .from("teacher_eligibility_questions")
+    .select("id,question_key,prompt,position")
+    .eq("test_id", test.id)
+    .eq("is_active", true)
+    .order("position", { ascending: true });
 
-async function getOnboardingLocation(
-  supabase: SupabaseClient,
-  locationSlug: string
-): Promise<
-  | { ok: true; data: OnboardingLocation }
-  | { ok: false; status: number; message: string }
-> {
-  const { data, error } = await supabase
-    .from("locations")
-    .select("id,city,district,latitude,longitude,slug")
-    .eq("slug", locationSlug)
-    .maybeSingle();
-
-  if (error) {
-    return { ok: false, status: 500, message: error.message };
+  if (questionError) {
+    throw new TeacherEligibilityError(questionError.message, 500);
   }
 
-  if (!data) {
-    return { ok: false, status: 404, message: "Konum bulunamadı." };
+  if (!questions?.length) {
+    throw new TeacherEligibilityError("Aktif test için soru bulunamadı.", 404);
   }
 
-  return { ok: true, data: data as OnboardingLocation };
-}
+  const { data: choices, error: choiceError } = await supabase
+    .from("teacher_eligibility_choices")
+    .select("question_id,choice_key,label,position")
+    .in(
+      "question_id",
+      questions.map((question) => question.id)
+    )
+    .order("position", { ascending: true });
 
-async function getOnboardingLessons(
-  supabase: SupabaseClient,
-  lessonSlugs: string[]
-): Promise<
-  | { ok: true; data: OnboardingLesson[] }
-  | { ok: false; status: number; message: string }
-> {
-  const { data, error } = await supabase
-    .from("lesson_categories")
-    .select("id,name,slug")
-    .in("slug", lessonSlugs)
-    .eq("is_active", true);
-
-  if (error) {
-    return { ok: false, status: 500, message: error.message };
+  if (choiceError) {
+    throw new TeacherEligibilityError(choiceError.message, 500);
   }
 
-  if (!data || data.length !== lessonSlugs.length) {
-    return { ok: false, status: 404, message: "Seçilen derslerden en az biri bulunamadı." };
-  }
-
-  const lessons = data as OnboardingLesson[];
   return {
-    ok: true,
-    data: lessonSlugs
-      .map((slug) => lessons.find((lesson) => lesson.slug === slug))
-      .filter((lesson): lesson is OnboardingLesson => Boolean(lesson)),
+    id: test.id,
+    version: test.version,
+    title: test.title,
+    passingScore: test.passing_score,
+    questionCount: questions.length,
+    questions: questions.map((question) => ({
+      id: question.question_key,
+      prompt: question.prompt,
+      choices: (choices ?? [])
+        .filter((choice) => choice.question_id === question.id)
+        .map((choice) => ({
+          id: choice.choice_key,
+          label: choice.label,
+        })),
+    })),
   };
 }
 
-async function insertTeacherListing(
-  supabase: SupabaseClient,
-  baseSlug: string,
-  userId: string,
-  listing: ListingInsert
-): Promise<
-  | { ok: true; data: { slug: string } }
-  | { ok: false; status: number; message: string }
-> {
-  const candidates = [baseSlug, teacherListingSlugFallback(baseSlug, userId)];
-  let lastConflictMessage = "Öğretmen ilanı slug değeri zaten kullanılıyor.";
+export async function submitTeacherEligibilityAnswers(
+  profileId: string,
+  input: { testId: string; answers: { questionId: string; choiceId: string }[] }
+): Promise<TeacherEligibilitySubmissionResult> {
+  const state = await getTeacherEligibilityState(profileId);
 
-  for (const slug of candidates) {
-    const { data, error } = await supabase
-      .from("teacher_listings")
-      .insert({
-        ...listing,
-        slug,
-      })
-      .select("slug")
-      .single();
-
-    if (!error) {
-      return { ok: true, data: data as { slug: string } };
-    }
-
-    if (error.code !== "23505") {
-      return { ok: false, status: 500, message: error.message };
-    }
-
-    lastConflictMessage = error.message;
+  if (state.status === "passed") {
+    throw new TeacherEligibilityError("Öğretmenlik testini zaten geçtin.", 409);
   }
 
-  return { ok: false, status: 409, message: lastConflictMessage };
+  const supabase = createSupabaseServiceRoleClient();
+  const { data: test, error: testError } = await supabase
+    .from("teacher_eligibility_tests")
+    .select("id,passing_score")
+    .eq("id", input.testId)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (testError) {
+    throw new TeacherEligibilityError(testError.message, 500);
+  }
+
+  if (!test) {
+    throw new TeacherEligibilityError("Test bulunamadı.", 404);
+  }
+
+  const { data: questions, error: questionError } = await supabase
+    .from("teacher_eligibility_questions")
+    .select("id,question_key")
+    .eq("test_id", test.id)
+    .eq("is_active", true);
+
+  if (questionError) {
+    throw new TeacherEligibilityError(questionError.message, 500);
+  }
+
+  if (!questions?.length) {
+    throw new TeacherEligibilityError("Test soruları bulunamadı.", 404);
+  }
+
+  const answerByQuestion = new Map<string, string>();
+
+  for (const answer of input.answers) {
+    if (answerByQuestion.has(answer.questionId)) {
+      throw new TeacherEligibilityError("Aynı soru için birden fazla cevap gönderilemez.", 400);
+    }
+
+    answerByQuestion.set(answer.questionId, answer.choiceId);
+  }
+
+  if (answerByQuestion.size !== questions.length) {
+    throw new TeacherEligibilityError("Tüm soruları cevaplamalısın.", 400);
+  }
+
+  const unknownQuestion = [...answerByQuestion.keys()].find(
+    (questionId) => !questions.some((question) => question.question_key === questionId)
+  );
+
+  if (unknownQuestion) {
+    throw new TeacherEligibilityError("Geçersiz soru cevabı gönderildi.", 400);
+  }
+
+  const { data: choices, error: choiceError } = await supabase
+    .from("teacher_eligibility_choices")
+    .select("question_id,choice_key,label,score,position")
+    .in(
+      "question_id",
+      questions.map((question) => question.id)
+    );
+
+  if (choiceError) {
+    throw new TeacherEligibilityError(choiceError.message, 500);
+  }
+
+  const choiceRows = (choices ?? []) as EligibilityChoiceRow[];
+  let earnedScore = 0;
+  let possibleScore = 0;
+
+  for (const question of questions) {
+    const questionChoices = choiceRows.filter((choice) => choice.question_id === question.id);
+    const selectedChoice = questionChoices.find(
+      (choice) => choice.choice_key === answerByQuestion.get(question.question_key)
+    );
+
+    if (!selectedChoice) {
+      throw new TeacherEligibilityError("Geçersiz cevap seçimi gönderildi.", 400);
+    }
+
+    earnedScore += selectedChoice.score;
+    possibleScore += Math.max(...questionChoices.map((choice) => choice.score));
+  }
+
+  if (possibleScore <= 0) {
+    throw new TeacherEligibilityError("Test puanlaması yapılandırılmamış.", 500);
+  }
+
+  const score = Math.round((earnedScore / possibleScore) * 100);
+  const status = score >= test.passing_score ? "passed" : "failed";
+  const { data: attempt, error: attemptError } = await supabase
+    .from("teacher_eligibility_attempts")
+    .insert({
+      profile_id: profileId,
+      test_id: test.id,
+      status,
+      score,
+      submitted_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+
+  if (attemptError) {
+    throw new TeacherEligibilityError(attemptError.message, 500);
+  }
+
+  return {
+    attemptId: attempt.id,
+    status,
+    score,
+    canPublishListing: status === "passed",
+  };
 }

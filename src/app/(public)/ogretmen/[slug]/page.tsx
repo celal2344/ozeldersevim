@@ -2,16 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { TeacherProfileView } from "@/features/teachers/teacher-profile-view";
-import { getTeacherProfileBySlug, getTeacherProfileSlugs } from "@/features/teachers/service";
+import { getTeacherProfileBySlug } from "@/features/teachers/service";
 import { teacherProfileJsonLd } from "@/features/teachers/utils";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateStaticParams() {
-  return getTeacherProfileSlugs().map((slug) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;

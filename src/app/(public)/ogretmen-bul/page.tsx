@@ -12,6 +12,7 @@ type PageProps = {
 };
 
 export { teacherSearchMetadata as metadata };
+export const dynamic = "force-dynamic";
 
 export default async function TeacherSearchPage({ searchParams }: PageProps) {
   const rawParams = await searchParams;

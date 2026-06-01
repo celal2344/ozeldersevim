@@ -1,15 +1,8 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
-import { createSupabaseServerClient } from "@/shared/db/supabase/server";
-
-const registerSchema = z.object({
-  fullName: z.string().min(2),
-  phone: z.string().min(10),
-  email: z.email(),
-  password: z.string().min(8),
-  role: z.enum(["student", "teacher"]),
-});
+import { registerSchema } from "@/features/auth/constants";
+import { registerAccount } from "@/features/auth/service";
+import { redirectForAuthResult, safeNextPath } from "@/features/auth/utils";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -22,51 +15,23 @@ export async function POST(request: Request) {
     );
   }
 
-  const { fullName, phone, email, password, role } = parsed.data;
-  const supabase = await createSupabaseServerClient();
+  try {
+    const next = body && typeof body === "object" && "next" in body && typeof body.next === "string"
+      ? safeNextPath(body.next)
+      : null;
+    const account = await registerAccount(parsed.data);
 
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { full_name: fullName, phone, role } },
-  });
-
-  if (signUpError) {
-    return NextResponse.json({ message: signUpError.message }, { status: 400 });
-  }
-
-  if (!signUpData.user || !signUpData.session) {
     return NextResponse.json(
-      { message: "Bu MVP akışı için Supabase email doğrulaması kapalı olmalı." },
-      { status: 409 }
+      {
+        account,
+        redirectTo: redirectForAuthResult(account.role, next, "signup"),
+      },
+      { status: 201 }
     );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Kayıt oluşturulamadı.";
+    const status = message.includes("email doğrulaması") ? 409 : 400;
+
+    return NextResponse.json({ message }, { status });
   }
-
-  await supabase.auth.setSession({
-    access_token: signUpData.session.access_token,
-    refresh_token: signUpData.session.refresh_token,
-  });
-
-  const { error: profileError } = await supabase.from("profiles").insert({
-    id: signUpData.user.id,
-    role,
-    full_name: fullName,
-    phone,
-  });
-
-  if (profileError) {
-    return NextResponse.json({ message: profileError.message }, { status: 500 });
-  }
-
-  if (role === "student") {
-    const { error: studentError } = await supabase.from("student_profiles").insert({
-      profile_id: signUpData.user.id,
-    });
-
-    if (studentError) {
-      return NextResponse.json({ message: studentError.message }, { status: 500 });
-    }
-  }
-
-  return NextResponse.json({ userId: signUpData.user.id, role });
 }

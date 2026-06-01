@@ -1,6 +1,6 @@
 # Ozel Ders Evim - Project Context
 
-Last updated: 2026-05-23
+Last updated: 2026-06-01
 
 ## Product Summary
 
@@ -19,12 +19,20 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Package manager/runtime: Bun.
 - Language: Turkish only, no i18n for now.
 - Deployment: Vercel for frontend/backend, Supabase for database.
-- SMS: not in MVP.
+- Supabase project ref: `hhddeqgvrnyxnwetetdc`.
+- Supabase project URL: `https://hhddeqgvrnyxnwetetdc.supabase.co`.
+- Local app env uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; do not commit `.env*` files or service-role/database credentials.
+- Vercel must define `NEXT_PUBLIC_SUPABASE_URL=https://hhddeqgvrnyxnwetetdc.supabase.co` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` for real auth flows.
+- Public session reads render as signed-out and sitemap omits dynamic teacher URLs when Supabase public env is missing so Vercel prerender/build does not crash; mutating auth and database flows still require the Supabase env and should fail loudly if it is missing.
+- Server-side eligibility grading uses `SUPABASE_SERVICE_ROLE_KEY`; it must stay server-only and must never be exposed through `NEXT_PUBLIC_*`.
+- Remote Supabase setup, MCP retargeting, applying unapplied migrations, QA, and test work are deferred operational/verification work. The next contributor should focus only on backend/frontend application code unless explicitly asked otherwise.
+- Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
+- SMS is not in MVP.
 - Architecture: feature-based architecture.
 - API documentation: OpenAPI should be maintained as backend endpoints evolve.
 - Responsive requirement: all pages must work well on mobile and desktop.
 - MVP business model: no payments and no lesson package sales for now; focus on teacher listings and student applications.
-- Institution accounts: later phase, not MVP.
+- Institution accounts are later-phase scope.
 - Teacher listing model: one public teacher profile/listing per teacher for now.
 - Teacher publishing: no admin approval for MVP; eligible teachers can publish directly.
 - Communication: no in-site chat for MVP. When a teacher accepts a lesson request, the student's contact details are shared with the teacher.
@@ -33,6 +41,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Seed data: include Erzurum and random test data covering different cases.
 - Vocabulary split: use this file for product/domain vocabulary and `LANGUAGE.md` for architecture vocabulary and rules.
 - Documentation maintenance: whenever a critical codebase rule, architecture rule, domain decision, or workflow decision is given, update the relevant Markdown documentation in the same change.
+- Turkish UI copy and documentation must stay UTF-8; run the copy check before committing.
 
 ## Branch Workflow
 
@@ -45,8 +54,13 @@ The first release should focus on SEO-visible public pages, teacher search, teac
   - `feat/search-results`
   - `feat/teacher-public-profile`
   - `feat/lesson-request-funnel`
-  - `feat/teacher-eligibility-onboarding`
-  - `feat/request-acceptance-review-gate`
+  - `feat/account-flow-cleanup`
+  - `chore/utf8-docs-and-copy-cleanup`
+  - `feat/auth-account-rebuild`
+  - `feat/dashboard-foundation`
+  - `feat/teacher-listing-eligibility-public-data`
+  - `feat/dashboard-request-management`
+  - `feat/dashboard-reviews`
   - `docs/openapi-mvp-lock`
 - Any API behavior change must update the OpenAPI contract in the same branch.
 - Any product or architecture decision discovered during implementation must update this context file in the same branch.
@@ -57,32 +71,53 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Public teacher profiles use `/ogretmen/[slug]`.
 - The teacher profile API is `GET /api/teachers/{slug}`.
 - Teacher search cards link to the public teacher profile route.
-- Teacher profile CTAs link to the future lesson request funnel with `teacher={slug}`.
+- Teacher profile CTAs link to the lesson request funnel with `teacher={slug}`.
 - Lesson request funnel uses `/ders-talebi?teacher={slug}`.
-- Lesson request submission creates a real Supabase student account and persists the lesson request.
-- Student accounts created through the lesson request funnel are active immediately; Supabase email confirmation must be disabled for this MVP flow.
-- The request completion API is `POST /api/lesson-requests/complete-with-account`.
-- Teacher onboarding uses `/ogretmen-ol`.
-- Teacher eligibility test scoring API is `POST /api/teacher-eligibility/attempts`.
-- Teacher onboarding completion API is `POST /api/teachers/onboarding`.
-- The MVP teacher eligibility test is a fixed 10-question auto-scored test with a passing score of 70.
-- Failed teacher eligibility attempts are stateless and not persisted.
-- Passed teacher eligibility attempts are persisted only after the teacher account is created.
-- Teacher accounts created through onboarding are active immediately; Supabase email confirmation must be disabled for this MVP flow.
-- Teacher onboarding creates one published teacher profile/listing without admin approval.
+- Lesson request submission requires a signed-in student account and persists the lesson request.
+- Student and teacher accounts are created through the normal `/kayit` registration flow; Supabase email confirmation must be disabled for MVP flows that expect an immediate session.
+- Unauthenticated visitors opening `/ders-talebi?teacher={slug}` are redirected to `/kayit?next=/ders-talebi?teacher={slug}`.
+- The request submission API is `POST /api/lesson-requests`.
+- Global auth APIs are `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/auth/me`.
+- Private dashboard foundation uses a shared shell in `src/features/dashboard`.
+- Student dashboard routes: `/ogrenci/panel`, `/ogrenci/panel/talepler`, `/ogrenci/panel/favoriler`, `/ogrenci/panel/profil`.
+- Teacher dashboard routes: `/ogretmen/panel`, `/ogretmen/panel/talepler`, `/ogretmen/panel/ilan`, `/ogretmen/panel/ogrenciler`, `/ogretmen/panel/yorumlar`, `/ogretmen/panel/profil`, `/ogretmen/panel/ayarlar`.
+- Dashboard foundation routes are clickable empty states only for request management, reviews, students, favorites, and settings forms. Teacher listing creation is now wired into `/ogretmen/panel/ilan`.
+- Teacher listing creation is implemented in `feat/teacher-listing-eligibility-public-data`: teachers can save draft listing content before passing the test, but publishing is blocked until a passed eligibility attempt exists.
+- Public teacher search/profile pages read Supabase published listings directly; seed data is no longer used as a runtime fallback for public teacher discovery.
+- Teacher eligibility test content is database-backed with questions and choices. Scores are read only by server-side grading through the service-role client.
+- New local migration for this branch: `supabase/migrations/20260524120000_teacher_listing_eligibility_public_data.sql`. Remote application is deferred and should not block backend/frontend feature work.
+- Teacher account/listing experiments from `a7b515a` and `f528c20` were cleaned up in `feat/account-flow-cleanup`.
+- The Supabase rollback migration for the teacher account/listing experiment was applied remotely.
+- `/ogretmen-ol` routes teachers into `/kayit?role=teacher`; teacher eligibility and listing creation continue inside `/ogretmen/panel/ilan`.
+- The active OpenAPI contract only documents implemented endpoints.
+- UTF-8 hygiene is being tracked in `chore/utf8-docs-and-copy-cleanup`.
 
-## Net New Decisions - 2026-05-23
+## Remaining Feature Order
 
-- Teacher onboarding is a two-step same-page flow: eligibility test first, then account/profile/listing form.
-- The first teacher onboarding implementation does not include service role access, admin approval, document verification, image upload, dashboard management, or request acceptance.
-- Teacher onboarding writes the app profile, passed eligibility attempt, teacher profile, teacher lessons, and public listing through authenticated Supabase RLS.
-- Public teacher profile reads can load published Supabase teacher listings; seed data remains the fallback when Supabase env is unavailable.
-- Teacher search can load published Supabase teacher listings; seed data remains the fallback when Supabase env is unavailable or returns no published listings.
+1. Dashboard request management: teacher incoming requests, accept/reject actions, and student request status views.
+2. Dashboard reviews: allow reviews only after an accepted lesson request.
+3. Favorites behavior and profile/settings forms.
+4. Admin/moderation basics.
+
+Deferred outside the next handoff scope:
+
+- Remote Supabase target confirmation and migration application.
+- QA passes, manual test plans, and automated test expansion.
+
+## Documented Findings - 2026-05-24
+
+- Auth now has a dedicated `src/features/auth` module; future auth/session/profile changes should use that seam.
+- Lesson request submission no longer creates accounts, but the route still mixes teacher seed validation with Supabase listing/category/location persistence.
+- Teacher Search, Teacher Profile, and lesson request teacher validation now use Supabase published teacher listings as the single teacher read source.
+- Dashboard foundation exists as role-aware private shells and empty routes. Request actions, reviews, and listing creation should build on it.
+- Request acceptance and reviews belong in dashboard flows, not as isolated public features.
+- Legal pages are placeholder text and need proper legal review before launch.
+- No production image assets should be taken from `docs/design-references`; those files are reference-only.
 
 ## Netleşen Kararlar - 2026-05-21
 
-- Ders talebi akışı hesap oluşturma ile başlamayacak. Öğrenci önce tüm ders talebi bilgilerini girecek, en son adımda şifre belirleyerek hesap oluşturacak.
-- Öğrenci hesabı ders talebi sonunda oluşacak ve talep bu hesaba bağlanacak.
+- Öğrenci ve öğretmen hesapları normal `/kayit` akışından oluşturulur.
+- Ders talebi akışı hesap oluşturmaz; ders talebi formuna girmek için öğrenci hesabıyla giriş yapılmış olmalıdır.
 - Öğretmen profili/ilanı şimdilik admin onayı olmadan yayına alınabilecek.
 - Ödeme, ders paketi satın alma ve platform içi tahsilat MVP kapsamında değil.
 - Her öğretmenin tek bir profili/ilanı olacak.
@@ -93,7 +128,10 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Online derslerde platform Meet/Zoom linki oluşturmayacak; taraflar kendi linklerini kullanacak.
 - Yorum yazma hakkı, öğretmenin o öğrencinin özel ders başvurusunu onaylamasından sonra verilecek.
 - SMS entegrasyonu şimdilik yok.
-- Öğretmen olmak için kullanıcıların önce bir testten geçmesi gerekiyor. Sadece testi geçen kullanıcılar öğretmen hesabı açıp ilan girebilecek.
+- Öğretmen hesabı açmak için test gerekmiyor. Test, öğretmen özel ders ilanı oluşturmak istediğinde gösterilecek ve sadece testi geçen öğretmenler ilan yayınlayabilecek.
+- Öğretmen ilan taslağını testi geçmeden kaydedebilir; yayına alma adımı test sonucu geçmeden engellenir.
+- MVP öğretmenlik testi veritabanından gelir; 3 placeholder soru ve her soruda ilk seçenek doğru olacak şekilde başlatılır.
+- Test tekrarları MVP için sınırsızdır; test geçildikten sonra yeniden test gerekmez.
 - Öğretmen için zorunlu ilk alanlar: ad, soyad, fiyat, konum, telefon.
 
 ## Visual References In Repo
@@ -116,13 +154,13 @@ These files are design references only. Do not use them directly as website imag
 - Can browse public pages without an account.
 - Can search teachers.
 - Can view teacher profiles.
-- Can start a lesson request without logging in.
-- Must create a student account at the final step of the lesson request by setting a password.
+- Can search and view teacher profiles without logging in.
+- Must register or log in before opening the lesson request form.
 
 ### Student
 
 - Can register/login.
-- Can be created at the end of the lesson request funnel.
+- Is created through the normal `/kayit` registration flow.
 - Can save favorite teachers.
 - Can submit lesson requests.
 - Can see submitted requests and accepted lessons in the dashboard.
@@ -131,7 +169,8 @@ These files are design references only. Do not use them directly as website imag
 ### Teacher
 
 - Can register/login as a teacher.
-- Must pass the teacher eligibility test before creating a teacher account/listing.
+- Can create a teacher account without passing the teacher eligibility test.
+- Must pass the teacher eligibility test before publishing a tutoring ad/listing.
 - Can create and edit teacher profile.
 - Can publish one public teacher listing/profile for now.
 - Can receive lesson requests.
@@ -148,7 +187,7 @@ These files are design references only. Do not use them directly as website imag
 
 ### Institution
 
-- Mentioned in the reference screenshot as "Kurumsal Uyelik".
+- Mentioned in the reference screenshot as "Kurumsal Üyelik".
 - Should be treated as later-phase scope unless confirmed as important for MVP.
 
 ## Core Public Pages
@@ -175,19 +214,11 @@ These files are design references only. Do not use them directly as website imag
 - Experience level filter.
 - Gender filter if this is a required marketplace feature.
 - Response time filter if tracked.
-- Sort options:
-  - recommended/default
-  - nearest
-  - highest rated
-  - lowest price
-  - most reviewed
-  - newest
+- Sort options: recommended/default, nearest, highest rated, lowest price, most reviewed, newest.
 - Backend-side filtering, sorting, and pagination.
 - Shareable URLs with query params for SEO and user navigation.
 
 ### 2. Teacher Cards
-
-Each result card should include:
 
 - Teacher name.
 - Profile photo placeholder until image upload is implemented.
@@ -202,8 +233,6 @@ Each result card should include:
 - CTA: profile view or lesson request.
 
 ### 3. Teacher Profile Page
-
-Profile detail should include:
 
 - Name, title, and verification status.
 - Location.
@@ -221,42 +250,37 @@ Profile detail should include:
 
 ### 4. Lesson Request Funnel
 
-Based on the screenshots, the funnel should be multi-step:
-
 1. Select lesson/category.
 2. Select city and district.
 3. Select online or face-to-face preference.
 4. Enter contact details.
 5. Select preferred contact method.
 6. Accept terms/privacy/KVKK consent.
-7. Set password and create student account.
-8. Submit request and attach it to the new student account.
+7. Submit request as the signed-in student.
 
-Potential additions:
-
-- Preferred date/time.
-- Online or face-to-face preference.
-- Student level: ilkokul, ortaokul, lise, universite, sinav hazirlik, yetiskin.
-- Goal/need text field.
-- Budget range.
+Potential additions: preferred date/time, student level, goal/need text field, and budget range.
 
 ### 5. Authentication
 
-- Separate student and teacher registration flows.
-- Student account can be created at the final step of the lesson request funnel.
-- Teacher account can only be created after passing the teacher eligibility test.
+- One normal registration form supports student and teacher account creation.
+- Student account creation happens through `/kayit`; lesson request no longer creates the account.
+- Teacher account can be created before the teacher eligibility test.
+- Teacher eligibility test is required when the teacher creates a tutoring ad/listing.
 - Supabase Auth email/password.
 - Phone number collection for lesson requests.
 - Email verification.
 - SMS verification is not part of MVP.
 - Role stored in application profile table, not only Supabase auth metadata.
 
-### 6. Teacher Onboarding
+### 6. Teacher Account And Listing
 
-Minimum teacher onboarding fields:
+Minimum teacher account fields:
 
 - Name and surname.
 - Phone.
+
+Minimum teacher listing fields:
+
 - City/district.
 - Hourly price.
 - Eligibility test passed state.
@@ -291,10 +315,11 @@ Goal: launch an SEO-visible tutoring directory with searchable teachers and a wo
 - Search/results page.
 - Teacher profile page.
 - Lesson request funnel.
-- Student account creation at the end of the request funnel.
 - Student/teacher registration entry.
-- Teacher eligibility test gate before teacher account/listing creation.
-- Teacher onboarding form.
+- Authenticated lesson request submission.
+- Teacher account registration.
+- Teacher eligibility test gate before tutoring ad/listing creation.
+- Teacher listing creation form.
 - Basic teacher listing CRUD.
 - Backend filters with pagination.
 - OpenAPI spec for route handlers/server endpoints.
@@ -306,25 +331,13 @@ Goal: launch an SEO-visible tutoring directory with searchable teachers and a wo
 
 Goal: give students and teachers private workspaces.
 
-- Student dashboard:
-  - lesson requests
-  - favorite teachers
-  - upcoming lessons
-  - profile settings
-- Teacher dashboard:
-  - incoming requests
-  - students
-  - lessons
-  - listing management
-  - profile completion
-  - reviews
+- Student dashboard: lesson requests, favorite teachers, upcoming lessons, profile settings.
+- Teacher dashboard: incoming requests, students, lessons, listing management, profile completion, reviews.
 - Notification center.
 - Basic message/contact tracking if direct messaging is approved later.
 - Optional in-site chat can be added in this phase or later.
 
 ### Phase 3 - Trust, Moderation, and Operations
-
-Goal: make the marketplace manageable and safer.
 
 - Admin panel.
 - Teacher verification workflow.
@@ -337,8 +350,6 @@ Goal: make the marketplace manageable and safer.
 
 ### Phase 4 - Monetization and Growth
 
-Goal: add revenue features after the core marketplace works.
-
 - Premium teacher placements.
 - Lesson package sales if the business model changes.
 - Payment integration if lessons are purchased through platform in a later phase.
@@ -347,8 +358,6 @@ Goal: add revenue features after the core marketplace works.
 - Blog/guide content for organic acquisition.
 
 ## Suggested Feature-Based Architecture
-
-Example structure:
 
 ```text
 src/
@@ -384,8 +393,6 @@ Keep domain logic inside `features/*`. Keep generic UI, form utilities, and infr
 
 ## Initial Data Model
 
-Suggested Supabase tables:
-
 - `profiles`: app-level user profile linked to Supabase auth user.
 - `teacher_profiles`: teacher-specific profile data.
 - `student_profiles`: student-specific profile data.
@@ -419,44 +426,38 @@ Contact sharing rule:
 
 ## SEO Plan
 
-SEO is a primary business requirement, so it should be built into the URL and data model early.
-
 - Stable, readable Turkish slugs.
 - Dynamic metadata per lesson, city, district, and teacher.
 - Canonical URLs for filtered pages.
 - Index only useful landing pages; avoid indexing every arbitrary filter combination.
-- Sitemap generation for:
-  - public teacher profiles
-  - lesson pages
-  - city + lesson pages
-  - static pages
-- JSON-LD:
-  - `Person` or `LocalBusiness` style data for teacher profiles where appropriate.
-  - `BreadcrumbList` for SEO pages.
-  - `FAQPage` only where real FAQ content exists.
-- Internal linking:
-  - homepage to popular lessons
-  - lesson pages to city pages
-  - city pages to district pages
-  - teacher profiles to related lessons/locations
+- Sitemap generation for public teacher profiles, lesson pages, city + lesson pages, and static pages.
+- JSON-LD for teacher profiles and breadcrumbs.
+- Internal linking from homepage to popular lessons, lesson pages to city pages, city pages to district pages, and teacher profiles to related lessons/locations.
 - SSR or server-rendered public pages for crawlability.
 
 ## API and OpenAPI Notes
 
 Even with Next.js route handlers/server actions, keep an OpenAPI contract for external clarity and agent continuity.
 
-Initial endpoints:
+Currently implemented endpoints:
 
 - `GET /api/search/teachers`
 - `GET /api/teachers/{slug}`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
 - `POST /api/lesson-requests`
-- `POST /api/lesson-requests/complete-with-account`
-- `POST /api/lesson-requests/{id}/accept`
-- `POST /api/teacher-eligibility/attempts`
-- `POST /api/teacher-eligibility/attempts/{id}/submit`
 - `GET /api/lesson-categories`
 - `GET /api/locations`
-- `POST /api/teachers/onboarding`
+- `GET /api/teacher-eligibility/test`
+- `POST /api/teacher-eligibility/submissions`
+- `GET /api/teachers/me/listing`
+- `PUT /api/teachers/me/listing`
+
+Planned endpoints:
+
+- `POST /api/lesson-requests/{id}/accept`
 - `PATCH /api/teachers/me`
 - `GET /api/student/requests`
 - `GET /api/teacher/requests`
@@ -467,65 +468,54 @@ Server actions can be used internally, but API shape should still be documented 
 
 - MVP scope is too broad unless dashboards, payments, institution accounts, and visual/media features are delayed.
 - Review integrity is partly defined: only accepted lesson requests can review. Still need anti-abuse rules and moderation behavior.
-- Contact ownership is now defined for MVP: contact details are shared only after teacher acceptance.
+- Contact ownership is defined for MVP: contact details are shared only after teacher acceptance.
 - Monetization is intentionally out of MVP. This is simpler, but future revenue model still needs a decision.
-- Teacher eligibility is now required, but the test content, scoring, retake limits, and anti-cheat rules are undefined.
+- Teacher eligibility is required for tutoring ad/listing creation, but retake limits and anti-cheat rules are still undefined.
 - Location search needs a data strategy. Nearest-location search requires coordinates, distance calculations, and privacy decisions.
 - SEO can create duplicate pages if filters are all indexable. Indexing rules must be explicit.
 - KVKK/privacy requirements are important because the funnel collects name, phone, email, location, and education needs.
-- Supabase RLS is not mentioned but should be part of the initial backend plan.
+- Supabase RLS exists in the baseline but needs review as new flows are added.
 - Admin approval is not required for MVP, but admin tooling will still be needed for reports, suspensions, reviews, and content quality.
-- Teacher listing relationship is now defined for MVP: one teacher, one listing/profile.
+- Teacher listing relationship is defined for MVP: one teacher, one listing/profile.
 - SMS is out of MVP, but phone ownership will remain weaker until phone verification is added.
 - Image/video upload is deferred, but the data model should leave room for it.
 - Dashboard phase needs a clear definition of what counts as a lesson, request, student, and completed lesson.
 
 ## Product Suggestions
 
-- Start with city + lesson SEO pages before advanced dashboards, because SEO is stated as a primary goal.
+- Start with city + lesson SEO pages before advanced dashboards, because SEO is a primary acquisition path.
 - Use a teacher profile completion score to improve listing quality.
 - Do not block publishing with admin approval in MVP, but keep admin suspend/report tools available as soon as practical.
 - Add saved searches or favorites for students.
 - Add "response time" only after it is tracked from real request data.
 - Use fake marketplace stats carefully. Public numbers should either be real or clearly maintainable.
-- Build seed content for top categories: Matematik, Fizik, Kimya, Ingilizce, Turkce, Yazilim, LGS, TYT/AYT.
+- Build seed content for top categories: Matematik, Fizik, Kimya, İngilizce, Türkçe, Yazılım, LGS, TYT/AYT.
 - Include Erzurum in seed data and add varied test cases: online-only teacher, face-to-face teacher, high price, low price, no reviews, many reviews, accepted/rejected lesson requests.
 - Add structured empty states for no results and suggest nearby districts or online teachers.
-- Add analytics events from day one:
-  - search submitted
-  - filter changed
-  - teacher profile viewed
-  - request funnel started
-  - request submitted
-  - registration completed
+- Add analytics events from day one: search submitted, filter changed, teacher profile viewed, request funnel started, request submitted, registration completed.
 - Add rate limiting and spam prevention to public lead forms.
 
 ## Açık Sorular
 
-1. Öğretmenlik testi kaç sorudan oluşacak ve hangi konuları ölçecek?
-2. Öğretmenlik testinde geçme puanı ne olacak?
-3. Testi geçemeyen kullanıcı tekrar deneyebilecek mi? Evetse kaç kez ve ne kadar arayla?
-4. Test cevapları manuel mi hazırlanacak, yoksa admin panelinden yönetilebilir mi olacak?
-5. Konum bazlı arama için kullanıcıdan tam adres mi, sadece il/ilçe mi, yoksa koordinat/pin mi alınacak?
-6. Yakındaki öğretmenler sıralaması ilçe merkezine göre mi, kullanıcının konumuna göre mi hesaplanacak?
-7. Öğrenci ders talebinin sonunda email ile doğrulama yapmadan hesap aktif olsun mu?
-8. Öğretmen başvuruyu kabul ettiğinde öğrenciye email bildirimi gönderilecek mi?
-9. Öğrencinin iletişim bilgilerinden hangileri öğretmene açılacak: telefon, email, ikisi de?
-10. Fiyat saatlik mi olacak, yoksa öğretmen ders süresini de seçebilecek mi?
-11. İlk seed kategoriler kesin olarak hangileri olacak?
-12. Admin panel MVP'de hiç olmayacak mı, yoksa minimum kullanıcı/ilan askıya alma eklenmeli mi?
-13. Yorumlar otomatik yayınlansın mı, yoksa admin/moderasyon beklesin mi?
-14. Öğretmen profilinde fotoğraf MVP'de zorunlu olmayacaksa varsayılan avatar stratejisi ne olacak?
-15. Erzurum dışında test için hangi şehirler eklenmeli?
+1. Gerçek öğretmenlik testi içerikleri, konu dağılımı ve soru sayısı MVP sonrasında nasıl yönetilecek?
+2. Konum bazlı arama için kullanıcıdan tam adres mi, sadece il/ilçe mi, yoksa koordinat/pin mi alınacak?
+3. Yakındaki öğretmenler sıralaması ilçe merkezine göre mi, kullanıcının konumuna göre mi hesaplanacak?
+4. Öğrenci ders talebinin sonunda email ile doğrulama yapmadan hesap aktif olsun mu?
+5. Öğretmen başvuruyu kabul ettiğinde öğrenciye email bildirimi gönderilecek mi?
+6. Öğrencinin iletişim bilgilerinden hangileri öğretmene açılacak: telefon, email, ikisi de?
+7. Fiyat saatlik mi olacak, yoksa öğretmen ders süresini de seçebilecek mi?
+8. Admin panel MVP'de hiç olmayacak mı, yoksa minimum kullanıcı/ilan askıya alma eklenmeli mi?
+9. Yorumlar otomatik yayınlansın mı, yoksa admin/moderasyon beklesin mi?
+10. Öğretmen profilinde fotoğraf MVP'de zorunlu olmayacaksa varsayılan avatar stratejisi ne olacak?
 
 ## Definition Of Done For Phase 1
 
 - Public pages render on mobile and desktop.
 - Search results are server-filtered and paginated.
 - Teacher profiles are SEO-rendered and indexable.
-- Lesson request funnel creates a student account at the final password step and persists valid requests.
-- Teacher eligibility test gates teacher registration/listing creation.
-- Teacher onboarding can create a draft/published teacher profile without admin approval.
+- Lesson request funnel requires a signed-in student and persists valid requests.
+- Teacher eligibility test gates tutoring ad/listing creation, not teacher account registration.
+- Teacher listing creation can create a draft/published teacher profile without admin approval.
 - Teachers can accept/reject lesson requests.
 - Student contact details become visible to the teacher only after request acceptance.
 - Supabase RLS protects private student/teacher data.

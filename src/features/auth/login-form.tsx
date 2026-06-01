@@ -1,76 +1,77 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LogInIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { LogInIcon, UserPlusIcon } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { loginSchema } from "@/features/auth/constants";
-import type { LoginFormValues } from "@/features/auth/types";
+import type { AuthResponsePayload, LoginInput } from "@/features/auth/types";
+import { authApiErrorMessage } from "@/features/auth/utils";
 import { Button } from "@/shared/components/ui/button";
-import { createSupabaseBrowserClient } from "@/shared/db/supabase/browser";
+import { Input } from "@/shared/components/ui/input";
 
-export function LoginForm({ redirectTo }: { redirectTo?: string }) {
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const form = useForm<LoginFormValues>({
+export function LoginForm({ next }: { next?: string | null }) {
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
+  const errors = form.formState.errors;
 
-  async function submit(values: LoginFormValues) {
-    setError(null);
-    const supabase = createSupabaseBrowserClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: values.email,
-      password: values.password,
+  async function submit(values: LoginInput) {
+    setSubmitError(null);
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...values, next }),
     });
+    const payload = await response.json().catch(() => null);
 
-    if (signInError) {
-      setError("Email veya şifre hatalı.");
+    if (!response.ok) {
+      setSubmitError(authApiErrorMessage(payload, "Giriş yapılamadı. Lütfen tekrar dene."));
       return;
     }
 
-    router.push(redirectTo ?? "/");
-    router.refresh();
+    const result = payload as AuthResponsePayload;
+    window.location.assign(result.redirectTo);
   }
-
-  const errors = form.formState.errors;
 
   return (
     <form onSubmit={form.handleSubmit(submit)} className="grid gap-5">
-      {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
-      ) : null}
-      <div className="grid gap-2">
-        <label className="text-sm font-medium text-brand-navy">Email</label>
-        <input
-          {...form.register("email")}
-          type="email"
-          placeholder="ornek@email.com"
-          className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy outline-none focus:border-brand-orange"
-        />
-        {errors.email ? <p className="text-xs text-red-600">{errors.email.message}</p> : null}
-      </div>
-      <div className="grid gap-2">
-        <label className="text-sm font-medium text-brand-navy">Şifre</label>
-        <input
-          {...form.register("password")}
-          type="password"
-          placeholder="Şifreniz"
-          className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy outline-none focus:border-brand-orange"
-        />
-        {errors.password ? <p className="text-xs text-red-600">{errors.password.message}</p> : null}
-      </div>
-      <Button
-        type="submit"
-        className="bg-brand-orange text-white hover:bg-brand-orange/90"
-        disabled={form.formState.isSubmitting}
-      >
+      <FieldError message={errors.email?.message ?? errors.password?.message ?? submitError ?? undefined} />
+      <label className="grid gap-2 text-sm font-medium text-brand-navy">
+        Email
+        <Input {...form.register("email")} className="h-11 bg-white" type="email" placeholder="ornek@email.com" />
+      </label>
+      <label className="grid gap-2 text-sm font-medium text-brand-navy">
+        Şifre
+        <Input {...form.register("password")} className="h-11 bg-white" type="password" placeholder="Şifren" />
+      </label>
+      <Button type="submit" className="h-11 bg-brand-orange text-white hover:bg-brand-orange/90" disabled={form.formState.isSubmitting}>
         <LogInIcon data-icon="inline-start" aria-hidden="true" />
-        {form.formState.isSubmitting ? "Giriş yapılıyor..." : "Giriş Yap"}
+        {form.formState.isSubmitting ? "Giriş yapılıyor" : "Giriş Yap"}
+      </Button>
+      <Button variant="outline" nativeButton={false} render={<Link href={next ? `/kayit?next=${encodeURIComponent(next)}` : "/kayit"} />}>
+        <UserPlusIcon data-icon="inline-start" aria-hidden="true" />
+        Yeni hesap oluştur
       </Button>
     </form>
+  );
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+
+  return (
+    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+      {message}
+    </div>
   );
 }

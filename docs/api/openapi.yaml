@@ -6,6 +6,96 @@ info:
 servers:
   - url: /api
 paths:
+  /auth/register:
+    post:
+      summary: Register a student or teacher account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterPayload"
+      responses:
+        "201":
+          description: Account created and signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Invalid payload or signup error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Signup did not return a session because email confirmation is enabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/login:
+    post:
+      summary: Sign in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginPayload"
+      responses:
+        "200":
+          description: Signed in account and redirect target
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials or missing app profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/logout:
+    post:
+      summary: Sign out the current account
+      responses:
+        "200":
+          description: Signed out
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+        "500":
+          description: Logout failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/me:
+    get:
+      summary: Get the current signed-in account
+      responses:
+        "200":
+          description: Current account
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [account]
+                properties:
+                  account:
+                    $ref: "#/components/schemas/AuthAccount"
+        "401":
+          description: No current session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /search/teachers:
     get:
       summary: Search published teacher listings
@@ -33,6 +123,125 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TeacherSearchResponse"
+  /lesson-categories:
+    get:
+      summary: List active lesson categories
+      responses:
+        "200":
+          description: Active lesson categories
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [categories]
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LessonCategoryOption"
+  /locations:
+    get:
+      summary: List supported city and district locations
+      responses:
+        "200":
+          description: Supported locations
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [locations]
+                properties:
+                  locations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LocationOption"
+  /teacher-eligibility/test:
+    get:
+      summary: Get the active teacher eligibility test for a signed-in teacher
+      responses:
+        "200":
+          description: Active eligibility test without answer scores
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [test]
+                properties:
+                  test:
+                    $ref: "#/components/schemas/TeacherEligibilityTest"
+        "401":
+          description: Teacher is not signed in
+        "403":
+          description: Current account is not a teacher
+        "404":
+          description: No active test found
+        "409":
+          description: Teacher already passed the test
+  /teacher-eligibility/submissions:
+    post:
+      summary: Submit teacher eligibility test answers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeacherEligibilitySubmissionPayload"
+      responses:
+        "200":
+          description: Eligibility attempt scored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherEligibilitySubmissionResponse"
+        "400":
+          description: Invalid, duplicate, or incomplete answers
+        "401":
+          description: Teacher is not signed in
+        "403":
+          description: Current account is not a teacher
+        "404":
+          description: Test not found
+        "409":
+          description: Teacher already passed the test
+  /teachers/me/listing:
+    get:
+      summary: Get the signed-in teacher's eligibility and singular listing
+      responses:
+        "200":
+          description: Teacher listing resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherListingResource"
+        "401":
+          description: Teacher is not signed in
+        "403":
+          description: Current account is not a teacher
+    put:
+      summary: Create or update the signed-in teacher's singular listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeacherListingPayload"
+      responses:
+        "200":
+          description: Teacher listing resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherListingResource"
+        "400":
+          description: Invalid listing payload
+        "401":
+          description: Teacher is not signed in
+        "403":
+          description: Current account is not a teacher
+        "404":
+          description: Location or lesson category not found
+        "409":
+          description: Publish blocked by missing eligibility or suspended listing
   /teachers/{slug}:
     get:
       summary: Get a public teacher profile by slug
@@ -55,92 +264,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /lesson-requests/complete-with-account:
+  /lesson-requests:
     post:
-      summary: Create a student account and submit a lesson request
+      summary: Submit a lesson request as the signed-in student
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CompleteLessonRequestPayload"
+              $ref: "#/components/schemas/SubmitLessonRequestPayload"
       responses:
         "200":
-          description: Lesson request submitted and attached to the new student account
+          description: Lesson request submitted
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CompleteLessonRequestResponse"
+                $ref: "#/components/schemas/SubmitLessonRequestResponse"
         "400":
           description: Invalid request payload or unsupported teacher/lesson/delivery choice
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "404":
-          description: Teacher, lesson category, or location not found
+        "401":
+          description: Student is not signed in
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: Supabase signup did not return a session because email confirmation is enabled
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /teacher-eligibility/attempts:
-    post:
-      summary: Score the fixed MVP teacher eligibility test without persisting failed attempts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TeacherEligibilityAttemptPayload"
-      responses:
-        "200":
-          description: Test score result. Correct answers are never returned.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TeacherEligibilityResult"
-        "400":
-          description: Invalid or incomplete test payload
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /teachers/onboarding:
-    post:
-      summary: Create an active teacher account, passed test attempt, teacher profile, lessons, and published listing
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TeacherOnboardingPayload"
-      responses:
-        "200":
-          description: Teacher account and listing created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TeacherOnboardingResponse"
-        "400":
-          description: Invalid request payload, failed eligibility test, or Supabase signup error
+        "403":
+          description: Current account is not a student
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Active teacher test, location, or lesson category not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: Supabase signup did not return a session because email confirmation is enabled, or listing slug conflict remains
+          description: Teacher, listing, lesson category, or location not found
           content:
             application/json:
               schema:
@@ -221,11 +380,261 @@ components:
   schemas:
     ErrorResponse:
       type: object
-      required:
-        - message
+      required: [message]
       properties:
         message:
           type: string
+    AuthRole:
+      type: string
+      enum: [student, teacher, admin]
+    AuthAccount:
+      type: object
+      required: [id, role, fullName, phone, email]
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          $ref: "#/components/schemas/AuthRole"
+        fullName:
+          type: string
+        phone:
+          type:
+            - string
+            - "null"
+        email:
+          type:
+            - string
+            - "null"
+          format: email
+    RegisterPayload:
+      type: object
+      required: [role, fullName, email, phone, password, termsAccepted, privacyAccepted]
+      properties:
+        role:
+          type: string
+          enum: [student, teacher]
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        password:
+          type: string
+          minLength: 8
+        termsAccepted:
+          type: boolean
+          enum: [true]
+        privacyAccepted:
+          type: boolean
+          enum: [true]
+        next:
+          type: string
+    LoginPayload:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        next:
+          type: string
+    AuthResponse:
+      type: object
+      required: [account, redirectTo]
+      properties:
+        account:
+          $ref: "#/components/schemas/AuthAccount"
+        redirectTo:
+          type: string
+    LessonCategoryOption:
+      type: object
+      required: [slug, name]
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+    LocationOption:
+      type: object
+      required: [slug, city, district]
+      properties:
+        slug:
+          type: string
+        city:
+          type: string
+        district:
+          type:
+            - string
+            - "null"
+    TeacherEligibilityState:
+      type: object
+      required: [status, latestAttemptId, latestScore, canRetake]
+      properties:
+        status:
+          type: string
+          enum: [not_started, passed, failed, expired]
+        latestAttemptId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        latestScore:
+          type:
+            - integer
+            - "null"
+        canRetake:
+          type: boolean
+    TeacherEligibilityTest:
+      type: object
+      required: [id, version, title, passingScore, questionCount, questions]
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        title:
+          type: string
+        passingScore:
+          type: integer
+        questionCount:
+          type: integer
+        questions:
+          type: array
+          items:
+            type: object
+            required: [id, prompt, choices]
+            properties:
+              id:
+                type: string
+              prompt:
+                type: string
+              choices:
+                type: array
+                items:
+                  type: object
+                  required: [id, label]
+                  properties:
+                    id:
+                      type: string
+                    label:
+                      type: string
+    TeacherEligibilitySubmissionPayload:
+      type: object
+      required: [testId, answers]
+      properties:
+        testId:
+          type: string
+          format: uuid
+        answers:
+          type: array
+          items:
+            type: object
+            required: [questionId, choiceId]
+            properties:
+              questionId:
+                type: string
+              choiceId:
+                type: string
+    TeacherEligibilitySubmissionResponse:
+      type: object
+      required: [attemptId, status, score, canPublishListing]
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [passed, failed]
+        score:
+          type: integer
+        canPublishListing:
+          type: boolean
+    TeacherListing:
+      type: object
+      required:
+        - status
+        - slug
+        - title
+        - bio
+        - education
+        - experienceYears
+        - hourlyPrice
+        - deliveryMode
+        - locationSlug
+        - lessonSlugs
+        - updatedAt
+      properties:
+        status:
+          type: string
+          enum: [missing, draft, published, suspended]
+        slug:
+          type:
+            - string
+            - "null"
+        title:
+          type: string
+        bio:
+          type: string
+        education:
+          type: string
+        experienceYears:
+          type: integer
+        hourlyPrice:
+          type: number
+        deliveryMode:
+          type: string
+          enum: [online, face_to_face, both]
+        locationSlug:
+          type: string
+        lessonSlugs:
+          type: array
+          items:
+            type: string
+        updatedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+    TeacherListingResource:
+      type: object
+      required: [eligibility, listing]
+      properties:
+        eligibility:
+          $ref: "#/components/schemas/TeacherEligibilityState"
+        listing:
+          $ref: "#/components/schemas/TeacherListing"
+    TeacherListingPayload:
+      type: object
+      required: [status, title, bio, education, experienceYears, hourlyPrice, deliveryMode, locationSlug, lessonSlugs]
+      properties:
+        status:
+          type: string
+          enum: [draft, published]
+        title:
+          type: string
+        bio:
+          type: string
+        education:
+          type: string
+        experienceYears:
+          type: integer
+        hourlyPrice:
+          type: number
+        deliveryMode:
+          type: string
+          enum: [online, face_to_face, both]
+        locationSlug:
+          type: string
+        lessonSlugs:
+          type: array
+          items:
+            type: string
     ListMeta:
       type: object
       required: [total, page, pageSize, totalPages]
@@ -376,7 +785,7 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/TeacherProfileReview"
-    CompleteLessonRequestPayload:
+    SubmitLessonRequestPayload:
       type: object
       required:
         - teacherSlug
@@ -391,7 +800,6 @@ components:
         - contactPreference
         - termsAccepted
         - privacyAccepted
-        - password
       properties:
         teacherSlug:
           type: string
@@ -426,10 +834,7 @@ components:
         privacyAccepted:
           type: boolean
           enum: [true]
-        password:
-          type: string
-          minLength: 8
-    CompleteLessonRequestResponse:
+    SubmitLessonRequestResponse:
       type: object
       required: [requestId, studentProfileId, status]
       properties:
@@ -442,117 +847,3 @@ components:
         status:
           type: string
           enum: [submitted]
-    TeacherEligibilityAnswer:
-      type: object
-      required: [questionId, optionId]
-      properties:
-        questionId:
-          type: string
-        optionId:
-          type: string
-    TeacherEligibilityAttemptPayload:
-      type: object
-      required: [answers]
-      properties:
-        answers:
-          type: array
-          minItems: 10
-          maxItems: 10
-          items:
-            $ref: "#/components/schemas/TeacherEligibilityAnswer"
-    TeacherEligibilityResult:
-      type: object
-      required: [passed, score, passingScore, questionCount, correctCount]
-      properties:
-        passed:
-          type: boolean
-        score:
-          type: integer
-          minimum: 0
-          maximum: 100
-        passingScore:
-          type: integer
-          enum: [70]
-        questionCount:
-          type: integer
-          enum: [10]
-        correctCount:
-          type: integer
-          minimum: 0
-          maximum: 10
-    TeacherOnboardingPayload:
-      type: object
-      required:
-        - eligibilityAnswers
-        - fullName
-        - email
-        - password
-        - phone
-        - locationSlug
-        - hourlyPrice
-        - title
-        - bio
-        - lessonSlugs
-        - education
-        - experienceYears
-        - deliveryMode
-        - termsAccepted
-        - privacyAccepted
-      properties:
-        eligibilityAnswers:
-          type: array
-          minItems: 10
-          maxItems: 10
-          items:
-            $ref: "#/components/schemas/TeacherEligibilityAnswer"
-        fullName:
-          type: string
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-          minLength: 8
-        phone:
-          type: string
-        locationSlug:
-          type: string
-        hourlyPrice:
-          type: number
-        title:
-          type: string
-        bio:
-          type: string
-          minLength: 40
-        lessonSlugs:
-          type: array
-          minItems: 1
-          maxItems: 6
-          items:
-            type: string
-        education:
-          type: string
-        experienceYears:
-          type: integer
-          minimum: 0
-        deliveryMode:
-          type: string
-          enum: [online, face_to_face, both]
-        termsAccepted:
-          type: boolean
-          enum: [true]
-        privacyAccepted:
-          type: boolean
-          enum: [true]
-    TeacherOnboardingResponse:
-      type: object
-      required: [teacherProfileId, listingSlug, status]
-      properties:
-        teacherProfileId:
-          type: string
-          format: uuid
-        listingSlug:
-          type: string
-        status:
-          type: string
-          enum: [published]

@@ -15,12 +15,12 @@ export const teacherSearchMetadata: Metadata = {
 
 export const lessonRequestMetadata: Metadata = {
   title: "Ders Talebi",
-  description: "Öğretmene özel ders talebi gönder ve öğrenci hesabını son adımda oluştur.",
+  description: "Giriş yaparak öğretmene özel ders talebi gönder.",
 };
 
 export const teacherOnboardingMetadata: Metadata = {
   title: "Öğretmen Ol",
-  description: "Öğretmenlik uygunluk testini geç, hesabını oluştur ve özel ders ilanını yayına al.",
+  description: "Öğretmen hesabı oluştur. Öğretmenlik testi, ilan oluşturma adımında gösterilir.",
 };
 
 export const privacyMetadata: Metadata = {
@@ -39,6 +39,8 @@ export const sitemapStaticRoutes = [
   "/",
   "/ogretmen-bul",
   "/ogretmen-ol",
+  "/kayit",
+  "/giris",
   "/gizlilik-politikasi",
   "/kullanim-kosullari",
   "/kvkk-aydinlatma-metni",

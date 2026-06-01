@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "check:copy": "node scripts/check-mojibake.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"

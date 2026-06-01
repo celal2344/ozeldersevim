@@ -1,10 +1,11 @@
-import Link from "next/link";
 import { GraduationCapIcon, LogInIcon, UserPlusIcon } from "lucide-react";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { siteConfig } from "@/features/seo/site";
 import { Button } from "@/shared/components/ui/button";
 
-export function PublicHeader() {
+export function PublicHeader({ actions }: { actions?: ReactNode }) {
   return (
     <header className="border-b border-white/10 bg-brand-navy text-white">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
@@ -27,21 +28,23 @@ export function PublicHeader() {
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            className="hidden border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white sm:inline-flex"
-            nativeButton={false}
-            render={<Link href="/giris" />}
-          >
-            <LogInIcon data-icon="inline-start" aria-hidden="true" />
-            Giriş Yap
-          </Button>
-          <Button className="bg-brand-orange text-white hover:bg-brand-orange/90" nativeButton={false} render={<Link href="/kayit" />}>
-            <UserPlusIcon data-icon="inline-start" aria-hidden="true" />
-            Kayıt Ol
-          </Button>
-        </div>
+        {actions ?? (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="hidden border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white sm:inline-flex"
+              nativeButton={false}
+              render={<Link href="/giris" />}
+            >
+              <LogInIcon data-icon="inline-start" aria-hidden="true" />
+              Giriş Yap
+            </Button>
+            <Button className="bg-brand-orange text-white hover:bg-brand-orange/90" nativeButton={false} render={<Link href="/kayit" />}>
+              <UserPlusIcon data-icon="inline-start" aria-hidden="true" />
+              Kayıt Ol
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   );

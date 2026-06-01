@@ -31,5 +31,10 @@ This file defines the architecture vocabulary and rules for this codebase. Use `
 - Reusable constants and utility functions belong in the relevant shared/global folder.
 - Domain-specific constants and utility functions belong in the owning domain feature folder.
 - If a constant or function is only used by one component but expresses domain behavior, keep it in that domain module's `constants.ts` or `utils.ts`, not inside the component file.
+- Supabase auth, session, and app profile creation must go through `src/features/auth`; do not reimplement signup/login/profile insertion inside unrelated feature routes.
+- Passive session checks must call `getCurrentAccount()` from `src/features/auth`; it is allowed to return `null` when public Supabase env is absent during prerender/build.
+- Mutating auth, teacher listing, teacher eligibility, and lesson request flows must use strict Supabase clients and fail visibly when required Supabase env vars are missing.
+- Supabase service-role access must stay in server-only modules and route handlers; never import service-role helpers into client components or expose service-role values through `NEXT_PUBLIC_*`.
+- Dashboard route pages should stay thin and use `src/features/dashboard` for shell, navigation, role-specific page content, and shared dashboard behavior.
 - When a critical codebase rule, architecture rule, domain decision, or workflow decision is given, update the relevant Markdown documentation in the same change.
 - Source files containing Turkish text must be saved as UTF-8. Avoid write paths that double-encode Turkish characters; verify no mojibake markers such as `Ã`, `Ä`, or `Å` remain before committing UI copy.

@@ -1,5 +1,6 @@
 import type { TeacherSearchParams, TeacherSearchResponse, TeacherSearchResult } from "./types";
 import { getPublishedTeacherProfiles } from "@/features/teachers/service";
+import { slugifyTurkish } from "@/features/teacher-listings/utils";
 import { paginateItems, parsePaginationParams } from "@/shared/api/list-query";
 
 const TEACHER_SEARCH_PAGE_SIZE = 6;
@@ -56,9 +57,12 @@ export async function searchTeachers(params: TeacherSearchParams): Promise<Teach
       const searchable = normalize(
         [teacher.fullName, teacher.headline, teacher.shortBio, teacher.city, teacher.district, ...teacher.lessons].join(" ")
       );
+      const lessonSearchable = teacher.lessons.some(
+        (item) => normalize(item).includes(lesson) || slugifyTurkish(item) === lesson
+      );
 
       if (query && !searchable.includes(query)) return false;
-      if (lesson && !teacher.lessons.some((item) => normalize(item).includes(lesson))) return false;
+      if (lesson && !lessonSearchable) return false;
       if (city && normalize(teacher.city) !== city) return false;
       if (district && normalize(teacher.district) !== district) return false;
       if (
@@ -73,7 +77,21 @@ export async function searchTeachers(params: TeacherSearchParams): Promise<Teach
       return true;
     })
     .map<TeacherSearchResult>((teacher) => ({
-      ...teacher,
+      id: teacher.id,
+      slug: teacher.slug,
+      fullName: teacher.fullName,
+      headline: teacher.headline,
+      shortBio: teacher.shortBio,
+      city: teacher.city,
+      district: teacher.district,
+      latitude: teacher.latitude,
+      longitude: teacher.longitude,
+      lessons: teacher.lessons,
+      deliveryMode: teacher.deliveryMode,
+      hourlyPrice: teacher.hourlyPrice,
+      ratingAverage: teacher.ratingAverage,
+      reviewCount: teacher.reviewCount,
+      experienceYears: teacher.experienceYears,
       distanceKm: hasLocation
         ? getDistanceKm(
             { lat: params.lat as number, lng: params.lng as number },

@@ -1,9 +1,22 @@
 import type { z } from "zod";
 
-import type { loginSchema, studentRegisterSchema, teacherRegisterSchema } from "@/features/auth/constants";
+import type { loginSchema, registerSchema } from "@/features/auth/constants";
 
-export type LoginFormValues = z.infer<typeof loginSchema>;
-export type StudentRegisterFormValues = z.infer<typeof studentRegisterSchema>;
-export type TeacherRegisterFormValues = z.infer<typeof teacherRegisterSchema>;
+export type AppRole = "student" | "teacher" | "admin";
 
-export type RegisterRole = "student" | "teacher";
+export type AuthAccount = {
+  id: string;
+  role: AppRole;
+  fullName: string;
+  phone: string | null;
+  email: string | null;
+};
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+export type AuthResponsePayload = {
+  account: AuthAccount;
+  redirectTo: string;
+};

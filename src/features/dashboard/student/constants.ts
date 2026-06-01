@@ -1,0 +1,48 @@
+import { HeartIcon, SearchIcon, UserIcon, ClipboardListIcon } from "lucide-react";
+
+import type { DashboardPageContent, DashboardRoleConfig } from "@/features/dashboard/types";
+
+export const studentDashboardConfig: DashboardRoleConfig = {
+  role: "student",
+  label: "Öğrenci Paneli",
+  homeHref: "/ogrenci/panel",
+  navItems: [
+    { href: "/ogrenci/panel", icon: SearchIcon, label: "Genel Bakış", pageId: "student-home" },
+    { href: "/ogrenci/panel/talepler", icon: ClipboardListIcon, label: "Ders Taleplerim", pageId: "student-requests" },
+    { href: "/ogrenci/panel/favoriler", icon: HeartIcon, label: "Favoriler", pageId: "student-favorites" },
+    { href: "/ogrenci/panel/profil", icon: UserIcon, label: "Profil", pageId: "student-profile" },
+  ],
+};
+
+export const studentDashboardPages: Record<string, DashboardPageContent> = {
+  "student-home": {
+    id: "student-home",
+    eyebrow: "Öğrenci Paneli",
+    title: "Ders aramaya buradan devam et.",
+    description: "Ders taleplerin, favori öğretmenlerin ve profil bilgilerin sonraki dashboard branchlerinde burada toplanacak.",
+    ctaHref: "/ogretmen-bul",
+    ctaLabel: "Öğretmen Bul",
+  },
+  "student-requests": {
+    id: "student-requests",
+    eyebrow: "Ders Taleplerim",
+    title: "Henüz listelenen ders talebi yok.",
+    description: "Ders talebi yönetimi sonraki branchte eklenecek. O zamana kadar yeni öğretmenleri arayabilirsin.",
+    ctaHref: "/ogretmen-bul",
+    ctaLabel: "Öğretmen Bul",
+  },
+  "student-favorites": {
+    id: "student-favorites",
+    eyebrow: "Favoriler",
+    title: "Favori öğretmen alanı hazırlanıyor.",
+    description: "Öğretmen kaydetme ve favori listesi sonraki fazda aktif olacak.",
+    ctaHref: "/ogretmen-bul",
+    ctaLabel: "Öğretmenleri Gör",
+  },
+  "student-profile": {
+    id: "student-profile",
+    eyebrow: "Profil",
+    title: "Profil ayarları yakında burada olacak.",
+    description: "Ad, telefon ve iletişim tercihlerini düzenleme ekranı sonraki dashboard adımlarında eklenecek.",
+  },
+};
