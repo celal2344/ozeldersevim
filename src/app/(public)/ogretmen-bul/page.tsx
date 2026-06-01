@@ -3,7 +3,7 @@ import Link from "next/link";
 import { teacherSearchMetadata } from "@/features/seo/constants";
 import { SearchFilters } from "@/features/search/search-filters";
 import { pageSearchParamsFromRecord, searchPageHref } from "@/features/search/utils";
-import { searchTeachers } from "@/features/search/search-service";
+import { getTeacherSearchFilterOptions, searchTeachers } from "@/features/search/search-service";
 import { TeacherResultCard } from "@/features/search/teacher-result-card";
 import { Button } from "@/shared/components/ui/button";
 
@@ -18,18 +18,21 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
   const rawParams = await searchParams;
   const params = pageSearchParamsFromRecord(rawParams);
 
-  const response = await searchTeachers({
-    q: params.get("q") ?? undefined,
-    lesson: params.get("lesson") ?? undefined,
-    city: params.get("city") ?? undefined,
-    district: params.get("district") ?? undefined,
-    deliveryMode: (params.get("deliveryMode") as never) ?? "all",
-    sort: (params.get("sort") as never) ?? "recommended",
-    page: Number(params.get("page") ?? 1),
-    pageSize: Number(params.get("pageSize") ?? 6),
-    lat: params.get("lat") ? Number(params.get("lat")) : undefined,
-    lng: params.get("lng") ? Number(params.get("lng")) : undefined,
-  });
+  const [response, filterOptions] = await Promise.all([
+    searchTeachers({
+      q: params.get("q") ?? undefined,
+      lesson: params.get("lesson") ?? undefined,
+      city: params.get("city") ?? undefined,
+      district: params.get("district") ?? undefined,
+      deliveryMode: (params.get("deliveryMode") as never) ?? "all",
+      sort: (params.get("sort") as never) ?? "recommended",
+      page: Number(params.get("page") ?? 1),
+      pageSize: Number(params.get("pageSize") ?? 6),
+      lat: params.get("lat") ? Number(params.get("lat")) : undefined,
+      lng: params.get("lng") ? Number(params.get("lng")) : undefined,
+    }),
+    getTeacherSearchFilterOptions(),
+  ]);
 
   return (
     <main className="bg-slate-50">
@@ -46,7 +49,7 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
         </div>
       </section>
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
-        <SearchFilters />
+        <SearchFilters {...filterOptions} />
         {response.data.length > 0 ? (
           <div className="grid gap-4 lg:grid-cols-2">
             {response.data.map((teacher) => (

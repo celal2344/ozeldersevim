@@ -2,7 +2,7 @@
 
 import { LocateFixedIcon, SearchIcon } from "lucide-react";
 
-import { cityOptions, districtOptions, lessonOptions } from "@/features/search/mock-data";
+import type { TeacherSearchFilterOptions } from "@/features/search/search-service";
 import { optionValue } from "@/features/search/utils";
 import { useSearchFilterNavigation } from "@/features/search/use-search-filter-navigation";
 import { Button } from "@/shared/components/ui/button";
@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 
-export function SearchFilters() {
+export function SearchFilters({ lessonOptions, cityOptions, districtOptions }: TeacherSearchFilterOptions) {
   const { locationPending, searchParams, updateParam, useCurrentLocation } =
     useSearchFilterNavigation();
 
