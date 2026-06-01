@@ -123,6 +123,125 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TeacherSearchResponse"
+  /lesson-categories:
+    get:
+      summary: List active lesson categories
+      responses:
+        "200":
+          description: Active lesson categories
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [categories]
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LessonCategoryOption"
+  /locations:
+    get:
+      summary: List supported city and district locations
+      responses:
+        "200":
+          description: Supported locations
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [locations]
+                properties:
+                  locations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LocationOption"
+  /teacher-eligibility/test:
+    get:
+      summary: Get the active teacher eligibility test for a signed-in teacher
+      responses:
+        "200":
+          description: Active eligibility test without answer scores
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [test]
+                properties:
+                  test:
+                    $ref: "#/components/schemas/TeacherEligibilityTest"
+        "401":
+          description: Teacher is not signed in
+        "403":
+          description: Current account is not a teacher
+        "404":
+          description: No active test found
+        "409":
+          description: Teacher already passed the test
+  /teacher-eligibility/submissions:
+    post:
+      summary: Submit teacher eligibility test answers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeacherEligibilitySubmissionPayload"
+      responses:
+        "200":
+          description: Eligibility attempt scored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherEligibilitySubmissionResponse"
+        "400":
+          description: Invalid, duplicate, or incomplete answers
+        "401":
+          description: Teacher is not signed in
+        "403":
+          description: Current account is not a teacher
+        "404":
+          description: Test not found
+        "409":
+          description: Teacher already passed the test
+  /teachers/me/listing:
+    get:
+      summary: Get the signed-in teacher's eligibility and singular listing
+      responses:
+        "200":
+          description: Teacher listing resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherListingResource"
+        "401":
+          description: Teacher is not signed in
+        "403":
+          description: Current account is not a teacher
+    put:
+      summary: Create or update the signed-in teacher's singular listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeacherListingPayload"
+      responses:
+        "200":
+          description: Teacher listing resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherListingResource"
+        "400":
+          description: Invalid listing payload
+        "401":
+          description: Teacher is not signed in
+        "403":
+          description: Current account is not a teacher
+        "404":
+          description: Location or lesson category not found
+        "409":
+          description: Publish blocked by missing eligibility or suspended listing
   /teachers/{slug}:
     get:
       summary: Get a public teacher profile by slug
@@ -332,6 +451,190 @@ components:
           $ref: "#/components/schemas/AuthAccount"
         redirectTo:
           type: string
+    LessonCategoryOption:
+      type: object
+      required: [slug, name]
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+    LocationOption:
+      type: object
+      required: [slug, city, district]
+      properties:
+        slug:
+          type: string
+        city:
+          type: string
+        district:
+          type:
+            - string
+            - "null"
+    TeacherEligibilityState:
+      type: object
+      required: [status, latestAttemptId, latestScore, canRetake]
+      properties:
+        status:
+          type: string
+          enum: [not_started, passed, failed, expired]
+        latestAttemptId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        latestScore:
+          type:
+            - integer
+            - "null"
+        canRetake:
+          type: boolean
+    TeacherEligibilityTest:
+      type: object
+      required: [id, version, title, passingScore, questionCount, questions]
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        title:
+          type: string
+        passingScore:
+          type: integer
+        questionCount:
+          type: integer
+        questions:
+          type: array
+          items:
+            type: object
+            required: [id, prompt, choices]
+            properties:
+              id:
+                type: string
+              prompt:
+                type: string
+              choices:
+                type: array
+                items:
+                  type: object
+                  required: [id, label]
+                  properties:
+                    id:
+                      type: string
+                    label:
+                      type: string
+    TeacherEligibilitySubmissionPayload:
+      type: object
+      required: [testId, answers]
+      properties:
+        testId:
+          type: string
+          format: uuid
+        answers:
+          type: array
+          items:
+            type: object
+            required: [questionId, choiceId]
+            properties:
+              questionId:
+                type: string
+              choiceId:
+                type: string
+    TeacherEligibilitySubmissionResponse:
+      type: object
+      required: [attemptId, status, score, canPublishListing]
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [passed, failed]
+        score:
+          type: integer
+        canPublishListing:
+          type: boolean
+    TeacherListing:
+      type: object
+      required:
+        - status
+        - slug
+        - title
+        - bio
+        - education
+        - experienceYears
+        - hourlyPrice
+        - deliveryMode
+        - locationSlug
+        - lessonSlugs
+        - updatedAt
+      properties:
+        status:
+          type: string
+          enum: [missing, draft, published, suspended]
+        slug:
+          type:
+            - string
+            - "null"
+        title:
+          type: string
+        bio:
+          type: string
+        education:
+          type: string
+        experienceYears:
+          type: integer
+        hourlyPrice:
+          type: number
+        deliveryMode:
+          type: string
+          enum: [online, face_to_face, both]
+        locationSlug:
+          type: string
+        lessonSlugs:
+          type: array
+          items:
+            type: string
+        updatedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+    TeacherListingResource:
+      type: object
+      required: [eligibility, listing]
+      properties:
+        eligibility:
+          $ref: "#/components/schemas/TeacherEligibilityState"
+        listing:
+          $ref: "#/components/schemas/TeacherListing"
+    TeacherListingPayload:
+      type: object
+      required: [status, title, bio, education, experienceYears, hourlyPrice, deliveryMode, locationSlug, lessonSlugs]
+      properties:
+        status:
+          type: string
+          enum: [draft, published]
+        title:
+          type: string
+        bio:
+          type: string
+        education:
+          type: string
+        experienceYears:
+          type: integer
+        hourlyPrice:
+          type: number
+        deliveryMode:
+          type: string
+          enum: [online, face_to_face, both]
+        locationSlug:
+          type: string
+        lessonSlugs:
+          type: array
+          items:
+            type: string
     ListMeta:
       type: object
       required: [total, page, pageSize, totalPages]

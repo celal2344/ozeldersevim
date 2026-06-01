@@ -1,5 +1,6 @@
 import { GraduationCapIcon } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { LogoutButton } from "@/features/auth/logout-button";
 import type { AuthAccount } from "@/features/auth/types";
@@ -35,9 +36,10 @@ type DashboardShellProps = {
   activePath: string;
   config: DashboardRoleConfig;
   page: DashboardPageContent;
+  children?: ReactNode;
 };
 
-export function DashboardShell({ account, activePath, config, page }: DashboardShellProps) {
+export function DashboardShell({ account, activePath, config, page, children }: DashboardShellProps) {
   return (
     <SidebarProvider>
       <Sidebar variant="inset" collapsible="icon">
@@ -93,20 +95,22 @@ export function DashboardShell({ account, activePath, config, page }: DashboardS
         </header>
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <section className="mx-auto flex max-w-5xl flex-col gap-5">
-            <Card>
-              <CardHeader>
-                <CardDescription>{page.eyebrow}</CardDescription>
-                <CardTitle className="text-2xl text-brand-navy">{page.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-5">
-                <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{page.description}</p>
-                {page.ctaHref && page.ctaLabel ? (
-                  <Button className="w-fit bg-brand-orange text-white hover:bg-brand-orange/90" nativeButton={false} render={<Link href={page.ctaHref} />}>
-                    {page.ctaLabel}
-                  </Button>
-                ) : null}
-              </CardContent>
-            </Card>
+            {children ?? (
+              <Card>
+                <CardHeader>
+                  <CardDescription>{page.eyebrow}</CardDescription>
+                  <CardTitle className="text-2xl text-brand-navy">{page.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-5">
+                  <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{page.description}</p>
+                  {page.ctaHref && page.ctaLabel ? (
+                    <Button className="w-fit bg-brand-orange text-white hover:bg-brand-orange/90" nativeButton={false} render={<Link href={page.ctaHref} />}>
+                      {page.ctaLabel}
+                    </Button>
+                  ) : null}
+                </CardContent>
+              </Card>
+            )}
           </section>
         </main>
       </SidebarInset>

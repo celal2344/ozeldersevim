@@ -15,6 +15,7 @@ type PageProps = {
 };
 
 export { lessonRequestMetadata as metadata };
+export const dynamic = "force-dynamic";
 
 export default async function LessonRequestPage({ searchParams }: PageProps) {
   const params = await searchParams;
@@ -30,7 +31,7 @@ export default async function LessonRequestPage({ searchParams }: PageProps) {
     redirect(panelPathForRole(account.role));
   }
 
-  const teacher = teacherSlug ? getTeacherProfileBySlug(teacherSlug) : null;
+  const teacher = teacherSlug ? await getTeacherProfileBySlug(teacherSlug) : null;
 
   if (!teacher) {
     return (
