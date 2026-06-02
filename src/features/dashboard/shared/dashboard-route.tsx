@@ -6,12 +6,13 @@ type DashboardRouteProps = {
   activePath: string;
   pageId: DashboardPageId;
   role: DashboardRole;
+  children?: React.ReactNode;
 };
 
-export async function DashboardRoute({ activePath, pageId, role }: DashboardRouteProps) {
+export async function DashboardRoute({ activePath, pageId, role, children }: DashboardRouteProps) {
   const account = await requireDashboardAccount(role, activePath);
   const config = dashboardConfigForRole(role);
   const page = dashboardPageForId(pageId);
 
-  return <DashboardShell account={account} activePath={activePath} config={config} page={page} />;
+  return <DashboardShell account={account} activePath={activePath} config={config} page={page}>{children}</DashboardShell>;
 }

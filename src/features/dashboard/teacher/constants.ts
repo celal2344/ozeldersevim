@@ -37,8 +37,8 @@ export const teacherDashboardPages: Record<string, DashboardPageContent> = {
   "teacher-requests": {
     id: "teacher-requests",
     eyebrow: "Ders Talepleri",
-    title: "Gelen ders talepleri burada listelenecek.",
-    description: "Kabul, ret ve iletişim bilgisi paylaşımı sonraki request management branchinin kapsamındadır.",
+    title: "Ders Talepleri",
+    description: "Öğrencilerden gelen ders taleplerini yönet, kabul et veya reddet.",
   },
   "teacher-listing": {
     id: "teacher-listing",

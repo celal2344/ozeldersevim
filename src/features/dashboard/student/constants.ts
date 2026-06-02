@@ -26,10 +26,8 @@ export const studentDashboardPages: Record<string, DashboardPageContent> = {
   "student-requests": {
     id: "student-requests",
     eyebrow: "Ders Taleplerim",
-    title: "Henüz listelenen ders talebi yok.",
-    description: "Ders talebi yönetimi sonraki branchte eklenecek. O zamana kadar yeni öğretmenleri arayabilirsin.",
-    ctaHref: "/ogretmen-bul",
-    ctaLabel: "Öğretmen Bul",
+    title: "Ders Taleplerim",
+    description: "Gönderdiğin ders taleplerini ve durumlarını buradan takip edebilirsin.",
   },
   "student-favorites": {
     id: "student-favorites",
