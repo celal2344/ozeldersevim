@@ -40,4 +40,5 @@ export type StudentLessonRequest = {
   accepted_at: string | null;
   rejected_at: string | null;
   lesson_categories: { name: string } | null;
+  reviews: { id: string } | null;
 };

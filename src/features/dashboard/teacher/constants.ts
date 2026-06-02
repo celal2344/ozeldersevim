@@ -57,8 +57,8 @@ export const teacherDashboardPages: Record<string, DashboardPageContent> = {
   "teacher-reviews": {
     id: "teacher-reviews",
     eyebrow: "Yorumlar",
-    title: "Yorum yönetimi henüz aktif değil.",
-    description: "Yorumlar yalnızca kabul edilmiş ders taleplerinden sonra açılacak ve ayrı bir feature branchte uygulanacak.",
+    title: "Yorumlar",
+    description: "Öğrencilerden gelen yorumları ve puanları buradan görebilirsin.",
   },
   "teacher-profile": {
     id: "teacher-profile",

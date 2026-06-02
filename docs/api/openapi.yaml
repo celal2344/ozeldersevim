@@ -145,6 +145,52 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /reviews:
+    post:
+      summary: Submit a review for an accepted lesson request (student only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitReviewPayload"
+      responses:
+        "200":
+          description: Review submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmitReviewResponse"
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not a student account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Lesson request not found or not owned by student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Request not accepted or review already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /lesson-requests/{id}/accept:
     post:
       summary: Accept a lesson request (teacher only)
@@ -638,3 +684,31 @@ components:
         status:
           type: string
           enum: [submitted]
+    SubmitReviewPayload:
+      type: object
+      required: [lessonRequestId, rating]
+      properties:
+        lessonRequestId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          maxLength: 1000
+    SubmitReviewResponse:
+      type: object
+      required: [reviewId, rating, status]
+      properties:
+        reviewId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        status:
+          type: string
+          enum: [pending, published, rejected, reported]

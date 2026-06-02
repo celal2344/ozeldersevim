@@ -6,9 +6,11 @@ import {
   lessonRequestStatusVariant,
 } from "@/features/requests/constants";
 import { getStudentLessonRequests } from "@/features/requests/service";
+import { ReviewForm } from "@/features/reviews/review-form";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Separator } from "@/shared/components/ui/separator";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
@@ -52,39 +54,54 @@ export async function StudentRequestsView() {
 
   return (
     <div className="flex flex-col gap-4">
-      {requests.map((req) => (
-        <Card key={req.id}>
-          <CardHeader className="pb-3">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground">{formatDate(req.created_at)}</span>
-                <CardTitle className="text-base text-brand-navy">
-                  {req.lesson_categories?.name ?? "Bilinmiyor"} dersi talebi
-                </CardTitle>
-                <span className="text-sm text-muted-foreground">
-                  {deliveryModeLabels[req.delivery_mode]}
-                  {req.student_level ? ` · ${req.student_level}` : ""}
-                </span>
+      {requests.map((req) => {
+        const isAccepted = req.status === "accepted";
+        const hasReview = Boolean(req.reviews);
+        const categoryName = req.lesson_categories?.name ?? "Bilinmiyor";
+
+        return (
+          <Card key={req.id}>
+            <CardHeader className="pb-3">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-muted-foreground">{formatDate(req.created_at)}</span>
+                  <CardTitle className="text-base text-brand-navy">
+                    {categoryName} dersi talebi
+                  </CardTitle>
+                  <span className="text-sm text-muted-foreground">
+                    {deliveryModeLabels[req.delivery_mode]}
+                    {req.student_level ? ` · ${req.student_level}` : ""}
+                  </span>
+                </div>
+                <Badge variant={lessonRequestStatusVariant[req.status]}>
+                  {lessonRequestStatusLabels[req.status]}
+                </Badge>
               </div>
-              <Badge variant={lessonRequestStatusVariant[req.status]}>
-                {lessonRequestStatusLabels[req.status]}
-              </Badge>
-            </div>
-          </CardHeader>
-          {req.goal && (
-            <CardContent className="pt-0">
-              <p className="text-sm leading-relaxed text-foreground/80">{req.goal}</p>
-            </CardContent>
-          )}
-          {req.status === "accepted" && (
-            <CardContent className="pt-0">
-              <p className="text-sm font-medium text-green-700">
-                Talebiniz kabul edildi. Öğretmen sizinle iletişime geçecek.
-              </p>
-            </CardContent>
-          )}
-        </Card>
-      ))}
+            </CardHeader>
+
+            {req.goal && (
+              <CardContent className="pb-3 pt-0">
+                <p className="text-sm leading-relaxed text-foreground/80">{req.goal}</p>
+              </CardContent>
+            )}
+
+            {isAccepted && (
+              <>
+                <Separator />
+                <CardContent className="pt-4">
+                  {hasReview ? (
+                    <p className="text-sm font-medium text-green-700">
+                      Bu talep için yorumunu zaten yazdın.
+                    </p>
+                  ) : (
+                    <ReviewForm lessonRequestId={req.id} lessonCategoryName={categoryName} />
+                  )}
+                </CardContent>
+              </>
+            )}
+          </Card>
+        );
+      })}
     </div>
   );
 }
