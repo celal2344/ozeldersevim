@@ -1,4 +1,5 @@
 import { DashboardRoute } from "@/features/dashboard/shared/dashboard-route";
+import { TeacherRequestsView } from "@/features/requests/teacher-requests-view";
 
 export const dynamic = "force-dynamic";
 
@@ -7,5 +8,9 @@ export const metadata = {
 };
 
 export default function TeacherRequestsPage() {
-  return <DashboardRoute activePath="/ogretmen/panel/talepler" pageId="teacher-requests" role="teacher" />;
+  return (
+    <DashboardRoute activePath="/ogretmen/panel/talepler" pageId="teacher-requests" role="teacher">
+      <TeacherRequestsView />
+    </DashboardRoute>
+  );
 }
