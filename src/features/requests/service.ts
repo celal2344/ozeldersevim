@@ -22,7 +22,7 @@ export async function getStudentLessonRequests(): Promise<StudentLessonRequest[]
   const { data, error } = await supabase
     .from("lesson_requests")
     .select(
-      "id, status, delivery_mode, student_level, goal, created_at, accepted_at, rejected_at, lesson_categories!lesson_category_id(name)"
+      "id, status, delivery_mode, student_level, goal, created_at, accepted_at, rejected_at, lesson_categories!lesson_category_id(name), reviews(id)"
     )
     .order("created_at", { ascending: false });
 
