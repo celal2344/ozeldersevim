@@ -76,7 +76,7 @@ export const featuredTeacherPreviews: FeaturedTeacherPreview[] = [
     name: "Mehmet Yılmaz",
     title: "Fizik Öğretmeni",
     price: "₺900 / saat",
-    rating: "Yeni",
+    rating: "—",
     slug: "mehmet-yilmaz-fizik-online",
   },
   {

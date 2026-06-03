@@ -41,10 +41,10 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
         <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-14 sm:px-6 lg:px-8">
           <p className="text-sm text-brand-orange">Öğretmen Bul</p>
           <h1 className="max-w-4xl text-4xl font-bold tracking-tight text-balance">
-            Özel ders öğretmenlerini ders, konum ve puana göre ara.
+            Özel ders öğretmeni bul, puana göre karşılaştır, hemen talep gönder.
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-white/72">
-            {response.meta.total} öğretmen bulundu. Konum izni verirsen yakındaki öğretmenleri mesafeye göre sıralayabilirsin.
+            {response.meta.total > 0 ? `${response.meta.total} öğretmen listelendi.` : "Filtrelerinize uygun öğretmen bulunamadı."} Konum erişimine izin verirseniz yakındaki öğretmenleri mesafeye göre sıralayabilirsiniz.
           </p>
         </div>
       </section>
