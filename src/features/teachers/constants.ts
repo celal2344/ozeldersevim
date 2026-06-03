@@ -26,6 +26,8 @@ export const teacherProfileSeed: TeacherProfile[] = [
     activeStudentCount: 14,
     completedLessonCount: 240,
     isVerified: true,
+    gender: "female",
+    fastResponse: true,
     reviews: [
       {
         id: "00000000-0000-0000-0000-000000000701",
@@ -68,6 +70,8 @@ export const teacherProfileSeed: TeacherProfile[] = [
     activeStudentCount: 8,
     completedLessonCount: 96,
     isVerified: true,
+    gender: "male",
+    fastResponse: true,
     reviews: [],
   },
   {
@@ -95,6 +99,8 @@ export const teacherProfileSeed: TeacherProfile[] = [
     activeStudentCount: 6,
     completedLessonCount: 72,
     isVerified: false,
+    gender: "female",
+    fastResponse: false,
     reviews: [
       {
         id: "00000000-0000-0000-0000-000000000703",
@@ -130,6 +136,8 @@ export const teacherProfileSeed: TeacherProfile[] = [
     activeStudentCount: 18,
     completedLessonCount: 310,
     isVerified: true,
+    gender: "male",
+    fastResponse: true,
     reviews: [
       {
         id: "00000000-0000-0000-0000-000000000704",
@@ -165,6 +173,8 @@ export const teacherProfileSeed: TeacherProfile[] = [
     activeStudentCount: 10,
     completedLessonCount: 134,
     isVerified: true,
+    gender: "female",
+    fastResponse: true,
     reviews: [
       {
         id: "00000000-0000-0000-0000-000000000705",
@@ -200,6 +210,8 @@ export const teacherProfileSeed: TeacherProfile[] = [
     activeStudentCount: 5,
     completedLessonCount: 58,
     isVerified: false,
+    gender: "male",
+    fastResponse: false,
     reviews: [],
   },
 ];

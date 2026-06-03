@@ -38,6 +38,10 @@ export function parseTeacherSearchParams(searchParams: URLSearchParams): Teacher
     district: searchParams.get("district") ?? undefined,
     deliveryMode: (searchParams.get("deliveryMode") as TeacherSearchParams["deliveryMode"]) ?? "all",
     sort: (searchParams.get("sort") as TeacherSearchParams["sort"]) ?? "recommended",
+    gender: (searchParams.get("gender") as TeacherSearchParams["gender"]) ?? "all",
+    minPrice: toNumber(searchParams.get("minPrice")),
+    maxPrice: toNumber(searchParams.get("maxPrice")),
+    fastResponse: searchParams.get("fastResponse") === "1",
     ...parsePaginationParams(searchParams, { pageSize: TEACHER_SEARCH_PAGE_SIZE }),
     lat: toNumber(searchParams.get("lat")),
     lng: toNumber(searchParams.get("lng")),
@@ -50,6 +54,7 @@ export function searchTeachers(params: TeacherSearchParams): TeacherSearchRespon
   const lesson = params.lesson ? normalize(params.lesson) : "";
   const city = params.city ? normalize(params.city) : "";
   const district = params.district ? normalize(params.district) : "";
+
   const filtered = teacherSearchSeed
     .filter((teacher) => {
       const searchable = normalize(
@@ -68,6 +73,10 @@ export function searchTeachers(params: TeacherSearchParams): TeacherSearchRespon
       ) {
         return false;
       }
+      if (params.gender && params.gender !== "all" && teacher.gender !== params.gender) return false;
+      if (params.minPrice !== undefined && teacher.hourlyPrice < params.minPrice) return false;
+      if (params.maxPrice !== undefined && teacher.hourlyPrice > params.maxPrice) return false;
+      if (params.fastResponse && !teacher.fastResponse) return false;
 
       return true;
     })
@@ -107,6 +116,10 @@ export function searchTeachers(params: TeacherSearchParams): TeacherSearchRespon
         ...(params.city ? { city: params.city } : {}),
         ...(params.district ? { district: params.district } : {}),
         ...(params.deliveryMode && params.deliveryMode !== "all" ? { deliveryMode: params.deliveryMode } : {}),
+        ...(params.gender && params.gender !== "all" ? { gender: params.gender } : {}),
+        ...(params.minPrice !== undefined ? { minPrice: params.minPrice } : {}),
+        ...(params.maxPrice !== undefined ? { maxPrice: params.maxPrice } : {}),
+        ...(params.fastResponse ? { fastResponse: true } : {}),
       },
     }
   );

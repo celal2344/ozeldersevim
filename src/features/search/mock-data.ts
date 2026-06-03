@@ -19,6 +19,8 @@ export const teacherSearchSeed: TeacherSearchResult[] = teacherProfileSeed.map((
   experienceYears: teacher.experienceYears,
   completedLessons: teacher.completedLessonCount,
   activeStudents: teacher.activeStudentCount,
+  gender: teacher.gender,
+  fastResponse: teacher.fastResponse,
 }));
 
 export const lessonOptions = ["Matematik", "Fizik", "Kimya", "İngilizce", "Türkçe", "Yazılım", "LGS", "TYT / AYT"];

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRightIcon, Clock3Icon, GraduationCapIcon, MonitorPlayIcon, SearchIcon, ShieldCheckIcon, StarIcon, UsersIcon } from "lucide-react";
+import { ChevronRightIcon, Clock3Icon, ClockIcon, GraduationCapIcon, MonitorPlayIcon, SearchIcon, ShieldCheckIcon, StarIcon, TagIcon, UsersIcon } from "lucide-react";
 
 import {
   featuredTeacherPreviews,
@@ -9,7 +9,10 @@ import {
   popularHomepageLessons,
 } from "@/features/homepage/constants";
 import { initialsFromName, lessonSearchHref } from "@/features/homepage/utils";
+import { blogPosts } from "@/features/blog/constants";
+import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 
 export default function HomePage() {
   return (
@@ -288,6 +291,46 @@ export default function HomePage() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight text-brand-navy">Blog</h2>
+              <div className="mt-3 h-1 w-16 rounded-full bg-brand-orange" />
+            </div>
+            <Link href="/blog" className="text-sm font-medium text-brand-navy hover:text-brand-orange">
+              Tüm yazıları gör
+            </Link>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {blogPosts.slice(0, 3).map((post) => (
+              <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
+                <Card className="h-full transition-shadow group-hover:shadow-md">
+                  <CardHeader className="pb-2">
+                    <Badge variant="secondary" className="mb-2 w-fit text-xs">
+                      <TagIcon className="mr-1 size-3" aria-hidden="true" />
+                      {post.category}
+                    </Badge>
+                    <CardTitle className="text-sm leading-snug text-brand-navy group-hover:text-brand-orange transition-colors">
+                      {post.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="mb-3 text-xs leading-relaxed text-muted-foreground line-clamp-2">
+                      {post.summary}
+                    </p>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <ClockIcon className="size-3" aria-hidden="true" />
+                      {post.readingMinutes} dk okuma
+                    </span>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
     </main>
