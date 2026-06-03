@@ -41,7 +41,7 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
         <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
         <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-14 sm:px-6 lg:px-8">
           <p className="text-xs font-bold uppercase tracking-widest text-brand-orange">Öğretmen Bul</p>
-          <h1 className="max-w-3xl text-4xl font-extrabold tracking-tight text-balance lg:text-5xl">
+          <h1 className="max-w-3xl text-2xl font-extrabold tracking-tight text-balance sm:text-4xl lg:text-5xl">
             Özel ders öğretmeni bul, puana göre karşılaştır.
           </h1>
           <p className="max-w-xl text-sm leading-6 text-white/55">
@@ -49,7 +49,8 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
           </p>
         </div>
       </section>
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8" style={{ background: "linear-gradient(180deg,#f8f9fe 0%,#f0f4ff 100%)" }}>
+      <section className="w-full px-4 py-8 sm:px-6 lg:px-8" style={{ background: "linear-gradient(180deg,#f8f9fe 0%,#f0f4ff 100%)" }}>
+      <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <SearchFilters />
         {response.data.length > 0 ? (
           <div className="grid gap-4 lg:grid-cols-2">
@@ -88,6 +89,7 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
             Sonraki
           </Button>
         </div>
+      </div>
       </section>
     </main>
   );
