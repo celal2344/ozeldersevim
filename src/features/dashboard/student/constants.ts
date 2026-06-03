@@ -38,7 +38,7 @@ export const studentDashboardPages: Record<string, DashboardPageContent> = {
   "student-profile": {
     id: "student-profile",
     eyebrow: "Profil",
-    title: "Profil ayarları yakında burada olacak.",
-    description: "Ad, telefon ve iletişim tercihlerini düzenleme ekranı sonraki dashboard adımlarında eklenecek.",
+    title: "Profilim",
+    description: "Ad, telefon ve hesap bilgilerini buradan düzenleyebilirsin.",
   },
 };

@@ -63,13 +63,13 @@ export const teacherDashboardPages: Record<string, DashboardPageContent> = {
   "teacher-profile": {
     id: "teacher-profile",
     eyebrow: "Profil",
-    title: "Öğretmen profil düzenleme yakında burada olacak.",
-    description: "Profil başlığı, açıklama, fiyat ve konum düzenleme alanları ilan/test akışıyla birlikte eklenecek.",
+    title: "Profilim",
+    description: "İlan başlığı, açıklama, fiyat ve ders türü bilgilerini buradan düzenleyebilirsin.",
   },
   "teacher-settings": {
     id: "teacher-settings",
-    eyebrow: "Ayarlar",
-    title: "Hesap ayarları hazırlanıyor.",
-    description: "Bildirim, güvenlik ve iletişim ayarları sonraki dashboard adımlarında genişletilecek.",
+    eyebrow: "Hesap Ayarları",
+    title: "Hesap Ayarları",
+    description: "Ad, telefon ve hesap bilgilerini buradan düzenleyebilirsin.",
   },
 };
