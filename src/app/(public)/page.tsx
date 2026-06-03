@@ -61,7 +61,7 @@ export default function HomePage() {
             <SparklesIcon className="size-3.5 text-brand-orange" aria-hidden="true" />
             Türkiye&apos;nin Özel Ders Platformu
           </div>
-          <h1 className="max-w-4xl text-5xl font-extrabold leading-[1.04] tracking-tight text-balance sm:text-6xl lg:text-7xl">
+          <h1 className="max-w-4xl text-3xl font-extrabold leading-[1.06] tracking-tight text-balance sm:text-5xl lg:text-7xl">
             Hayalindeki{" "}
             <span className="bg-gradient-to-r from-brand-orange to-orange-300 bg-clip-text text-transparent">
               öğretmeni
