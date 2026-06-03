@@ -4,7 +4,6 @@ import { ChevronRightIcon, Clock3Icon, ClockIcon, GraduationCapIcon, MonitorPlay
 import {
   featuredTeacherPreviews,
   heroFeatures,
-  homepageStats,
   platformBenefits,
   popularHomepageLessons,
 } from "@/features/homepage/constants";
@@ -219,16 +218,27 @@ export default function HomePage() {
       </section>
 
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-5 rounded-2xl bg-brand-navy p-7 text-white md:grid-cols-4">
-          {homepageStats.map(({ label, value, icon: Icon }) => (
-            <div key={label} className="flex items-center gap-4">
-              <Icon aria-hidden="true" className="text-brand-orange" />
-              <div>
-                <p className="text-3xl font-bold text-brand-orange">{value}</p>
-                <p className="text-sm text-white/70">{label}</p>
-              </div>
+        <div className="mx-auto max-w-7xl">
+          <div className="rounded-2xl bg-brand-navy p-8 text-white">
+            <h2 className="mb-6 text-center text-2xl font-bold">Nasıl Çalışır?</h2>
+            <div className="grid gap-6 md:grid-cols-3">
+              {[
+                { step: "1", title: "Öğretmen Bul", text: "Ders, konum ve puana göre filtrele. Öğretmen profilini incele." },
+                { step: "2", title: "Talep Gönder", text: "Ücretsiz kayıt ol ve seçtiğin öğretmene ders talebi gönder." },
+                { step: "3", title: "Derse Başla", text: "Öğretmen kabul edince seni arar. Ders programınızı birlikte planlayın." },
+              ].map(({ step, title, text }) => (
+                <div key={step} className="flex gap-4">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-orange text-lg font-bold">
+                    {step}
+                  </span>
+                  <div>
+                    <p className="font-semibold">{title}</p>
+                    <p className="mt-1 text-sm text-white/70">{text}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </section>
 
