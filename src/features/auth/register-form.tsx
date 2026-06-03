@@ -1,8 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRightIcon, UserPlusIcon } from "lucide-react";
-import Link from "next/link";
+import { UserPlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -105,10 +104,6 @@ export function RegisterForm({ initialRole = "student", next }: { initialRole?: 
       <Button type="submit" className="h-11 bg-brand-orange text-white hover:bg-brand-orange/90" disabled={form.formState.isSubmitting}>
         <UserPlusIcon data-icon="inline-start" aria-hidden="true" />
         {form.formState.isSubmitting ? "Kaydediliyor" : "Kayıt Ol"}
-      </Button>
-      <Button variant="outline" nativeButton={false} render={<Link href={next ? `/giris?next=${encodeURIComponent(next)}` : "/giris"} />}>
-        Hesabın var mı? Giriş yap
-        <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
       </Button>
     </form>
   );
