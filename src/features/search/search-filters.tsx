@@ -1,6 +1,6 @@
 "use client";
 
-import { LocateFixedIcon, SearchIcon } from "lucide-react";
+import { BoltIcon, LocateFixedIcon, SearchIcon } from "lucide-react";
 
 import { cityOptions, districtOptions, lessonOptions } from "@/features/search/mock-data";
 import { optionValue } from "@/features/search/utils";
@@ -15,13 +15,52 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { cn } from "@/shared/lib/utils";
+
+const priceRanges = [
+  { label: "Tüm fiyatlar", min: undefined, max: undefined },
+  { label: "₺0 – ₺500", min: 0, max: 500 },
+  { label: "₺500 – ₺750", min: 500, max: 750 },
+  { label: "₺750 – ₺1000", min: 750, max: 1000 },
+  { label: "₺1000 – ₺1500", min: 1000, max: 1500 },
+  { label: "₺1500+", min: 1500, max: undefined },
+];
+
+function priceRangeValue(min?: number, max?: number) {
+  if (min === undefined && max === undefined) return "";
+  return `${min ?? ""}-${max ?? ""}`;
+}
+
+function parsePriceRange(value: string) {
+  if (!value) return { min: undefined, max: undefined };
+  const [minStr, maxStr] = value.split("-");
+  return {
+    min: minStr ? Number(minStr) : undefined,
+    max: maxStr ? Number(maxStr) : undefined,
+  };
+}
 
 export function SearchFilters() {
-  const { locationPending, searchParams, updateParam, useCurrentLocation } =
+  const { locationPending, searchParams, updateParam, updateParams, useCurrentLocation } =
     useSearchFilterNavigation();
+
+  const currentMin = searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : undefined;
+  const currentMax = searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined;
+  const currentPriceValue = priceRangeValue(currentMin, currentMax);
+  const fastResponse = searchParams.get("fastResponse") === "1";
+  const currentGender = searchParams.get("gender") ?? "all";
+
+  function handlePriceChange(value: string) {
+    const { min, max } = parsePriceRange(value);
+    updateParams({
+      minPrice: min !== undefined ? String(min) : null,
+      maxPrice: max !== undefined ? String(max) : null,
+    });
+  }
 
   return (
     <div className="rounded-2xl bg-white p-5 shadow-2xl shadow-slate-950/10 ring-1 ring-slate-200">
+      {/* Üst satır: metin arama + ders + şehir + ara butonu */}
       <form action="/ogretmen-bul" className="grid gap-3 md:grid-cols-[1.2fr_1fr_1fr_auto]">
         <div className="relative">
           <SearchIcon aria-hidden="true" className="pointer-events-none absolute left-3 top-2.5 text-muted-foreground" />
@@ -61,10 +100,12 @@ export function SearchFilters() {
           Ara
         </Button>
       </form>
+
+      {/* Alt satır 1: ilçe, ders türü, sıralama, konum */}
       <div className="mt-3 grid gap-3 md:grid-cols-4">
         <select
           value={searchParams.get("district") ?? ""}
-          onChange={(event) => updateParam("district", event.target.value)}
+          onChange={(e) => updateParam("district", e.target.value)}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
           <option value="">Tüm ilçeler</option>
@@ -113,6 +154,60 @@ export function SearchFilters() {
           <LocateFixedIcon data-icon="inline-start" aria-hidden="true" />
           Konumumu Kullan
         </Button>
+      </div>
+
+      {/* Alt satır 2: cinsiyet, fiyat, hızlı yanıt */}
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+        {/* Cinsiyet */}
+        <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden text-sm">
+          {[
+            { value: "all", label: "Tümü" },
+            { value: "female", label: "Kadın" },
+            { value: "male", label: "Erkek" },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => updateParam("gender", opt.value === "all" ? "" : opt.value)}
+              className={cn(
+                "px-3 py-1.5 transition-colors",
+                currentGender === opt.value || (opt.value === "all" && !searchParams.get("gender"))
+                  ? "bg-brand-navy text-white"
+                  : "text-muted-foreground hover:bg-slate-50"
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Fiyat aralığı */}
+        <select
+          value={currentPriceValue}
+          onChange={(e) => handlePriceChange(e.target.value)}
+          className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
+        >
+          {priceRanges.map((range) => (
+            <option key={priceRangeValue(range.min, range.max)} value={priceRangeValue(range.min, range.max)}>
+              {range.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Hızlı yanıt toggle */}
+        <button
+          type="button"
+          onClick={() => updateParam("fastResponse", fastResponse ? "" : "1")}
+          className={cn(
+            "flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm transition-colors",
+            fastResponse
+              ? "border-brand-orange bg-brand-orange/10 text-brand-orange"
+              : "border-slate-200 bg-white text-muted-foreground hover:bg-slate-50"
+          )}
+        >
+          <BoltIcon className="size-3.5" aria-hidden="true" />
+          Hızlı yanıt
+        </button>
       </div>
     </div>
   );

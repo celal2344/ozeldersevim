@@ -2,6 +2,7 @@ import type { ListResponse } from "@/shared/api/list-query";
 
 export type DeliveryModeFilter = "all" | "online" | "face_to_face" | "both";
 export type TeacherSort = "recommended" | "nearest" | "highest_rated" | "lowest_price" | "most_reviewed";
+export type GenderFilter = "all" | "male" | "female";
 
 export type TeacherSearchParams = {
   q?: string;
@@ -10,6 +11,10 @@ export type TeacherSearchParams = {
   district?: string;
   deliveryMode?: DeliveryModeFilter;
   sort?: TeacherSort;
+  gender?: GenderFilter;
+  minPrice?: number;
+  maxPrice?: number;
+  fastResponse?: boolean;
   page?: number;
   lat?: number;
   lng?: number;
@@ -34,6 +39,8 @@ export type TeacherSearchResult = {
   experienceYears: number;
   completedLessons?: number;
   activeStudents?: number;
+  gender?: "male" | "female";
+  fastResponse?: boolean;
   distanceKm?: number;
 };
 

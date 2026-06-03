@@ -30,5 +30,7 @@ export type TeacherProfile = {
   activeStudentCount: number;
   completedLessonCount: number;
   isVerified: boolean;
+  gender?: "male" | "female";
+  fastResponse?: boolean;
   reviews: TeacherProfileReview[];
 };
