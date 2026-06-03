@@ -18,6 +18,7 @@ import {
   teacherRatingLabel,
   teacherRequestHref,
 } from "@/features/teachers/utils";
+import { FavoriteButton } from "@/features/favorites/favorite-button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
@@ -98,6 +99,7 @@ export function TeacherProfileView({ teacher }: { teacher: TeacherProfile }) {
               >
                 Ders Talep Et
               </Button>
+              <FavoriteButton teacherSlug={teacher.slug} />
               <div className="grid gap-2 text-sm text-muted-foreground">
                 <span>Platform içi ödeme yok.</span>
                 <span>Online ders linkini taraflar kendileri oluşturur.</span>

@@ -32,10 +32,8 @@ export const studentDashboardPages: Record<string, DashboardPageContent> = {
   "student-favorites": {
     id: "student-favorites",
     eyebrow: "Favoriler",
-    title: "Favori öğretmen alanı hazırlanıyor.",
-    description: "Öğretmen kaydetme ve favori listesi sonraki fazda aktif olacak.",
-    ctaHref: "/ogretmen-bul",
-    ctaLabel: "Öğretmenleri Gör",
+    title: "Favoriler",
+    description: "Kaydettiğin öğretmenleri buradan takip edebilirsin.",
   },
   "student-profile": {
     id: "student-profile",

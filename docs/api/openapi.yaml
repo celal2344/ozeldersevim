@@ -145,6 +145,68 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /favorites/check:
+    get:
+      summary: Check if the signed-in student has favorited a teacher listing
+      parameters:
+        - in: query
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Favorite state
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [isFavorited]
+                properties:
+                  isFavorited:
+                    type: boolean
+  /favorites/toggle:
+    post:
+      summary: Toggle favorite state for a teacher listing (student only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slug]
+              properties:
+                slug:
+                  type: string
+      responses:
+        "200":
+          description: New favorite state after toggle
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [isFavorited]
+                properties:
+                  isFavorited:
+                    type: boolean
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not a student account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Teacher listing not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /reviews:
     post:
       summary: Submit a review for an accepted lesson request (student only)
