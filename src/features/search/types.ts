@@ -32,6 +32,8 @@ export type TeacherSearchResult = {
   ratingAverage: number;
   reviewCount: number;
   experienceYears: number;
+  completedLessons?: number;
+  activeStudents?: number;
   distanceKm?: number;
 };
 
