@@ -7,14 +7,6 @@ import { optionValue } from "@/features/search/utils";
 import { useSearchFilterNavigation } from "@/features/search/use-search-filter-navigation";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import { cn } from "@/shared/lib/utils";
 
 const priceRanges = [
@@ -115,35 +107,26 @@ export function SearchFilters() {
             </option>
           ))}
         </select>
-        <Select
+        <select
           value={searchParams.get("deliveryMode") ?? "all"}
-          onValueChange={(value) => updateParam("deliveryMode", value)}
+          onChange={(e) => updateParam("deliveryMode", e.target.value)}
+          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
         >
-          <SelectTrigger className="h-10 w-full border-slate-200 bg-white text-brand-navy">
-            <SelectValue placeholder="Ders türü" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="all">Tüm ders türleri</SelectItem>
-              <SelectItem value="online">Online</SelectItem>
-              <SelectItem value="face_to_face">Yüz yüze</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Select value={searchParams.get("sort") ?? "recommended"} onValueChange={(value) => updateParam("sort", value)}>
-          <SelectTrigger className="h-10 w-full border-slate-200 bg-white text-brand-navy">
-            <SelectValue placeholder="Sıralama" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="recommended">Önerilen</SelectItem>
-              <SelectItem value="nearest">Yakındaki</SelectItem>
-              <SelectItem value="highest_rated">En yüksek puan</SelectItem>
-              <SelectItem value="lowest_price">En düşük ücret</SelectItem>
-              <SelectItem value="most_reviewed">En çok yorum</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          <option value="all">Tüm ders türleri</option>
+          <option value="online">Online</option>
+          <option value="face_to_face">Yüz yüze</option>
+        </select>
+        <select
+          value={searchParams.get("sort") ?? "recommended"}
+          onChange={(e) => updateParam("sort", e.target.value)}
+          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
+        >
+          <option value="recommended">Önerilen</option>
+          <option value="nearest">Yakındaki</option>
+          <option value="highest_rated">En yüksek puan</option>
+          <option value="lowest_price">En düşük ücret</option>
+          <option value="most_reviewed">En çok yorum</option>
+        </select>
         <Button
           type="button"
           variant="outline"
