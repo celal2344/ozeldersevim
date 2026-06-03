@@ -196,7 +196,7 @@ export function TeacherProfileView({ teacher }: { teacher: TeacherProfile }) {
               </p>
               <p className="inline-flex items-center gap-2 text-brand-navy">
                 <MessageCircleIcon aria-hidden="true" className="text-brand-orange" />
-                Platform içi chat sonraki fazdadır.
+                Talep kabul edildikten sonra iletişime doğrudan geçebilirsiniz.
               </p>
             </CardContent>
           </Card>

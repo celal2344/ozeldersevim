@@ -18,8 +18,8 @@ export const studentDashboardPages: Record<string, DashboardPageContent> = {
   "student-home": {
     id: "student-home",
     eyebrow: "Öğrenci Paneli",
-    title: "Ders aramaya buradan devam et.",
-    description: "Ders taleplerin, favori öğretmenlerin ve profil bilgilerin sonraki dashboard branchlerinde burada toplanacak.",
+    title: "Hoş geldin!",
+    description: "Sol menüden ders taleplerini, favori öğretmenlerini ve profil bilgilerini yönetebilirsin.",
     ctaHref: "/ogretmen-bul",
     ctaLabel: "Öğretmen Bul",
   },
