@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/features/auth/login-form";
@@ -23,19 +24,25 @@ export default async function LoginPage({ searchParams }: PageProps) {
   }
 
   return (
-    <main className="bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
-      <section className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-        <div className="rounded-2xl bg-brand-navy p-8 text-white shadow-sm">
-          <p className="text-sm font-semibold text-brand-orange">Giriş Yap</p>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight">Derslerine ve başvurularına devam et.</h1>
-          <p className="mt-4 text-sm leading-6 text-white/72">
-            Öğrenci hesabınla öğretmen arayabilir, öğretmen hesabınla gelen ders taleplerini yönetebilirsin.
-          </p>
+    <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-50 px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <p className="text-3xl font-bold text-brand-navy">Tekrar hoş geldin! 👋</p>
+          <p className="mt-2 text-sm text-muted-foreground">Hesabına giriş yaparak devam et.</p>
         </div>
-        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
+        <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
           <LoginForm next={next} />
         </div>
-      </section>
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Hesabın yok mu?{" "}
+          <Link
+            href={next ? `/kayit?next=${encodeURIComponent(next)}` : "/kayit"}
+            className="font-medium text-brand-orange hover:underline"
+          >
+            Ücretsiz kayıt ol
+          </Link>
+        </p>
+      </div>
     </main>
   );
 }
