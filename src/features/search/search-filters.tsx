@@ -7,21 +7,46 @@ import { optionValue } from "@/features/search/utils";
 import { useSearchFilterNavigation } from "@/features/search/use-search-filter-navigation";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import { PremiumSelect } from "@/shared/components/ui/premium-select";
 import { cn } from "@/shared/lib/utils";
 
-const priceRanges = [
-  { label: "Tüm fiyatlar", min: undefined, max: undefined },
-  { label: "₺0 – ₺500", min: 0, max: 500 },
-  { label: "₺500 – ₺750", min: 500, max: 750 },
-  { label: "₺750 – ₺1000", min: 750, max: 1000 },
-  { label: "₺1000 – ₺1500", min: 1000, max: 1500 },
-  { label: "₺1500+", min: 1500, max: undefined },
+const lessonSelectOptions = [
+  { value: "", label: "Tüm dersler" },
+  ...lessonOptions.map((l) => ({ value: optionValue(l), label: l })),
 ];
 
-function priceRangeValue(min?: number, max?: number) {
-  if (min === undefined && max === undefined) return "";
-  return `${min ?? ""}-${max ?? ""}`;
-}
+const citySelectOptions = [
+  { value: "", label: "Tüm şehirler" },
+  ...cityOptions.map((c) => ({ value: optionValue(c), label: c })),
+];
+
+const districtSelectOptions = [
+  { value: "", label: "Tüm ilçeler" },
+  ...districtOptions.map((d) => ({ value: optionValue(d), label: d })),
+];
+
+const deliveryOptions = [
+  { value: "all", label: "Tüm ders türleri" },
+  { value: "online", label: "Online" },
+  { value: "face_to_face", label: "Yüz yüze" },
+];
+
+const sortOptions = [
+  { value: "recommended", label: "Önerilen" },
+  { value: "nearest", label: "Yakındaki" },
+  { value: "highest_rated", label: "En yüksek puan" },
+  { value: "lowest_price", label: "En düşük ücret" },
+  { value: "most_reviewed", label: "En çok yorum" },
+];
+
+const priceOptions = [
+  { value: "", label: "Tüm fiyatlar" },
+  { value: "0-500", label: "₺0 – ₺500" },
+  { value: "500-750", label: "₺500 – ₺750" },
+  { value: "750-1000", label: "₺750 – ₺1000" },
+  { value: "1000-1500", label: "₺1000 – ₺1500" },
+  { value: "1500-", label: "₺1500+" },
+];
 
 function parsePriceRange(value: string) {
   if (!value) return { min: undefined, max: undefined };
@@ -32,13 +57,17 @@ function parsePriceRange(value: string) {
   };
 }
 
+function currentPriceOption(min?: number, max?: number) {
+  if (min === undefined && max === undefined) return "";
+  return `${min ?? ""}-${max ?? ""}`;
+}
+
 export function SearchFilters() {
   const { locationPending, searchParams, updateParam, updateParams, useCurrentLocation } =
     useSearchFilterNavigation();
 
   const currentMin = searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : undefined;
   const currentMax = searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined;
-  const currentPriceValue = priceRangeValue(currentMin, currentMax);
   const fastResponse = searchParams.get("fastResponse") === "1";
   const currentGender = searchParams.get("gender") ?? "all";
 
@@ -51,11 +80,11 @@ export function SearchFilters() {
   }
 
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-2xl shadow-slate-950/10 ring-1 ring-slate-200">
-      {/* Üst satır: metin arama + ders + şehir + ara butonu */}
+    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xl shadow-slate-200/60">
+      {/* Üst satır */}
       <form action="/ogretmen-bul" className="grid gap-3 md:grid-cols-[1.2fr_1fr_1fr_auto]">
         <div className="relative">
-          <SearchIcon aria-hidden="true" className="pointer-events-none absolute left-3 top-2.5 text-muted-foreground" />
+          <SearchIcon aria-hidden="true" className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground" />
           <Input
             name="q"
             defaultValue={searchParams.get("q") ?? ""}
@@ -63,74 +92,44 @@ export function SearchFilters() {
             className="h-10 border-slate-200 pl-9"
           />
         </div>
-        <select
-          name="lesson"
-          defaultValue={searchParams.get("lesson") ?? ""}
-          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
-        >
-          <option value="">Tüm dersler</option>
-          {lessonOptions.map((lesson) => (
-            <option key={lesson} value={optionValue(lesson)}>
-              {lesson}
-            </option>
-          ))}
-        </select>
-        <select
-          name="city"
-          defaultValue={searchParams.get("city") ?? ""}
-          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
-        >
-          <option value="">Tüm şehirler</option>
-          {cityOptions.map((city) => (
-            <option key={city} value={optionValue(city)}>
-              {city}
-            </option>
-          ))}
-        </select>
+        {/* Lesson — form GET param, use native for submit compatibility */}
+        <PremiumSelect
+          value={searchParams.get("lesson") ?? ""}
+          onChange={(v) => updateParam("lesson", v)}
+          options={lessonSelectOptions}
+        />
+        <PremiumSelect
+          value={searchParams.get("city") ?? ""}
+          onChange={(v) => updateParam("city", v)}
+          options={citySelectOptions}
+        />
         <Button type="submit" className="h-10 bg-brand-orange text-white hover:bg-brand-orange/90">
           <SearchIcon data-icon="inline-start" aria-hidden="true" />
           Ara
         </Button>
       </form>
 
-      {/* Alt satır 1: ilçe, ders türü, sıralama, konum */}
+      {/* Alt satır 1 */}
       <div className="mt-3 grid gap-3 md:grid-cols-4">
-        <select
+        <PremiumSelect
           value={searchParams.get("district") ?? ""}
-          onChange={(e) => updateParam("district", e.target.value)}
-          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
-        >
-          <option value="">Tüm ilçeler</option>
-          {districtOptions.map((district) => (
-            <option key={district} value={optionValue(district)}>
-              {district}
-            </option>
-          ))}
-        </select>
-        <select
+          onChange={(v) => updateParam("district", v)}
+          options={districtSelectOptions}
+        />
+        <PremiumSelect
           value={searchParams.get("deliveryMode") ?? "all"}
-          onChange={(e) => updateParam("deliveryMode", e.target.value)}
-          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
-        >
-          <option value="all">Tüm ders türleri</option>
-          <option value="online">Online</option>
-          <option value="face_to_face">Yüz yüze</option>
-        </select>
-        <select
+          onChange={(v) => updateParam("deliveryMode", v)}
+          options={deliveryOptions}
+        />
+        <PremiumSelect
           value={searchParams.get("sort") ?? "recommended"}
-          onChange={(e) => updateParam("sort", e.target.value)}
-          className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
-        >
-          <option value="recommended">Önerilen</option>
-          <option value="nearest">Yakındaki</option>
-          <option value="highest_rated">En yüksek puan</option>
-          <option value="lowest_price">En düşük ücret</option>
-          <option value="most_reviewed">En çok yorum</option>
-        </select>
+          onChange={(v) => updateParam("sort", v)}
+          options={sortOptions}
+        />
         <Button
           type="button"
           variant="outline"
-          className="h-10 border-brand-navy/20 bg-white text-brand-navy hover:bg-brand-navy hover:text-white"
+          className="h-10 border-slate-200 text-brand-navy hover:bg-brand-navy hover:text-white"
           onClick={useCurrentLocation}
           disabled={locationPending}
         >
@@ -139,10 +138,10 @@ export function SearchFilters() {
         </Button>
       </div>
 
-      {/* Alt satır 2: cinsiyet, fiyat, hızlı yanıt */}
+      {/* Alt satır 2 */}
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-        {/* Cinsiyet */}
-        <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden text-sm">
+        {/* Cinsiyet toggle */}
+        <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-0.5 text-sm">
           {[
             { value: "all", label: "Tümü" },
             { value: "female", label: "Kadın" },
@@ -153,10 +152,10 @@ export function SearchFilters() {
               type="button"
               onClick={() => updateParam("gender", opt.value === "all" ? "" : opt.value)}
               className={cn(
-                "px-3 py-1.5 transition-colors",
+                "rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
                 currentGender === opt.value || (opt.value === "all" && !searchParams.get("gender"))
-                  ? "bg-brand-navy text-white"
-                  : "text-muted-foreground hover:bg-slate-50"
+                  ? "bg-brand-navy text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {opt.label}
@@ -164,25 +163,20 @@ export function SearchFilters() {
           ))}
         </div>
 
-        {/* Fiyat aralığı */}
-        <select
-          value={currentPriceValue}
-          onChange={(e) => handlePriceChange(e.target.value)}
-          className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy"
-        >
-          {priceRanges.map((range) => (
-            <option key={priceRangeValue(range.min, range.max)} value={priceRangeValue(range.min, range.max)}>
-              {range.label}
-            </option>
-          ))}
-        </select>
+        {/* Fiyat */}
+        <PremiumSelect
+          value={currentPriceOption(currentMin, currentMax)}
+          onChange={handlePriceChange}
+          options={priceOptions}
+          className="h-9 min-w-[140px]"
+        />
 
-        {/* Hızlı yanıt toggle */}
+        {/* Hızlı yanıt */}
         <button
           type="button"
           onClick={() => updateParam("fastResponse", fastResponse ? "" : "1")}
           className={cn(
-            "flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm transition-colors",
+            "flex h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-medium transition-all",
             fastResponse
               ? "border-brand-orange bg-brand-orange/10 text-brand-orange"
               : "border-slate-200 bg-white text-muted-foreground hover:bg-slate-50"

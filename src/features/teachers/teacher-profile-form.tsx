@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import { PremiumSelect } from "@/shared/components/ui/premium-select";
 
 type DeliveryMode = "online" | "face_to_face" | "both";
 
@@ -127,17 +128,12 @@ export function TeacherProfileForm({ defaultValues }: TeacherProfileFormProps) {
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-foreground" htmlFor="deliveryMode">Ders Türü</label>
-        <select
-          id="deliveryMode"
+        <label className="text-sm font-medium text-foreground">Ders Türü</label>
+        <PremiumSelect
           value={values.deliveryMode}
-          onChange={(e) => update("deliveryMode", e.target.value as DeliveryMode)}
-          className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          {deliveryModeOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+          onChange={(v) => update("deliveryMode", v as DeliveryMode)}
+          options={deliveryModeOptions}
+        />
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
       {saved && <p className="text-sm font-medium text-green-700">Değişiklikler kaydedildi.</p>}

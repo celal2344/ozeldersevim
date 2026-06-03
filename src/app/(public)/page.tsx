@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   ArrowRightIcon,
-  BookOpenIcon,
   ClockIcon,
   GraduationCapIcon,
   SearchIcon,
@@ -11,6 +14,8 @@ import {
   TagIcon,
   ZapIcon,
 } from "lucide-react";
+
+import { PremiumSelect } from "@/shared/components/ui/premium-select";
 
 import {
   featuredTeacherPreviews,
@@ -26,7 +31,21 @@ const avatarGradients = [
   "from-orange-500 to-red-600",
 ];
 
+const heroLessonOptions = [
+  { value: "", label: "Ders seç" },
+  { value: "matematik", label: "Matematik" },
+  { value: "fizik", label: "Fizik" },
+  { value: "kimya", label: "Kimya" },
+  { value: "ingilizce", label: "İngilizce" },
+  { value: "turkce", label: "Türkçe" },
+  { value: "yazilim", label: "Yazılım" },
+  { value: "lgs", label: "LGS" },
+  { value: "tyt-ayt", label: "TYT / AYT" },
+];
+
 export default function HomePage() {
+  const router = useRouter();
+  const [lesson, setLesson] = useState("");
   return (
     <main>
 
@@ -53,29 +72,23 @@ export default function HomePage() {
             Matematik&apos;ten yazılıma, İngilizce&apos;den TYT/AYT&apos;ye — alanında uzman öğretmenlerle
             online veya yüz yüze birebir ders al.
           </p>
-          <form action="/ogretmen-bul" className="flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
-            <select
-              name="lesson"
-              className="h-12 flex-1 rounded-xl border border-white/15 bg-white/10 px-4 text-sm text-white backdrop-blur focus:outline-none focus:ring-2 focus:ring-brand-orange/60 [&>option]:bg-[#0a0f1e]"
-            >
-              <option value="">Ders seç</option>
-              <option value="matematik">Matematik</option>
-              <option value="fizik">Fizik</option>
-              <option value="kimya">Kimya</option>
-              <option value="ingilizce">İngilizce</option>
-              <option value="turkce">Türkçe</option>
-              <option value="yazilim">Yazılım</option>
-              <option value="lgs">LGS</option>
-              <option value="tyt-ayt">TYT / AYT</option>
-            </select>
+          <div className="flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
+            <PremiumSelect
+              value={lesson}
+              onChange={setLesson}
+              options={heroLessonOptions}
+              variant="dark"
+              className="h-12 flex-1 rounded-xl text-base"
+            />
             <button
-              type="submit"
+              type="button"
+              onClick={() => router.push(`/ogretmen-bul${lesson ? `?lesson=${lesson}` : ""}`)}
               className="flex h-12 items-center justify-center gap-2 rounded-xl bg-brand-orange px-6 text-sm font-semibold text-white shadow-lg shadow-orange-900/30 transition-all hover:bg-orange-400 hover:scale-[1.02] active:scale-[0.98]"
             >
               <SearchIcon className="size-4" aria-hidden="true" />
               Öğretmen Ara
             </button>
-          </form>
+          </div>
           <div className="flex flex-wrap justify-center gap-4 text-xs text-white/50">
             {[
               { icon: ZapIcon, text: "Ücretsiz kayıt" },
