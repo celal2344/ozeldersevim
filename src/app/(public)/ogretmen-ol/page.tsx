@@ -53,8 +53,8 @@ export default function TeacherOnboardingHoldingPage() {
               </div>
             </div>
             <div className="rounded-2xl border border-white/12 bg-brand-navy-muted p-5 text-sm leading-6 text-white/72">
-              Bu branch öğretmen hesabını açar. Öğretmenlik testi ve ilan oluşturma akışı sonraki feature branch içinde
-              panele bağlanacak.
+              Hesabını oluşturduktan sonra öğretmen paneline yönlendirileceksin. İlan oluşturma adımında kısa bir
+              uygunluk testi seni bekleyecek.
             </div>
           </div>
         </div>
