@@ -240,7 +240,7 @@ export default function HomePage() {
                 Öne Çıkan Öğretmenler
               </h2>
               <p className="mt-2 text-muted-foreground">
-                Referans tasarımdaki koyu kart yapısı HTML/CSS ile yeniden kuruldu.
+                Yüksek puanlı ve deneyimli öğretmenler. Hemen ders talebi oluştur.
               </p>
             </div>
             <Link href="/ogretmen-bul" className="hidden text-sm font-medium text-brand-navy hover:text-brand-orange sm:block">

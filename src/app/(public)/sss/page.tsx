@@ -14,15 +14,19 @@ const faqItems = [
     questions: [
       {
         q: "ÖzelDersEvim nedir?",
-        a: "ÖzelDersEvim, öğrencilerin uygun özel ders öğretmenlerini bulmasını ve ders taleplerini kolayca göndermesini sağlayan Türkiye'ye özgü bir özel ders platformudur.",
+        a: "ÖzelDersEvim, öğrencilerin özel ders öğretmenlerini bulmasını ve ders taleplerini kolayca göndermesini sağlayan Türkiye'ye özgü bir platformdur.",
       },
       {
         q: "Platform kullanımı ücretsiz mi?",
-        a: "Evet. Platforma kayıt olmak, öğretmen aramak ve ders talebi göndermek tamamen ücretsizdir. Ödeme, öğrenci ile öğretmen arasında doğrudan gerçekleşir; platform herhangi bir komisyon almaz.",
+        a: "Evet. Kayıt olmak, öğretmen aramak ve ders talebi göndermek tamamen ücretsizdir. Platform herhangi bir komisyon almaz; ödeme öğrenci ile öğretmen arasında doğrudan gerçekleşir.",
+      },
+      {
+        q: "Ücretler nasıl belirleniyor?",
+        a: "Saatlik ücretleri her öğretmen kendisi belirler. Arama sayfasında fiyat filtresi kullanarak bütçenize uygun öğretmenleri bulabilirsiniz.",
       },
       {
         q: "Hangi dersler için öğretmen bulabilirim?",
-        a: "Matematik, Fizik, Kimya, Biyoloji, İngilizce, Türkçe, Yazılım, LGS hazırlık, TYT/AYT hazırlığı başta olmak üzere yüzlerce farklı ders kategorisinde öğretmen bulabilirsiniz.",
+        a: "Matematik, Fizik, Kimya, Biyoloji, İngilizce, Türkçe, Yazılım, LGS ve TYT/AYT hazırlığı başta olmak üzere pek çok ders kategorisinde öğretmen bulabilirsiniz.",
       },
     ],
   },
@@ -31,11 +35,11 @@ const faqItems = [
     questions: [
       {
         q: "Nasıl ders talebi gönderebilirim?",
-        a: "Önce ücretsiz öğrenci hesabı oluşturun. Ardından bir öğretmenin profilinden 'Ders Talep Et' butonuna tıklayın ve talep formunu doldurun. Öğretmen talebinizi inceleyip kabul ya da reddeder.",
+        a: "Önce ücretsiz öğrenci hesabı oluşturun. Bir öğretmenin profilinden 'Hızlı Talep Oluştur' veya 'Ders Talep Et' butonuna tıklayın ve formu doldurun. Öğretmen talebinizi inceleyip kabul ya da reddeder.",
       },
       {
         q: "Öğretmen talebimi kabul edince ne olur?",
-        a: "Öğretmen talebinizi kabul ettiğinde iletişim bilgileriniz öğretmenle paylaşılır. Bu noktadan sonra ders programınızı doğrudan öğretmeninizle planlayabilirsiniz.",
+        a: "Öğretmen talebinizi kabul ettiğinde iletişim bilgileriniz öğretmenle paylaşılır ve öğretmen sizinle doğrudan iletişime geçer.",
       },
       {
         q: "Birden fazla öğretmene talep gönderebilir miyim?",
@@ -56,15 +60,15 @@ const faqItems = [
       },
       {
         q: "İlan oluşturmak için öğretmenlik testi şart mı?",
-        a: "Evet. İlan oluşturabilmek için kısa bir öğretmenlik uygunluk testini geçmeniz gerekir. Hesabı açmak için test gerekmez; sadece ilan yayınlama adımında sorulur.",
+        a: "Evet. İlan yayınlayabilmek için kısa bir uygunluk testini geçmeniz gerekir. Hesabı açmak için test gerekmez; yalnızca ilan yayınlama adımında uygulanır.",
       },
       {
-        q: "Platform benden komisyon alıyor mu?",
+        q: "Platform komisyon alıyor mu?",
         a: "Hayır. ÖzelDersEvim herhangi bir komisyon almaz. Ücretlendirme tamamen öğrenci ile öğretmen arasında gerçekleşir.",
       },
       {
         q: "Online ders verebilir miyim?",
-        a: "Evet. İlanınızda 'Online', 'Yüz Yüze' ya da her ikisini birden seçebilirsiniz. Online dersler için platform bir video görüşme aracı sağlamaz; Zoom, Meet gibi araçları kendiniz kullanabilirsiniz.",
+        a: "Evet. İlanınızda 'Online', 'Yüz Yüze' ya da her ikisini birden seçebilirsiniz. Platform video görüşme aracı sağlamaz; Zoom veya Meet gibi araçları kendiniz kullanabilirsiniz.",
       },
     ],
   },
@@ -73,17 +77,17 @@ const faqItems = [
     questions: [
       {
         q: "İletişim bilgilerim güvende mi?",
-        a: "Öğrencinin telefon ve e-posta bilgileri yalnızca öğretmen ders talebini kabul ettikten sonra öğretmenle paylaşılır. Talep reddedilirse veya beklemedeyse bilgileriniz öğretmene görünmez.",
+        a: "Öğrencinin telefon ve e-posta bilgileri yalnızca öğretmen ders talebini kabul ettikten sonra öğretmenle paylaşılır. Talep reddedilirse veya beklemedeyse bu bilgiler öğretmene görünmez.",
       },
       {
         q: "Hesabımı nasıl silebilirim?",
-        a: "Hesap silme taleplerini iletisim@ozeldersevim.com adresine e-posta göndererek iletebilirsiniz. Talebiniz en geç 7 iş günü içinde işleme alınır.",
+        a: "Hesap silme taleplerini destek@ozeldersevim.com adresine e-posta göndererek iletebilirsiniz. Talebiniz en geç 7 iş günü içinde işleme alınır.",
       },
     ],
   },
 ];
 
-export default function SSSSayfasi() {
+export default function SSSPage() {
   return (
     <main className="bg-slate-50">
       <section className="bg-brand-navy px-4 py-14 text-white sm:px-6">

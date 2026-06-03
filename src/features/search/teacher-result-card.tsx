@@ -75,7 +75,7 @@ export function TeacherResultCard({ teacher }: { teacher: TeacherSearchResult })
           {teacher.activeStudents !== undefined && teacher.activeStudents > 0 ? (
             <span className="flex items-center gap-1.5">
               <UsersIcon className="size-3.5 shrink-0 text-brand-orange" aria-hidden="true" />
-              {teacher.activeStudents} aktif öğrenci
+              {teacher.activeStudents} öğrenci
             </span>
           ) : null}
           {teacher.distanceKm !== undefined ? (

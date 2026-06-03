@@ -58,10 +58,10 @@ export const popularHomepageLessons: HomepageLesson[] = [
 ];
 
 export const homepageStats: HomepageStat[] = [
-  { label: "Mutlu Öğrenci", value: "10.000+", icon: UsersIcon },
+  { label: "Kayıtlı Öğrenci", value: "10.000+", icon: UsersIcon },
   { label: "Uzman Öğretmen", value: "1.500+", icon: GraduationCapIcon },
-  { label: "Tamamlanan Ders", value: "25.000+", icon: MonitorPlayIcon },
-  { label: "Öğrenci Memnuniyeti", value: "4.9/5", icon: StarIcon },
+  { label: "Verilen Ders", value: "25.000+", icon: MonitorPlayIcon },
+  { label: "Ortalama Puan", value: "4.9 / 5", icon: StarIcon },
 ];
 
 export const featuredTeacherPreviews: FeaturedTeacherPreview[] = [
@@ -97,14 +97,14 @@ export const featuredTeacherPreviews: FeaturedTeacherPreview[] = [
 
 export const heroFeatures: HeroFeature[] = [
   { label: "Esnek Ders Saatleri", icon: CalendarDaysIcon },
-  { label: "Birebir İletişim", icon: UsersIcon },
+  { label: "Birebir Destek", icon: UsersIcon },
   { label: "Güvenli Altyapı", icon: ShieldCheckIcon },
-  { label: "Konumlu Arama", icon: SearchIcon },
+  { label: "Konuma Göre Arama", icon: SearchIcon },
 ];
 
 export const platformBenefits: PlatformBenefit[] = [
   { title: "Esnek Ders Saatleri", text: "Dilediğin zaman planla", icon: Clock3Icon },
-  { title: "Birebir İletişim", text: "Öğretmeninle net akış", icon: UsersIcon },
-  { title: "Güvenli Altyapı", text: "Kontrollü başvuru süreci", icon: ShieldCheckIcon },
-  { title: "Raporlama Sistemi", text: "Gelişimi takip et", icon: CheckCircle2Icon },
+  { title: "Doğrudan İletişim", text: "Öğretmeninle birebir çalış", icon: UsersIcon },
+  { title: "Güvenli Platform", text: "İletişim bilgilerin korumalı", icon: ShieldCheckIcon },
+  { title: "Kolay Takip", text: "Taleplerinizi panelden izleyin", icon: CheckCircle2Icon },
 ];
