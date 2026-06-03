@@ -13,6 +13,7 @@ const adminNavItems = [
   { href: "/admin", label: "Genel Bakış" },
   { href: "/admin/ogretmenler", label: "Öğretmenler" },
   { href: "/admin/yorumlar", label: "Yorumlar" },
+  { href: "/admin/analitik", label: "Analitik" },
 ];
 
 export function AdminShell({ account, children }: AdminShellProps) {
