@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpenIcon, MapPinIcon, SearchIcon, StarIcon, UsersIcon, GraduationCapIcon } from "lucide-react";
+import { ArrowRightIcon, BookOpenIcon, GraduationCapIcon, MapPinIcon, SearchIcon, StarIcon, UsersIcon } from "lucide-react";
 
 import { getLessonPage, lessonPageSlugs } from "@/features/seo/lesson-pages";
 import { absoluteUrl } from "@/features/seo/site";
 import { searchTeachers } from "@/features/search/search-service";
 import { teacherDeliveryLabels } from "@/features/search/constants";
 import { initialsFromTeacherName, reviewLabel } from "@/features/search/utils";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/shared/components/ui/card";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
+
+const avatarGradients = [
+  "from-violet-500 to-purple-700",
+  "from-brand-orange to-orange-600",
+  "from-emerald-500 to-teal-600",
+  "from-blue-500 to-cyan-600",
+];
 
 export function generateStaticParams() {
   return lessonPageSlugs.map((slug) => ({ slug }));
@@ -23,26 +28,19 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const lesson = getLessonPage(slug);
-
   if (!lesson) return { title: "Sayfa Bulunamadı" };
-
   return {
     title: lesson.title,
     description: lesson.description,
     keywords: lesson.keywords,
     alternates: { canonical: `/ozel-ders/${slug}` },
-    openGraph: {
-      title: `${lesson.title} | Özel Ders Evim`,
-      description: lesson.description,
-      url: absoluteUrl(`/ozel-ders/${slug}`),
-    },
+    openGraph: { title: `${lesson.title} | Özel Ders Evim`, description: lesson.description, url: absoluteUrl(`/ozel-ders/${slug}`) },
   };
 }
 
 export default async function LessonLandingPage({ params }: PageProps) {
   const { slug } = await params;
   const lesson = getLessonPage(slug);
-
   if (!lesson) notFound();
 
   const jsonLd = {
@@ -55,204 +53,143 @@ export default async function LessonLandingPage({ params }: PageProps) {
     ],
   };
 
-  const { data: teachers } = searchTeachers({
-    lesson: lesson.name.toLocaleLowerCase("tr-TR"),
-    pageSize: 4,
-  });
+  const { data: teachers } = searchTeachers({ lesson: lesson.name.toLocaleLowerCase("tr-TR"), pageSize: 4 });
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <section className="bg-brand-navy text-white">
-        <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
-          <div className="mb-4 flex justify-center">
-            <Badge className="bg-brand-orange/20 text-brand-orange text-sm px-3 py-1">
-              <BookOpenIcon className="size-3.5 mr-1" aria-hidden="true" />
-              {lesson.name} Özel Ders
-            </Badge>
+      {/* ── HERO ── */}
+      <section className="relative overflow-hidden bg-[#0a0f1e] text-white">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_-10%,rgba(251,115,22,0.22),transparent)]" />
+        <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-6">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-1.5 text-sm text-white/80 backdrop-blur">
+            <BookOpenIcon className="size-3.5 text-brand-orange" aria-hidden="true" />
+            {lesson.name} Özel Ders
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-            {lesson.title} Öğretmeni Bul
+          <h1 className="text-4xl font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+            {lesson.title}{" "}
+            <span className="bg-gradient-to-r from-brand-orange to-orange-300 bg-clip-text text-transparent">Öğretmeni Bul</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-7 text-white/75">
-            {lesson.description}
-          </p>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-7 text-white/60">{lesson.description}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button
-              size="lg"
-              className="h-11 bg-brand-orange text-white hover:bg-brand-orange/90"
-              nativeButton={false}
-              render={<Link href={`/ogretmen-bul?lesson=${slug}`} />}
-            >
-              <SearchIcon data-icon="inline-start" aria-hidden="true" />
+            <a href={`/ogretmen-bul?lesson=${slug}`} className="inline-flex h-12 items-center gap-2 rounded-xl bg-brand-orange px-6 text-sm font-bold text-white shadow-lg shadow-orange-900/30 transition-all hover:bg-orange-400 hover:scale-[1.02]">
+              <SearchIcon className="size-4" aria-hidden="true" />
               Tüm Öğretmenleri Gör
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-11 border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
-              nativeButton={false}
-              render={<Link href="/kayit" />}
-            >
+            </a>
+            <a href="/kayit" className="inline-flex h-12 items-center gap-2 rounded-xl border border-white/15 bg-white/8 px-6 text-sm font-bold text-white backdrop-blur transition-all hover:bg-white/15">
               Ücretsiz Kayıt Ol
-            </Button>
+            </a>
           </div>
         </div>
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#f8f9fe] to-transparent" />
       </section>
 
+      {/* ── ÖĞRETMENLER ── */}
       {teachers.length > 0 && (
-        <section className="bg-white px-4 py-12 sm:px-6">
+        <section className="px-4 py-14 sm:px-6" style={{ background: "linear-gradient(180deg,#f8f9fe 0%,#f0f4ff 100%)" }}>
           <div className="mx-auto max-w-5xl">
-            <h2 className="mb-6 text-2xl font-bold text-brand-navy">
-              {lesson.name} Öğretmenleri
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
-              {teachers.map((teacher) => (
-                <Card key={teacher.id} className="overflow-hidden ring-1 ring-slate-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-navy text-sm font-bold text-white">
-                        {initialsFromTeacherName(teacher.fullName)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-brand-navy truncate">{teacher.fullName}</p>
-                        <p className="text-xs text-muted-foreground truncate">{teacher.headline}</p>
-                        <div className="mt-0.5 flex items-center gap-1">
-                          <StarIcon className="size-3 fill-yellow-400 text-yellow-400" aria-hidden="true" />
-                          <span className="text-xs text-muted-foreground">{reviewLabel(teacher)}</span>
-                        </div>
-                      </div>
-                      <p className="ml-auto text-base font-bold text-brand-orange shrink-0">
-                        ₺{teacher.hourlyPrice}<span className="text-xs font-normal text-muted-foreground">/saat</span>
-                      </p>
+            <div className="mb-8">
+              <p className="text-xs font-bold uppercase tracking-widest text-brand-orange">Öğretmenler</p>
+              <h2 className="mt-1 text-2xl font-extrabold text-brand-navy">{lesson.name} Öğretmenleri</h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {teachers.map((teacher, i) => (
+                <div key={teacher.id} className="group flex flex-col overflow-hidden rounded-2xl border border-white bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60">
+                  <div className="flex items-center gap-4 p-5">
+                    <div className={`flex size-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${avatarGradients[i % avatarGradients.length]} text-sm font-extrabold text-white shadow-lg`}>
+                      {initialsFromTeacherName(teacher.fullName)}
                     </div>
-                  </CardHeader>
-                  <CardContent className="pb-3 pt-0">
-                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <MapPinIcon className="size-3 text-brand-orange" aria-hidden="true" />
-                        {teacher.city}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <GraduationCapIcon className="size-3 text-brand-orange" aria-hidden="true" />
-                        {teacher.experienceYears} yıl
-                      </span>
-                      <span>{teacherDeliveryLabels[teacher.deliveryMode]}</span>
-                      {teacher.activeStudents ? (
-                        <span className="flex items-center gap-1">
-                          <UsersIcon className="size-3 text-brand-orange" aria-hidden="true" />
-                          {teacher.activeStudents} öğrenci
-                        </span>
-                      ) : null}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-brand-navy truncate group-hover:text-brand-orange transition-colors">{teacher.fullName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{teacher.headline}</p>
+                      <div className="mt-1 flex items-center gap-1">
+                        <StarIcon className="size-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
+                        <span className="text-xs font-medium text-muted-foreground">{reviewLabel(teacher)}</span>
+                      </div>
                     </div>
-                  </CardContent>
-                  <CardFooter className="gap-2 border-t bg-slate-50/60 pt-3">
-                    <Button
-                      size="sm"
-                      className="flex-1 bg-brand-orange text-white hover:bg-brand-orange/90"
-                      nativeButton={false}
-                      render={<Link href={`/ders-talebi?teacher=${teacher.slug}`} />}
-                    >
+                    <div className="text-right">
+                      <p className="text-lg font-extrabold text-brand-orange">₺{teacher.hourlyPrice}</p>
+                      <p className="text-xs text-muted-foreground">/saat</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-3 px-5 pb-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1"><MapPinIcon className="size-3 text-brand-orange" />{teacher.city}</span>
+                    <span className="flex items-center gap-1"><GraduationCapIcon className="size-3 text-brand-orange" />{teacher.experienceYears} yıl</span>
+                    <span>{teacherDeliveryLabels[teacher.deliveryMode]}</span>
+                    {teacher.activeStudents ? <span className="flex items-center gap-1"><UsersIcon className="size-3 text-brand-orange" />{teacher.activeStudents} öğrenci</span> : null}
+                  </div>
+                  <div className="flex gap-2 border-t border-slate-100 bg-slate-50/50 p-4">
+                    <a href={`/ders-talebi?teacher=${teacher.slug}`} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-brand-orange py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-orange-400">
                       Hızlı Talep Oluştur
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      nativeButton={false}
-                      render={<Link href={`/ogretmen/${teacher.slug}`} />}
-                    >
+                    </a>
+                    <a href={`/ogretmen/${teacher.slug}`} className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-brand-navy hover:bg-slate-50 transition-colors">
                       Profili Gör
-                    </Button>
-                  </CardFooter>
-                </Card>
+                    </a>
+                  </div>
+                </div>
               ))}
             </div>
-            <div className="mt-6 text-center">
-              <Button
-                variant="outline"
-                className="border-brand-navy/20 text-brand-navy hover:bg-brand-navy hover:text-white"
-                nativeButton={false}
-                render={<Link href={`/ogretmen-bul?lesson=${slug}`} />}
-              >
-                Tüm {lesson.name} Öğretmenlerini Gör
-              </Button>
+            <div className="mt-8 text-center">
+              <a href={`/ogretmen-bul?lesson=${slug}`} className="inline-flex items-center gap-2 rounded-xl bg-brand-navy px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand-navy/20 transition-all hover:bg-brand-navy/90 hover:scale-[1.02]">
+                Tüm {lesson.name} Öğretmenlerini Gör <ArrowRightIcon className="size-4" />
+              </a>
             </div>
           </div>
         </section>
       )}
 
-      <section className="bg-slate-50 px-4 py-12 sm:px-6">
+      {/* ── BİLGİ ── */}
+      <section className="px-4 py-14 sm:px-6" style={{ background: "linear-gradient(180deg,#f0f4ff 0%,#e8eeff 100%)" }}>
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
             <div className="flex flex-col gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{lesson.name} Özel Dersi Neden Önemli?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-7 text-muted-foreground">{lesson.intro}</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Online veya Yüz Yüze Ders</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200 p-4">
-                      <p className="font-medium text-brand-navy">Online Ders</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Türkiye'nin her yerinden öğretmenlerle bağlanın. Kendi ortamınızda ders alın.
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-slate-200 p-4">
-                      <p className="font-medium text-brand-navy">Yüz Yüze Ders</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Şehrinizdeki öğretmenlerle daha yüksek etkileşimli dersler alın.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <aside className="flex flex-col gap-4">
-              <Card className="bg-brand-navy text-white">
-                <CardHeader>
-                  <CardTitle className="text-white">Nasıl Çalışır?</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3 text-sm text-white/75">
-                  {["Öğretmen profillerini incele.", "Ders talebi gönder.", "Öğretmen kabul edince sizi arar.", "Ders programınızı birlikte planlayın."].map((step, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-brand-orange text-xs font-bold text-white">{i + 1}</span>
-                      <span>{step}</span>
+              <div className="rounded-2xl border border-white bg-white p-7 shadow-sm">
+                <h2 className="mb-1 flex items-center gap-2 text-lg font-bold text-brand-navy">
+                  <span className="h-5 w-1 rounded-full bg-brand-orange" />
+                  {lesson.name} Özel Dersi Neden Önemli?
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{lesson.intro}</p>
+              </div>
+              <div className="rounded-2xl border border-white bg-white p-7 shadow-sm">
+                <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-brand-navy">
+                  <span className="h-5 w-1 rounded-full bg-violet-500" />
+                  Online veya Yüz Yüze
+                </h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    { title: "Online Ders", text: "Türkiye'nin her yerinden öğretmenlerle bağlanın. Kendi ortamınızda ders alın." },
+                    { title: "Yüz Yüze Ders", text: "Şehrinizdeki öğretmenlerle daha yüksek etkileşimli dersler alın." },
+                  ].map(({ title, text }) => (
+                    <div key={title} className="rounded-xl bg-slate-50 p-4">
+                      <p className="font-semibold text-brand-navy">{title}</p>
+                      <p className="mt-1 text-xs text-muted-foreground leading-5">{text}</p>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Hemen Başla</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                  <p className="text-sm text-muted-foreground">
-                    {lesson.name.toLowerCase()} öğretmenlerini keşfet ve ders talebi gönder.
-                  </p>
-                  <Button
-                    className="bg-brand-orange text-white hover:bg-brand-orange/90"
-                    nativeButton={false}
-                    render={<Link href={`/ogretmen-bul?lesson=${slug}`} />}
-                  >
-                    <MapPinIcon data-icon="inline-start" aria-hidden="true" />
-                    {lesson.name} Öğretmeni Ara
-                  </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </div>
+            <aside className="flex flex-col gap-5">
+              <div className="overflow-hidden rounded-2xl bg-[#0a0f1e] shadow-xl shadow-black/20">
+                <div className="border-b border-white/8 px-6 py-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-brand-orange">Nasıl Çalışır?</p>
+                </div>
+                <div className="px-6 py-5">
+                  <div className="flex flex-col gap-4">
+                    {["Öğretmen profillerini incele.", "Ders talebi gönder.", "Öğretmen kabul edince seni arar.", "Ders programınızı birlikte planlayın."].map((step, i) => (
+                      <div key={i} className="flex items-start gap-3 text-sm text-white/65">
+                        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-orange text-xs font-bold text-white">{i + 1}</span>
+                        {step}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <a href={`/ogretmen-bul?lesson=${slug}`} className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-brand-orange text-sm font-bold text-white shadow-lg shadow-orange-200 transition-all hover:bg-orange-400 hover:scale-[1.01]">
+                <MapPinIcon className="size-4" aria-hidden="true" />
+                {lesson.name} Öğretmeni Ara
+              </a>
             </aside>
           </div>
         </div>
