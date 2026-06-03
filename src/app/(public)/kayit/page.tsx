@@ -20,13 +20,13 @@ export const metadata = {
 const teacherBenefits = [
   "Kendi saatini ve ücretini belirle",
   "Binlerce öğrenciye ulaş",
-  "Aracı kurum olmadan kazan",
+  "Komisyonsuz, bağımsız çalış",
   "Online veya yüz yüze ders ver",
 ];
 
 const studentBenefits = [
   "Yüzlerce öğretmen arasından seç",
-  "Ders talebi gönder, öğretmen seni bulsun",
+  "Ders talebi gönder, öğretmen seni arasın",
   "Online veya yüz yüze ders al",
   "Tamamen ücretsiz kayıt",
 ];

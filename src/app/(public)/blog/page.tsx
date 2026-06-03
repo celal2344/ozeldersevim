@@ -1,21 +1,24 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { ClockIcon, TagIcon } from "lucide-react";
+import { useState } from "react";
 
 import { blogCategories, blogPosts } from "@/features/blog/constants";
 import { Badge } from "@/shared/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 
-export const metadata: Metadata = {
-  title: "Blog | ÖzelDersEvim",
-  description: "Özel ders, sınav hazırlığı ve eğitim hakkında rehber içerikler.",
-};
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
-}
-
 export default function BlogPage() {
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  const filtered = activeCategory
+    ? blogPosts.filter((p) => p.category === activeCategory)
+    : blogPosts;
+
+  function formatDate(iso: string) {
+    return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  }
+
   return (
     <main className="bg-slate-50">
       <section className="bg-brand-navy px-4 py-14 text-white sm:px-6">
@@ -30,18 +33,33 @@ export default function BlogPage() {
 
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="mb-6 flex flex-wrap gap-2">
-          <Badge variant="default" className="cursor-pointer bg-brand-navy text-white">
+          <button
+            onClick={() => setActiveCategory(null)}
+            className={`inline-flex h-6 items-center rounded-full border px-3 text-xs font-medium transition-colors ${
+              activeCategory === null
+                ? "border-transparent bg-brand-navy text-white"
+                : "border-border bg-white text-foreground hover:bg-muted"
+            }`}
+          >
             Tümü
-          </Badge>
+          </button>
           {blogCategories.map((cat) => (
-            <Badge key={cat} variant="outline" className="cursor-pointer hover:bg-brand-navy hover:text-white">
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat === activeCategory ? null : cat)}
+              className={`inline-flex h-6 items-center rounded-full border px-3 text-xs font-medium transition-colors ${
+                activeCategory === cat
+                  ? "border-transparent bg-brand-orange text-white"
+                  : "border-border bg-white text-foreground hover:bg-muted"
+              }`}
+            >
               {cat}
-            </Badge>
+            </button>
           ))}
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {blogPosts.map((post) => (
+          {filtered.map((post) => (
             <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
               <Card className="h-full transition-shadow group-hover:shadow-md">
                 <CardHeader className="pb-2">

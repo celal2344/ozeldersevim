@@ -227,7 +227,7 @@ export default async function LessonLandingPage({ params }: PageProps) {
                   <CardTitle className="text-white">Nasıl Çalışır?</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3 text-sm text-white/75">
-                  {["Öğretmen profillerini incele.", "Ders talebi gönder.", "Öğretmen kabul edince iletişime geç.", "Dersinizi planlayın."].map((step, i) => (
+                  {["Öğretmen profillerini incele.", "Ders talebi gönder.", "Öğretmen kabul edince sizi arar.", "Ders programınızı birlikte planlayın."].map((step, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-brand-orange text-xs font-bold text-white">{i + 1}</span>
                       <span>{step}</span>
