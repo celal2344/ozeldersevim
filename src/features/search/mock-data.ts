@@ -17,6 +17,8 @@ export const teacherSearchSeed: TeacherSearchResult[] = teacherProfileSeed.map((
   ratingAverage: teacher.ratingAverage,
   reviewCount: teacher.reviewCount,
   experienceYears: teacher.experienceYears,
+  completedLessons: teacher.completedLessonCount,
+  activeStudents: teacher.activeStudentCount,
 }));
 
 export const lessonOptions = ["Matematik", "Fizik", "Kimya", "İngilizce", "Türkçe", "Yazılım", "LGS", "TYT / AYT"];
