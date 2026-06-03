@@ -316,6 +316,66 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /admin/teacher-profiles/{id}/status:
+    post:
+      summary: Update a teacher profile status (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [published, suspended, draft]
+      responses:
+        "200":
+          description: Status updated
+        "403":
+          description: Not admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/reviews/{id}/status:
+    post:
+      summary: Update a review status (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [published, rejected]
+      responses:
+        "200":
+          description: Status updated
+        "403":
+          description: Not admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /reviews:
     post:
       summary: Submit a review for an accepted lesson request (student only)
