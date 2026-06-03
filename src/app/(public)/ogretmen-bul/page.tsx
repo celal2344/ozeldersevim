@@ -35,20 +35,21 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
   });
 
   return (
-    <main className="bg-slate-50">
-      <section className="relative overflow-hidden border-b border-white/10 bg-brand-navy text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(251,115,22,0.26),transparent_26%)]" />
+    <main>
+      <section className="relative overflow-hidden bg-[#0a0f1e] text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_70%_0%,rgba(251,115,22,0.18),transparent)]" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
         <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-14 sm:px-6 lg:px-8">
-          <p className="text-sm text-brand-orange">Öğretmen Bul</p>
-          <h1 className="max-w-4xl text-4xl font-bold tracking-tight text-balance">
-            Özel ders öğretmeni bul, puana göre karşılaştır, hemen talep gönder.
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-orange">Öğretmen Bul</p>
+          <h1 className="max-w-3xl text-4xl font-extrabold tracking-tight text-balance lg:text-5xl">
+            Özel ders öğretmeni bul, puana göre karşılaştır.
           </h1>
-          <p className="max-w-2xl text-sm leading-6 text-white/72">
+          <p className="max-w-xl text-sm leading-6 text-white/55">
             {response.meta.total > 0 ? `${response.meta.total} öğretmen listelendi.` : "Filtrelerinize uygun öğretmen bulunamadı."} Konum erişimine izin verirseniz yakındaki öğretmenleri mesafeye göre sıralayabilirsiniz.
           </p>
         </div>
       </section>
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8" style={{ background: "linear-gradient(180deg,#f8f9fe 0%,#f0f4ff 100%)" }}>
         <SearchFilters />
         {response.data.length > 0 ? (
           <div className="grid gap-4 lg:grid-cols-2">
