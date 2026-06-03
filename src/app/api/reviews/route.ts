@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getCurrentAccount } from "@/features/auth/service";
+import { trackEvent } from "@/features/analytics/track";
 import { createSupabaseServerClient } from "@/shared/db/supabase/server";
 
 const submitReviewSchema = z.object({
@@ -71,6 +72,8 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ message: insertError.message }, { status: 500 });
   }
+
+  await trackEvent(supabase, "review_submitted", { rating, lessonRequestId }, account.id);
 
   return NextResponse.json({ reviewId: review.id, rating: review.rating, status: review.status });
 }
