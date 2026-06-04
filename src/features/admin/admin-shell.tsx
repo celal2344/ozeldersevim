@@ -41,6 +41,13 @@ export function AdminShell({ account, children }: AdminShellProps) {
             </nav>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+                  key="/"
+                  href="/"
+                  className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                >
+                  Siteye dön
+                </Link>
             <span className="hidden text-xs text-muted-foreground sm:block">{account.email}</span>
             <LogoutButton />
           </div>

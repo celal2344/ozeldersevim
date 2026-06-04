@@ -5,7 +5,7 @@ import type { DashboardPageContent, DashboardRoleConfig } from "@/features/dashb
 export const studentDashboardConfig: DashboardRoleConfig = {
   role: "student",
   label: "Öğrenci Paneli",
-  homeHref: "/ogrenci/panel",
+  homeHref: "/",
   navItems: [
     { href: "/ogrenci/panel", icon: SearchIcon, label: "Genel Bakış", pageId: "student-home" },
     { href: "/ogrenci/panel/talepler", icon: ClipboardListIcon, label: "Ders Taleplerim", pageId: "student-requests" },
