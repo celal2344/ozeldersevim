@@ -24,6 +24,7 @@ export function defaultSignupRedirectForRole(role: AppRole) {
 }
 
 export function panelPathForRole(role: AppRole) {
+  if (role === "admin") return "/admin";
   if (role === "student") return studentPanelPath;
   if (role === "teacher") return teacherPanelPath;
   return "/";

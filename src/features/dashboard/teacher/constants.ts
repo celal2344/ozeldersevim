@@ -13,7 +13,7 @@ import type { DashboardPageContent, DashboardRoleConfig } from "@/features/dashb
 export const teacherDashboardConfig: DashboardRoleConfig = {
   role: "teacher",
   label: "Öğretmen Paneli",
-  homeHref: "/ogretmen/panel",
+  homeHref: "/",
   navItems: [
     { href: "/ogretmen/panel", icon: GraduationCapIcon, label: "Genel Bakış", pageId: "teacher-home" },
     { href: "/ogretmen/panel/talepler", icon: ClipboardCheckIcon, label: "Ders Talepleri", pageId: "teacher-requests" },
