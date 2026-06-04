@@ -119,7 +119,7 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Applied pending remote migrations to project `hhddeqgvrnyxnwetetdc`:
   - `20260603120000_admin_write_policies.sql`
   - `20260603130000_analytics_events.sql`
-- Fixed `supabase/seed.sql` Turkish seed text to valid UTF-8 before applying it remotely.
+- Confirmed `supabase/seed.sql` Turkish seed text is valid UTF-8 before applying it remotely.
 - Ran the production-safe reference seed against the linked Supabase project.
 - Verified remote reference data through Supabase service-role reads:
   - `locations`: 5 rows.
