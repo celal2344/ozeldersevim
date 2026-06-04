@@ -38,8 +38,8 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Communication: no in-site chat for MVP. When a teacher accepts a lesson request, the student's contact details are shared with the teacher.
 - Delivery modes: both online and face-to-face are supported. For online lessons, teachers/students manage their own meeting links externally.
 - Search location model: support both city/district filtering and location-based nearby search.
-- Seed data: include Erzurum and random test data covering different cases.
-- Production seed data must not create fake users, fake teachers, fake listings, fake reviews, or fake marketplace stats. Keep production seeds to reference data such as locations, lesson categories, and teacher eligibility test content.
+- Seed data: `supabase/seed.sql` is now a full demo seed for the current Supabase project. It includes Erzurum plus varied demo cases across profiles, teachers, listings, lesson requests, lessons, reviews, favorites, notifications, analytics, and admin audit logs.
+- Demo seed data is not real production marketplace data. Do not present seeded teachers, students, listings, reviews, or analytics as real user activity. Create a separate production-safe reference seed if the project later needs one.
 - Vocabulary split: use this file for product/domain vocabulary and `LANGUAGE.md` for architecture vocabulary and rules.
 - Documentation maintenance: whenever a critical codebase rule, architecture rule, domain decision, or workflow decision is given, update the relevant Markdown documentation in the same change.
 - `CONTEXT.md` is the required linear project tracker. Every agent that changes this project must update this file in the same work session with the latest completed work, current in-progress state, next todos, blockers/conflicts, and relevant branch/commit references. Do not leave progress only in chat, temporary handoff files, or commit messages.
@@ -129,7 +129,48 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
   - `teacher_eligibility_choices`: 12 rows.
   - `analytics_events`: 0 rows, expected immediately after migration.
 - Verified seeded Turkish text renders correctly for locations, lesson categories, and teacher eligibility prompts.
-- Do not add fake production users, teachers, listings, reviews, or marketplace stats to `supabase/seed.sql`.
+- At that time `supabase/seed.sql` was reference-only; this was superseded later the same day by the full demo seed request below.
+
+### 2026-06-04 - Full Demo Seed Added
+
+- Expanded `supabase/seed.sql` from reference-only data into a full deterministic demo seed.
+- Seed now includes:
+  - 1 admin application profile.
+  - 7 teacher application profiles.
+  - 4 student application profiles.
+  - 7 teacher eligibility attempts.
+  - 7 teacher profiles, including 6 published profiles and 1 draft profile for admin/moderation cases.
+  - 15 teacher lesson mappings.
+  - 7 teacher listings, including 6 public listings and 1 unpublished draft listing.
+  - 13 lesson requests covering accepted, submitted, and rejected statuses.
+  - 13 lesson request contact rows.
+  - 11 lesson rows covering completed and scheduled statuses.
+  - 11 reviews covering published and pending statuses.
+  - 6 favorites.
+  - 4 notifications.
+  - 4 analytics events.
+  - 2 admin audit log rows.
+- Applied the expanded seed to remote project `hhddeqgvrnyxnwetetdc`.
+- Verified remote counts through Supabase service-role reads:
+  - `profiles`: 17 total rows at verification time, including existing profiles plus demo rows.
+  - `student_profiles`: 6 total rows at verification time.
+  - `locations`: 5 rows.
+  - `lesson_categories`: 8 rows.
+  - `teacher_eligibility_tests`: 1 row.
+  - `teacher_eligibility_attempts`: 7 rows.
+  - `teacher_profiles`: 7 rows.
+  - `teacher_lessons`: 15 rows.
+  - `teacher_listings`: 7 rows.
+  - `lesson_requests`: 13 rows.
+  - `lesson_request_contacts`: 13 rows.
+  - `lessons`: 11 rows.
+  - `reviews`: 11 rows.
+  - `favorites`: 6 rows.
+  - `notifications`: 4 rows.
+  - `analytics_events`: 4 rows.
+  - `admin_audit_logs`: 2 rows.
+- `supabase/seed.sql` remains idempotent by deleting deterministic demo profile IDs and demo analytics/audit records before re-inserting.
+- Seed does not create Supabase Auth users. Demo application profile rows exist for marketplace data; login-capable demo users require a separate Auth/admin API seed script.
 
 ### 2026-06-04 - Latest Commit Review
 
@@ -150,7 +191,7 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 
 - Supabase/Vercel prerender handling fixed so public auth/session reads can render signed-out when public Supabase env is absent.
 - `main` was ancestry-merged into `dev` with the `ours` strategy to keep `dev` from appearing behind while preserving the newer `dev` app flow.
-- Production database was seeded with production-safe reference data only: locations, lesson categories, and teacher eligibility test content.
+- Remote Supabase was seeded with a full demo marketplace dataset on 2026-06-04.
 - Remote Supabase migrations are current through `20260603130000_analytics_events.sql`.
 - Fake production profile IDs from the older seed were removed from production.
 - Runtime mock teacher/search seed files were removed locally in `6a3e7d2`.
