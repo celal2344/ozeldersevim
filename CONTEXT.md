@@ -1,6 +1,6 @@
 # Ozel Ders Evim - Project Context
 
-Last updated: 2026-06-01
+Last updated: 2026-06-04
 
 ## Product Summary
 
@@ -42,12 +42,15 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Production seed data must not create fake users, fake teachers, fake listings, fake reviews, or fake marketplace stats. Keep production seeds to reference data such as locations, lesson categories, and teacher eligibility test content.
 - Vocabulary split: use this file for product/domain vocabulary and `LANGUAGE.md` for architecture vocabulary and rules.
 - Documentation maintenance: whenever a critical codebase rule, architecture rule, domain decision, or workflow decision is given, update the relevant Markdown documentation in the same change.
+- `CONTEXT.md` is the required linear project tracker. Every agent that changes this project must update this file in the same work session with the latest completed work, current in-progress state, next todos, blockers/conflicts, and relevant branch/commit references. Do not leave progress only in chat, temporary handoff files, or commit messages.
 - Turkish UI copy and documentation must stay UTF-8; run the copy check before committing.
 
 ## Branch Workflow
 
 - Each feature must be implemented on its own branch.
 - Do not mix unrelated feature work in the same branch.
+- Before starting new work, read the "Linear Progress Tracker" section below and update it when the work changes state.
+- A feature is not ready for handoff until `CONTEXT.md` reflects what changed, what remains, and any verification or known failure.
 - Use the canonical feature branch names from the implementation plan:
   - `feat/mvp-foundation`
   - `feat/mvp-data-auth-seeds`
@@ -66,6 +69,61 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Any API behavior change must update the OpenAPI contract in the same branch.
 - Any product or architecture decision discovered during implementation must update this context file in the same branch.
 - Branches should be pushed after their acceptance criteria pass.
+
+## Linear Progress Tracker
+
+This section is the canonical progress and todo tracker for agents. Keep it chronological and current.
+
+### 2026-06-04 - Merge Resolution
+
+- Local branch: `dev`.
+- Pulled `origin/dev` into local `dev` and resolved merge conflicts.
+- Resolution policy: keep the newer remote premium design/mobile work while preserving the local production rule that public marketplace pages must not fall back to fake teachers, fake listings, fake reviews, fake stats, or runtime mock search data.
+- Public homepage, teacher search, lesson landing pages, sitemap, and search API now use Supabase-backed data paths with no runtime mock teacher/search fallback.
+- Verification passed during merge resolution: `bun run check:copy`, `bun run typecheck`, `bun run lint`, and `bun run build`.
+- Runtime mock seed files removed in the merge resolution:
+  - `src/features/search/mock-data.ts`
+  - `src/features/teachers/constants.ts`
+- Conflicted files resolved on 2026-06-04:
+  - `src/app/(public)/ogretmen-bul/page.tsx`
+  - `src/app/(public)/page.tsx`
+  - `src/app/api/search/teachers/route.ts`
+  - `src/app/sitemap.ts`
+  - `src/features/dashboard/shared/dashboard-shell.tsx`
+  - `src/features/homepage/constants.ts`
+  - `src/features/search/search-filters.tsx`
+  - `src/features/search/search-service.ts`
+- Merge commit and push are still in progress.
+
+### 2026-06-04 - Latest Commit Review
+
+- Local latest completed merge: `3fe7261 Merge chore/prod-seed-and-remove-mocks`.
+- Local latest feature commit: `6a3e7d2 Remove homepage mocks and seed production references`.
+- Latest remote `origin/dev` commit at inspection time: `55ba07b Merge fix/final-design-and-mobile`.
+- Newer remote work to reconcile includes:
+  - final design and mobile pass: `314d9a0`.
+  - premium page upgrade for login, SSS, contact, blog, and lesson landing pages: `81d54a4`.
+  - custom `PremiumSelect` dropdown replacement: `12313b3`.
+  - premium visual polish and teacher profile overhaul: `60299c1`.
+  - design overhaul for homepage, register hub, login, and search filters: `472f286`.
+  - password reset callback page: `c4ba05b`.
+  - final placeholder/legal/footer/copy cleanup: `179920e`.
+  - SSS, contact, and lesson landing pages: `52c6f53`.
+
+### Completed
+
+- Supabase/Vercel prerender handling fixed so public auth/session reads can render signed-out when public Supabase env is absent.
+- `main` was ancestry-merged into `dev` with the `ours` strategy to keep `dev` from appearing behind while preserving the newer `dev` app flow.
+- Production database was seeded with production-safe reference data only: locations, lesson categories, and teacher eligibility test content.
+- Fake production profile IDs from the older seed were removed from production.
+- Runtime mock teacher/search seed files were removed locally in `6a3e7d2`.
+- Homepage teacher sections and search filters were moved toward Supabase-backed data locally in `6a3e7d2`.
+
+### Next Todos
+
+1. Commit the resolved merge and push `dev` to `origin/dev`.
+2. Update this tracker again with the final merge resolution commit hash and the next real feature target.
+3. Re-check OpenAPI after the merge commit lands if search/request endpoint behavior changes further.
 
 ## Implementation Progress
 

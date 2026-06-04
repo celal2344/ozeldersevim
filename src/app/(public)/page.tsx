@@ -1,175 +1,127 @@
-import { ChevronRightIcon, GraduationCapIcon, MonitorPlayIcon, SearchIcon, ShieldCheckIcon, StarIcon, UsersIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  ClockIcon,
+  SparklesIcon,
+  StarIcon,
+  TagIcon,
+} from "lucide-react";
 import Link from "next/link";
 
-import { heroFeatures, platformBenefits } from "@/features/homepage/constants";
+import { blogPosts } from "@/features/blog/constants";
+import {
+  homepageHeroSignals,
+  homepageSteps,
+  homepageTeacherCardGradients,
+  heroFeatures,
+  platformBenefits,
+} from "@/features/homepage/constants";
+import { HomepageHeroSearch } from "@/features/homepage/homepage-hero-search";
 import { getHomepageMarketplaceData } from "@/features/homepage/service";
-import { homepageLessonIcon, initialsFromName, lessonSearchHref } from "@/features/homepage/utils";
+import { homepageLessonIcon, initialsFromName } from "@/features/homepage/utils";
 import { teacherDeliveryLabels } from "@/features/search/constants";
 import { reviewLabel } from "@/features/search/utils";
-import { Button } from "@/shared/components/ui/button";
 
 export default async function HomePage() {
   const { lessons, teachers } = await getHomepageMarketplaceData();
 
   return (
-    <main className="bg-white">
-      <section className="relative overflow-hidden bg-brand-navy text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(251,115,22,0.32),transparent_31%),radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.08),transparent_24%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/25 to-transparent" />
-        <div className="relative mx-auto grid min-h-[620px] max-w-7xl items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:px-8">
-          <div className="flex flex-col gap-8">
-            <div className="flex flex-wrap gap-5 text-sm text-white/78">
-              <span className="inline-flex items-center gap-2">
-                <MonitorPlayIcon aria-hidden="true" className="text-brand-orange" />
-                Online ve yüz yüze
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <ShieldCheckIcon aria-hidden="true" className="text-brand-orange" />
-                Kontrollü iletişim
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <GraduationCapIcon aria-hidden="true" className="text-brand-orange" />
-                Testten geçmiş ilanlar
-              </span>
-            </div>
-            <div className="flex flex-col gap-5">
-              <h1 className="max-w-3xl text-5xl font-bold leading-[1.05] tracking-tight text-balance sm:text-6xl">
-                Türkiye&apos;nin Yeni Nesil <span className="text-brand-orange">Özel Ders</span> Platformu
-              </h1>
-              <p className="max-w-xl text-lg leading-8 text-white/78">
-                Ders, konum ve ders türüne göre öğretmen ara. Beğendiğin öğretmene ders talebi gönder.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                size="lg"
-                className="h-11 bg-brand-orange px-7 text-white shadow-lg shadow-orange-950/25 hover:bg-brand-orange/90"
-                nativeButton={false}
-                render={<Link href="/ogretmen-bul" />}
-              >
-                Ders Bul
-                <ChevronRightIcon data-icon="inline-end" aria-hidden="true" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-11 border-white/35 bg-transparent px-7 text-white hover:bg-white/10 hover:text-white"
-                nativeButton={false}
-                render={<Link href="/ogretmen-ol" />}
-              >
-                <UsersIcon data-icon="inline-start" aria-hidden="true" />
-                Öğretmen Ol
-              </Button>
-            </div>
-            <div className="grid gap-5 text-sm text-white/80 sm:grid-cols-2 lg:grid-cols-4">
-              {heroFeatures.map(({ label, icon: Icon }) => (
-                <span key={label} className="inline-flex items-center gap-2">
-                  <Icon aria-hidden="true" className="text-brand-orange" />
-                  {label}
-                </span>
-              ))}
-            </div>
+    <main>
+      <section className="relative overflow-hidden bg-[#0a0f1e] text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(251,115,22,0.22),transparent)]" />
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div className="relative mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 py-24 text-center sm:px-6 sm:py-32">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-1.5 text-sm text-white/80 backdrop-blur">
+            <SparklesIcon className="size-3.5 text-brand-orange" aria-hidden="true" />
+            Türkiye&apos;nin Özel Ders Platformu
           </div>
-
-          <div className="relative">
-            <div className="rounded-[2rem] border border-white/12 bg-white/8 p-5 shadow-2xl backdrop-blur">
-              <div className="rounded-[1.4rem] border border-white/10 bg-brand-navy-muted p-6">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm text-white/55">Ders talebi akışı</p>
-                    <p className="mt-1 text-2xl font-semibold">Öğretmenini seç, talebini gönder</p>
-                  </div>
-                  <span className="flex size-12 items-center justify-center rounded-xl bg-brand-orange text-white">
-                    <SearchIcon aria-hidden="true" />
-                  </span>
-                </div>
-                <div className="mt-6 grid gap-3">
-                  {["Ders ve konum filtrele", "Öğretmen profilini incele", "Talep formunu gönder", "Kabul sonrası iletişim paylaşılır"].map((step, index) => (
-                    <div key={step} className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/10 p-4">
-                      <span className="flex size-8 items-center justify-center rounded-lg bg-brand-orange text-sm font-semibold text-white">
-                        {index + 1}
-                      </span>
-                      <span className="text-sm text-white/78">{step}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+          <h1 className="max-w-4xl text-3xl font-extrabold leading-[1.06] tracking-tight text-balance sm:text-5xl lg:text-7xl">
+            Hayalindeki{" "}
+            <span className="bg-gradient-to-r from-brand-orange to-orange-300 bg-clip-text text-transparent">
+              öğretmeni
+            </span>{" "}
+            bul, hemen başla.
+          </h1>
+          <p className="max-w-2xl text-lg leading-7 text-white/65">
+            Matematik&apos;ten yazılıma, İngilizce&apos;den TYT/AYT&apos;ye alanında uzman öğretmenlerle
+            online veya yüz yüze birebir ders al.
+          </p>
+          <HomepageHeroSearch lessons={lessons} />
+          <div className="flex flex-wrap justify-center gap-4 text-xs text-white/50">
+            {homepageHeroSignals.map(({ icon: Icon, text }) => (
+              <span key={text} className="inline-flex items-center gap-1.5">
+                <Icon className="size-3.5 text-brand-orange" aria-hidden="true" />
+                {text}
+              </span>
+            ))}
+          </div>
+          <div className="grid gap-4 text-xs text-white/60 sm:grid-cols-2 lg:grid-cols-4">
+            {heroFeatures.map(({ label, icon: Icon }) => (
+              <span key={label} className="inline-flex items-center justify-center gap-2">
+                <Icon className="size-3.5 text-brand-orange" aria-hidden="true" />
+                {label}
+              </span>
+            ))}
           </div>
         </div>
-      </section>
-
-      <section className="relative z-10 -mt-12 px-4 sm:px-6 lg:px-8">
-        <form
-          action="/ogretmen-bul"
-          className="mx-auto grid max-w-6xl gap-4 rounded-2xl bg-white p-5 shadow-2xl shadow-slate-950/15 ring-1 ring-slate-200 md:grid-cols-[1fr_1fr_1fr_auto]"
-        >
-          <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-            Ders Seçin
-            <select name="lesson" className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-muted-foreground">
-              <option value="">Tüm dersler</option>
-              {lessons.map((lesson) => (
-                <option key={lesson} value={lesson.toLocaleLowerCase("tr-TR")}>
-                  {lesson}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-            Seviye
-            <select name="q" className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-muted-foreground">
-              <option value="">Tüm seviyeler</option>
-              <option value="lgs">LGS</option>
-              <option value="tyt">TYT / AYT</option>
-            </select>
-          </label>
-          <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-            Ders Türü
-            <select name="deliveryMode" className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-muted-foreground">
-              <option value="all">Tümü</option>
-              <option value="online">Online</option>
-              <option value="face_to_face">Yüz yüze</option>
-            </select>
-          </label>
-          <Button className="self-end bg-brand-orange text-white hover:bg-brand-orange/90">
-            <SearchIcon data-icon="inline-start" aria-hidden="true" />
-            Öğretmen Ara
-          </Button>
-        </form>
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#f8f9fe] to-transparent" />
       </section>
 
       {lessons.length > 0 ? (
-        <section className="px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-8 flex items-end justify-between gap-4">
+        <section
+          className="relative px-4 py-20 sm:px-6 lg:px-8"
+          style={{ background: "linear-gradient(180deg, #f8f9fe 0%, #ffffff 100%)" }}
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_20%_50%,rgba(251,115,22,0.04),transparent)]" />
+          <div className="relative mx-auto max-w-7xl">
+            <div className="mb-10 flex items-end justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-bold tracking-tight text-brand-navy">Ders Kategorileri</h2>
-                <div className="mt-3 h-1 w-16 rounded-full bg-brand-orange" />
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-orange">Dersler</p>
+                <h2 className="mt-1 text-3xl font-extrabold text-brand-navy">Popüler Kategoriler</h2>
+                <div className="mt-2 h-1 w-12 rounded-full bg-gradient-to-r from-brand-orange to-orange-300" />
               </div>
-              <Link href="/ogretmen-bul" className="text-sm font-medium text-brand-navy hover:text-brand-orange">
-                Tüm dersleri gör
+              <Link
+                href="/ogretmen-bul"
+                className="hidden items-center gap-1 text-sm font-medium text-brand-navy/50 transition-colors hover:text-brand-orange sm:flex"
+              >
+                Tümünü gör <ArrowRightIcon className="size-4" />
               </Link>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-              {lessons.map((name, index) => {
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+              {lessons.map(({ name, slug }, index) => {
                 const Icon = homepageLessonIcon(name);
+                const tone = index % 2 === 0 ? "orange" : "navy";
 
                 return (
                   <Link
-                    key={name}
-                    href={lessonSearchHref(name)}
-                    className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-lg"
+                    key={slug}
+                    href={`/ogretmen-bul?lesson=${slug}`}
+                    className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-transparent hover:shadow-xl hover:shadow-slate-200"
                   >
-                    <span
+                    <div
                       className={
-                        index % 2 === 0
-                          ? "flex size-14 items-center justify-center rounded-xl bg-brand-orange text-white"
-                          : "flex size-14 items-center justify-center rounded-xl bg-brand-navy text-white"
+                        tone === "orange"
+                          ? "absolute inset-0 bg-gradient-to-br from-orange-50 via-amber-50 to-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                          : "absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                       }
-                    >
-                      <Icon aria-hidden="true" />
-                    </span>
-                    <span className="mt-4 block font-semibold text-brand-navy">{name}</span>
+                    />
+                    <div className="relative">
+                      <span
+                        className={
+                          tone === "orange"
+                            ? "flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-brand-orange to-orange-600 text-white shadow-orange-200 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
+                            : "flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-brand-navy to-blue-800 text-white shadow-blue-200 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
+                        }
+                      >
+                        <Icon className="size-5" aria-hidden="true" />
+                      </span>
+                      <p className="mt-3 font-bold text-brand-navy">{name}</p>
+                    </div>
                   </Link>
                 );
               })}
@@ -179,51 +131,199 @@ export default async function HomePage() {
       ) : null}
 
       {teachers.length > 0 ? (
-        <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-8 flex items-end justify-between gap-4">
+        <section
+          className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8"
+          style={{ background: "linear-gradient(135deg, #0d1424 0%, #12192f 50%, #0f1e18 100%)" }}
+        >
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.05]"
+            style={{
+              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)",
+              backgroundSize: "28px 28px",
+            }}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_60%_at_80%_50%,rgba(251,115,22,0.12),transparent)]" />
+          <div className="relative mx-auto max-w-7xl">
+            <div className="mb-10 flex items-end justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-bold tracking-tight text-brand-navy">Öne Çıkan Öğretmenler</h2>
-                <p className="mt-2 text-muted-foreground">Yayında olan öğretmen ilanlarından alınır.</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-orange">Öğretmenler</p>
+                <h2 className="mt-1 text-3xl font-extrabold text-white">Öne Çıkan Öğretmenler</h2>
+                <div className="mt-2 h-1 w-12 rounded-full bg-gradient-to-r from-brand-orange to-orange-300" />
               </div>
-              <Link href="/ogretmen-bul" className="hidden text-sm font-medium text-brand-navy hover:text-brand-orange sm:block">
-                Tüm öğretmenleri gör
+              <Link
+                href="/ogretmen-bul"
+                className="hidden items-center gap-1 text-sm font-medium text-white/40 transition-colors hover:text-brand-orange sm:flex"
+              >
+                Tümünü gör <ArrowRightIcon className="size-4" />
               </Link>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {teachers.map((teacher) => (
-                <div key={teacher.id} className="rounded-2xl bg-brand-navy p-5 text-white shadow-lg">
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+              {teachers.map((teacher, index) => (
+                <Link
+                  key={teacher.id}
+                  href={`/ogretmen/${teacher.slug}`}
+                  className="group flex flex-col rounded-2xl border border-white/8 bg-white/6 p-5 backdrop-blur transition-all duration-300 hover:scale-[1.02] hover:border-white/20 hover:bg-white/10 hover:shadow-2xl hover:shadow-black/30"
+                >
                   <div className="flex items-center gap-3">
-                    <div className="flex size-14 items-center justify-center rounded-full bg-white/10 font-semibold">
+                    <div
+                      className={`flex size-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${
+                        homepageTeacherCardGradients[index % homepageTeacherCardGradients.length]
+                      } text-sm font-bold text-white shadow-lg`}
+                    >
                       {initialsFromName(teacher.fullName)}
                     </div>
-                    <div>
-                      <p className="font-semibold">{teacher.fullName}</p>
-                      <p className="text-sm text-white/58">{teacher.headline}</p>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-white transition-colors group-hover:text-brand-orange">
+                        {teacher.fullName}
+                      </p>
+                      <p className="truncate text-xs text-white/50">{teacher.headline}</p>
                     </div>
                   </div>
-                  <div className="mt-5 flex items-center justify-between gap-3">
-                    <span className="inline-flex items-center gap-1 text-sm text-brand-orange">
-                      <StarIcon aria-hidden="true" />
+                  <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
+                    <span className="inline-flex items-center gap-1 text-sm font-medium text-amber-400">
+                      <StarIcon className="size-3.5 fill-amber-400" aria-hidden="true" />
                       {reviewLabel(teacher)}
                     </span>
-                    <span className="font-semibold">₺{teacher.hourlyPrice}</span>
+                    <span className="text-sm font-bold text-brand-orange">₺{teacher.hourlyPrice}</span>
                   </div>
-                  <p className="mt-2 text-xs text-white/55">{teacherDeliveryLabels[teacher.deliveryMode]}</p>
-                  <Button
-                    variant="outline"
-                    className="mt-5 w-full border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white"
-                    nativeButton={false}
-                    render={<Link href={`/ogretmen/${teacher.slug}`} />}
-                  >
-                    Profili Gör
-                  </Button>
-                </div>
+                  <p className="mt-2 text-xs text-white/45">{teacherDeliveryLabels[teacher.deliveryMode]}</p>
+                  <div className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-white/8 py-2 text-xs font-medium text-white/70 transition-all group-hover:bg-brand-orange group-hover:text-white">
+                    Profili Gör <ArrowRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
         </section>
       ) : null}
+
+      <section
+        className="relative px-4 py-20 sm:px-6 lg:px-8"
+        style={{ background: "linear-gradient(180deg, #ffffff 0%, #f8f9fe 100%)" }}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_40%_60%_at_80%_30%,rgba(251,115,22,0.05),transparent)]" />
+        <div className="relative mx-auto max-w-5xl">
+          <div className="mb-14 text-center">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-orange">Nasıl Çalışır?</p>
+            <h2 className="mt-2 text-3xl font-extrabold text-brand-navy">3 adımda derse başla</h2>
+            <div className="mx-auto mt-3 h-1 w-12 rounded-full bg-gradient-to-r from-brand-orange to-orange-300" />
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {homepageSteps.map(({ num, title, text, color }, index) => (
+              <div
+                key={num}
+                className="group relative flex flex-col items-center rounded-2xl border border-slate-100 bg-white p-8 text-center shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-transparent hover:shadow-xl hover:shadow-slate-200"
+              >
+                <div className={`flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br ${color} text-2xl font-extrabold text-white shadow-lg`}>
+                  {num}
+                </div>
+                <h3 className="mt-5 text-lg font-bold text-brand-navy">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
+                {index < homepageSteps.length - 1 ? (
+                  <div className="absolute -right-4 top-8 hidden size-8 items-center justify-center md:flex">
+                    <ArrowRightIcon className="size-5 text-slate-200" />
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 text-center">
+            <Link
+              href="/ogretmen-bul"
+              className="inline-flex h-12 items-center gap-2 rounded-xl bg-brand-navy px-8 text-sm font-semibold text-white shadow-lg shadow-brand-navy/20 transition-all hover:scale-[1.02] hover:bg-brand-navy/90"
+            >
+              Hemen Başla <ArrowRightIcon className="size-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8"
+        style={{ background: "linear-gradient(135deg, #f8f9fe 0%, #f0f4ff 100%)" }}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_60%_at_10%_80%,rgba(251,115,22,0.05),transparent)]" />
+        <div className="relative mx-auto max-w-7xl">
+          <div className="mb-10 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-brand-orange">Blog</p>
+              <h2 className="mt-1 text-3xl font-extrabold text-brand-navy">Eğitim Rehberleri</h2>
+              <div className="mt-2 h-1 w-12 rounded-full bg-gradient-to-r from-brand-orange to-orange-300" />
+            </div>
+            <Link
+              href="/blog"
+              className="hidden items-center gap-1 text-sm font-medium text-brand-navy/50 transition-colors hover:text-brand-orange sm:flex"
+            >
+              Tüm yazılar <ArrowRightIcon className="size-4" />
+            </Link>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {blogPosts.slice(0, 3).map((post, index) => (
+              <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
+                <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-200">
+                  <div
+                    className={
+                      index === 0
+                        ? "absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-orange to-orange-400"
+                        : index === 1
+                          ? "absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500"
+                          : "absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400"
+                    }
+                  />
+                  <div className="mb-3">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                      <TagIcon className="size-3" aria-hidden="true" />
+                      {post.category}
+                    </span>
+                  </div>
+                  <h3 className="flex-1 text-sm font-bold leading-snug text-brand-navy transition-colors group-hover:text-brand-orange">
+                    {post.title}
+                  </h3>
+                  <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                    <ClockIcon className="size-3.5" aria-hidden="true" />
+                    {post.readingMinutes} dk okuma
+                  </div>
+                </article>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-[#0a0f1e] px-4 py-20 text-white sm:px-6 lg:px-8">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_120%,rgba(251,115,22,0.25),transparent)]" />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div className="relative mx-auto max-w-2xl text-center">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-orange">Öğretmenler İçin</p>
+          <h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">
+            Öğrencilere{" "}
+            <span className="bg-gradient-to-r from-brand-orange to-orange-300 bg-clip-text text-transparent">
+              ulaş.
+            </span>
+          </h2>
+          <p className="mt-4 text-white/55">Bağımsız çalış. Kendi saatini ve ücretini belirle.</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/kayit?role=teacher"
+              className="inline-flex h-12 items-center gap-2 rounded-xl bg-brand-orange px-8 text-sm font-semibold text-white shadow-lg shadow-orange-900/30 transition-all hover:scale-[1.02] hover:bg-orange-400"
+            >
+              Öğretmen Hesabı Aç <ArrowRightIcon className="size-4" />
+            </Link>
+            <Link
+              href="/ogretmen-bul"
+              className="inline-flex h-12 items-center gap-2 rounded-xl border border-white/15 bg-white/8 px-8 text-sm font-semibold text-white backdrop-blur transition-all hover:bg-white/15"
+            >
+              Öğretmen Bul
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section className="bg-brand-navy px-4 py-8 text-white sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-5">

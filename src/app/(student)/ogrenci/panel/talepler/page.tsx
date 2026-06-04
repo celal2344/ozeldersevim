@@ -1,4 +1,5 @@
 import { DashboardRoute } from "@/features/dashboard/shared/dashboard-route";
+import { StudentRequestsView } from "@/features/requests/student-requests-view";
 
 export const dynamic = "force-dynamic";
 
@@ -7,5 +8,9 @@ export const metadata = {
 };
 
 export default function StudentRequestsPage() {
-  return <DashboardRoute activePath="/ogrenci/panel/talepler" pageId="student-requests" role="student" />;
+  return (
+    <DashboardRoute activePath="/ogrenci/panel/talepler" pageId="student-requests" role="student">
+      <StudentRequestsView />
+    </DashboardRoute>
+  );
 }

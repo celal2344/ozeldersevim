@@ -1,9 +1,10 @@
-import type { TeacherSearchParams, TeacherSearchResponse, TeacherSearchResult } from "./types";
-import { getPublishedTeacherProfiles } from "@/features/teachers/service";
 import { getLessonCategoryOptions, getLocationOptions } from "@/features/teacher-listings/service";
 import { slugifyTurkish } from "@/features/teacher-listings/utils";
+import { getPublishedTeacherProfiles } from "@/features/teachers/service";
 import { paginateItems, parsePaginationParams } from "@/shared/api/list-query";
 import { hasSupabasePublicEnv } from "@/shared/config/env";
+
+import type { TeacherSearchParams, TeacherSearchResponse, TeacherSearchResult } from "./types";
 
 const TEACHER_SEARCH_PAGE_SIZE = 6;
 
@@ -47,6 +48,10 @@ export function parseTeacherSearchParams(searchParams: URLSearchParams): Teacher
     district: searchParams.get("district") ?? undefined,
     deliveryMode: (searchParams.get("deliveryMode") as TeacherSearchParams["deliveryMode"]) ?? "all",
     sort: (searchParams.get("sort") as TeacherSearchParams["sort"]) ?? "recommended",
+    gender: (searchParams.get("gender") as TeacherSearchParams["gender"]) ?? "all",
+    minPrice: toNumber(searchParams.get("minPrice")),
+    maxPrice: toNumber(searchParams.get("maxPrice")),
+    fastResponse: searchParams.get("fastResponse") === "1",
     ...parsePaginationParams(searchParams, { pageSize: TEACHER_SEARCH_PAGE_SIZE }),
     lat: toNumber(searchParams.get("lat")),
     lng: toNumber(searchParams.get("lng")),
@@ -60,6 +65,7 @@ export async function searchTeachers(params: TeacherSearchParams): Promise<Teach
   const city = params.city ? normalize(params.city) : "";
   const district = params.district ? normalize(params.district) : "";
   const teachers = await getPublishedTeacherProfiles();
+
   const filtered = teachers
     .filter((teacher) => {
       const searchable = normalize(
@@ -81,6 +87,10 @@ export async function searchTeachers(params: TeacherSearchParams): Promise<Teach
       ) {
         return false;
       }
+      if (params.minPrice !== undefined && teacher.hourlyPrice < params.minPrice) return false;
+      if (params.maxPrice !== undefined && teacher.hourlyPrice > params.maxPrice) return false;
+      if (params.gender && params.gender !== "all") return false;
+      if (params.fastResponse) return false;
 
       return true;
     })
@@ -100,6 +110,9 @@ export async function searchTeachers(params: TeacherSearchParams): Promise<Teach
       ratingAverage: teacher.ratingAverage,
       reviewCount: teacher.reviewCount,
       experienceYears: teacher.experienceYears,
+      completedLessons: teacher.completedLessonCount,
+      activeStudents: teacher.activeStudentCount,
+      fastResponse: false,
       distanceKm: hasLocation
         ? getDistanceKm(
             { lat: params.lat as number, lng: params.lng as number },
@@ -134,6 +147,10 @@ export async function searchTeachers(params: TeacherSearchParams): Promise<Teach
         ...(params.city ? { city: params.city } : {}),
         ...(params.district ? { district: params.district } : {}),
         ...(params.deliveryMode && params.deliveryMode !== "all" ? { deliveryMode: params.deliveryMode } : {}),
+        ...(params.gender && params.gender !== "all" ? { gender: params.gender } : {}),
+        ...(params.minPrice !== undefined ? { minPrice: params.minPrice } : {}),
+        ...(params.maxPrice !== undefined ? { maxPrice: params.maxPrice } : {}),
+        ...(params.fastResponse ? { fastResponse: true } : {}),
       },
     }
   );
@@ -148,7 +165,7 @@ export async function getTeacherSearchFilterOptions(): Promise<TeacherSearchFilt
     const [lessons, locations] = await Promise.all([getLessonCategoryOptions(), getLocationOptions()]);
 
     return {
-      lessonOptions: lessons.map((lesson) => lesson.name),
+      lessonOptions: lessons.map((lessonOption) => lessonOption.name),
       cityOptions: [...new Set(locations.map((location) => location.city))],
       districtOptions: [
         ...new Set(locations.map((location) => location.district).filter((district): district is string => Boolean(district))),

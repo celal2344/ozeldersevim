@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentAccount } from "@/features/auth/service";
+import { trackEvent } from "@/features/analytics/track";
 import { submitLessonRequestSchema } from "@/features/requests/constants";
 import { deliveryModeAllowedForTeacher, lessonSlugFromName, optionalNumber } from "@/features/requests/utils";
 import { getTeacherProfileBySlug } from "@/features/teachers/service";
@@ -122,6 +123,12 @@ export async function POST(request: Request) {
     if (contactError.error) {
       return NextResponse.json({ message: contactError.error.message }, { status: 500 });
     }
+
+    await trackEvent(supabase, "lesson_request_submitted", {
+      teacherSlug: input.teacherSlug,
+      lessonSlug: input.lessonSlug,
+      deliveryMode: input.deliveryMode,
+    }, account.id);
 
     return NextResponse.json({
       requestId: lessonRequest.id,

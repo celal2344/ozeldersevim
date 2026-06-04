@@ -42,3 +42,14 @@ export function pageSearchParamsFromRecord(record: Record<string, string | strin
 
   return params;
 }
+
+export function parsePriceRange(value: string) {
+  if (!value) return { min: undefined, max: undefined };
+  const [minStr, maxStr] = value.split("-");
+  return { min: minStr ? Number(minStr) : undefined, max: maxStr ? Number(maxStr) : undefined };
+}
+
+export function currentPriceOption(min?: number, max?: number) {
+  if (min === undefined && max === undefined) return "";
+  return `${min ?? ""}-${max ?? ""}`;
+}
