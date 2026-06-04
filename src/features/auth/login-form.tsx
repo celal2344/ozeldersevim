@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LogInIcon, UserPlusIcon } from "lucide-react";
+import { LogInIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -27,9 +27,7 @@ export function LoginForm({ next }: { next?: string | null }) {
     setSubmitError(null);
     const response = await fetch("/api/auth/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...values, next }),
     });
     const payload = await response.json().catch(() => null);
@@ -39,39 +37,62 @@ export function LoginForm({ next }: { next?: string | null }) {
       return;
     }
 
-    const result = payload as AuthResponsePayload;
-    window.location.assign(result.redirectTo);
+    window.location.assign((payload as AuthResponsePayload).redirectTo);
   }
 
   return (
-    <form onSubmit={form.handleSubmit(submit)} className="grid gap-5">
-      <FieldError message={errors.email?.message ?? errors.password?.message ?? submitError ?? undefined} />
-      <label className="grid gap-2 text-sm font-medium text-brand-navy">
-        Email
-        <Input {...form.register("email")} className="h-11 bg-white" type="email" placeholder="ornek@email.com" />
-      </label>
-      <label className="grid gap-2 text-sm font-medium text-brand-navy">
-        Şifre
-        <Input {...form.register("password")} className="h-11 bg-white" type="password" placeholder="Şifren" />
-      </label>
-      <Button type="submit" className="h-11 bg-brand-orange text-white hover:bg-brand-orange/90" disabled={form.formState.isSubmitting}>
+    <form onSubmit={form.handleSubmit(submit)} className="flex flex-col gap-4">
+      {(errors.email?.message ?? errors.password?.message ?? submitError) && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {errors.email?.message ?? errors.password?.message ?? submitError}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-medium text-brand-navy" htmlFor="email">
+          E-posta adresin
+        </label>
+        <Input
+          id="email"
+          {...form.register("email")}
+          className="h-11 bg-white"
+          type="email"
+          placeholder="ornek@email.com"
+          autoComplete="email"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-brand-navy" htmlFor="password">
+            Şifren
+          </label>
+          <Link
+            href="/sifremi-unuttum"
+            className="text-xs text-brand-orange hover:underline"
+            tabIndex={-1}
+          >
+            Şifremi unuttum
+          </Link>
+        </div>
+        <Input
+          id="password"
+          {...form.register("password")}
+          className="h-11 bg-white"
+          type="password"
+          placeholder="••••••••"
+          autoComplete="current-password"
+        />
+      </div>
+
+      <Button
+        type="submit"
+        className="mt-1 h-11 w-full bg-brand-orange text-white hover:bg-brand-orange/90"
+        disabled={form.formState.isSubmitting}
+      >
         <LogInIcon data-icon="inline-start" aria-hidden="true" />
-        {form.formState.isSubmitting ? "Giriş yapılıyor" : "Giriş Yap"}
-      </Button>
-      <Button variant="outline" nativeButton={false} render={<Link href={next ? `/kayit?next=${encodeURIComponent(next)}` : "/kayit"} />}>
-        <UserPlusIcon data-icon="inline-start" aria-hidden="true" />
-        Yeni hesap oluştur
+        {form.formState.isSubmitting ? "Giriş yapılıyor…" : "Giriş Yap"}
       </Button>
     </form>
-  );
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-
-  return (
-    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-      {message}
-    </div>
   );
 }

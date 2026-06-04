@@ -1,6 +1,5 @@
 import { GraduationCapIcon } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import { LogoutButton } from "@/features/auth/logout-button";
 import type { AuthAccount } from "@/features/auth/types";
@@ -36,7 +35,7 @@ type DashboardShellProps = {
   activePath: string;
   config: DashboardRoleConfig;
   page: DashboardPageContent;
-  children?: ReactNode;
+  children?: React.ReactNode;
 };
 
 export function DashboardShell({ account, activePath, config, page, children }: DashboardShellProps) {

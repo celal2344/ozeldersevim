@@ -1,6 +1,6 @@
 # Ozel Ders Evim - Project Context
 
-Last updated: 2026-06-01
+Last updated: 2026-06-04
 
 ## Product Summary
 
@@ -25,7 +25,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Vercel must define `NEXT_PUBLIC_SUPABASE_URL=https://hhddeqgvrnyxnwetetdc.supabase.co` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` for real auth flows.
 - Public session reads render as signed-out and sitemap omits dynamic teacher URLs when Supabase public env is missing so Vercel prerender/build does not crash; mutating auth and database flows still require the Supabase env and should fail loudly if it is missing.
 - Server-side eligibility grading uses `SUPABASE_SERVICE_ROLE_KEY`; it must stay server-only and must never be exposed through `NEXT_PUBLIC_*`.
-- Remote Supabase setup, MCP retargeting, applying unapplied migrations, QA, and test work are deferred operational/verification work. The next contributor should focus only on backend/frontend application code unless explicitly asked otherwise.
+- Remote Supabase MCP retargeting, QA, and test work are deferred operational/verification work. The next contributor should focus only on backend/frontend application code unless explicitly asked otherwise.
 - Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
 - SMS is not in MVP.
 - Architecture: feature-based architecture.
@@ -38,16 +38,19 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Communication: no in-site chat for MVP. When a teacher accepts a lesson request, the student's contact details are shared with the teacher.
 - Delivery modes: both online and face-to-face are supported. For online lessons, teachers/students manage their own meeting links externally.
 - Search location model: support both city/district filtering and location-based nearby search.
-- Seed data: include Erzurum and random test data covering different cases.
-- Production seed data must not create fake users, fake teachers, fake listings, fake reviews, or fake marketplace stats. Keep production seeds to reference data such as locations, lesson categories, and teacher eligibility test content.
+- Seed data: `supabase/seed.sql` is now a full demo seed for the current Supabase project. It includes Erzurum plus varied demo cases across profiles, teachers, listings, lesson requests, lessons, reviews, favorites, notifications, analytics, and admin audit logs.
+- Demo seed data is not real production marketplace data. Do not present seeded teachers, students, listings, reviews, or analytics as real user activity. Create a separate production-safe reference seed if the project later needs one.
 - Vocabulary split: use this file for product/domain vocabulary and `LANGUAGE.md` for architecture vocabulary and rules.
 - Documentation maintenance: whenever a critical codebase rule, architecture rule, domain decision, or workflow decision is given, update the relevant Markdown documentation in the same change.
+- `CONTEXT.md` is the required linear project tracker. Every agent that changes this project must update this file in the same work session with the latest completed work, current in-progress state, next todos, blockers/conflicts, and relevant branch/commit references. Do not leave progress only in chat, temporary handoff files, or commit messages.
 - Turkish UI copy and documentation must stay UTF-8; run the copy check before committing.
 
 ## Branch Workflow
 
 - Each feature must be implemented on its own branch.
 - Do not mix unrelated feature work in the same branch.
+- Before starting new work, read the "Linear Progress Tracker" section below and update it when the work changes state.
+- A feature is not ready for handoff until `CONTEXT.md` reflects what changed, what remains, and any verification or known failure.
 - Use the canonical feature branch names from the implementation plan:
   - `feat/mvp-foundation`
   - `feat/mvp-data-auth-seeds`
@@ -67,6 +70,176 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Any product or architecture decision discovered during implementation must update this context file in the same branch.
 - Branches should be pushed after their acceptance criteria pass.
 
+## Linear Progress Tracker
+
+This section is the canonical progress and todo tracker for agents. Keep it chronological and current.
+
+### 2026-06-04 - Merge Resolution
+
+- Local branch: `dev`.
+- Pulled `origin/dev` into local `dev` and resolved merge conflicts.
+- Resolution policy: keep the newer remote premium design/mobile work while preserving the local production rule that public marketplace pages must not fall back to fake teachers, fake listings, fake reviews, fake stats, or runtime mock search data.
+- Public homepage, teacher search, lesson landing pages, sitemap, and search API now use Supabase-backed data paths with no runtime mock teacher/search fallback.
+- Verification passed during merge resolution: `bun run check:copy`, `bun run typecheck`, `bun run lint`, and `bun run build`.
+- Runtime mock seed files removed in the merge resolution:
+  - `src/features/search/mock-data.ts`
+  - `src/features/teachers/constants.ts`
+- Conflicted files resolved on 2026-06-04:
+  - `src/app/(public)/ogretmen-bul/page.tsx`
+  - `src/app/(public)/page.tsx`
+  - `src/app/api/search/teachers/route.ts`
+  - `src/app/sitemap.ts`
+  - `src/features/dashboard/shared/dashboard-shell.tsx`
+  - `src/features/homepage/constants.ts`
+  - `src/features/search/search-filters.tsx`
+  - `src/features/search/search-service.ts`
+- Merge commit created locally: `6024cec Merge origin/dev into dev`.
+- Merge was pushed to `origin/dev`; latest pushed docs tracker commit is `d035f52 docs: record dev merge resolution`.
+
+### 2026-06-04 - Origin Dev Work Integrated
+
+- Integrated `origin/dev` premium design and mobile pass through `55ba07b Merge fix/final-design-and-mobile`.
+- Public UI now includes premium layouts for homepage, login, register hub, teacher search, teacher profile, `ogretmen-ol`, SSS, contact, blog, password reset, legal pages, and lesson landing pages.
+- `PremiumSelect` is now the shared custom dropdown used instead of native selects in the polished public UI.
+- Public header/footer and mobile menu were upgraded, including mobile navigation support.
+- Lesson landing pages now live under `/ozel-ders/[slug]` with SEO metadata and real teacher-list sections when Supabase-backed published teachers exist.
+- Password reset flow was added with `/sifremi-unuttum` and `/sifremi-sifirla`.
+- Blog pages were added at `/blog` and `/blog/[slug]`.
+- Contact and SSS pages were added at `/iletisim` and `/sss`.
+- Admin foundation was added under `/admin`, including teacher moderation, review moderation, analytics shell, admin auth guard helpers, and admin write-policy/analytics migrations.
+- Dashboard request-management UI was added for student and teacher panels, including accept/reject API routes for lesson requests.
+- Dashboard reviews UI was added, including review submission API/service and teacher reviews view.
+- Favorites UI/API/service was added for student favorite teachers.
+- Account profile and teacher profile settings forms were added for dashboard profile management.
+- Search UI now includes the premium filter layout with global pagination/sorting/filtering parameters, extra gender/price/fast-response filters, and Supabase-backed filter options.
+- Search analytics tracking was added for `/api/search/teachers`.
+
+### 2026-06-04 - Remote Supabase Seeded
+
+- Applied pending remote migrations to project `hhddeqgvrnyxnwetetdc`:
+  - `20260603120000_admin_write_policies.sql`
+  - `20260603130000_analytics_events.sql`
+- Confirmed `supabase/seed.sql` Turkish seed text is valid UTF-8 before applying it remotely.
+- Ran the production-safe reference seed against the linked Supabase project.
+- Verified remote reference data through Supabase service-role reads:
+  - `locations`: 5 rows.
+  - `lesson_categories`: 8 rows.
+  - `teacher_eligibility_tests`: 1 row.
+  - `teacher_eligibility_questions`: 3 rows.
+  - `teacher_eligibility_choices`: 12 rows.
+  - `analytics_events`: 0 rows, expected immediately after migration.
+- Verified seeded Turkish text renders correctly for locations, lesson categories, and teacher eligibility prompts.
+- At that time `supabase/seed.sql` was reference-only; this was superseded later the same day by the full demo seed request below.
+
+### 2026-06-04 - Full Demo Seed Added
+
+- Expanded `supabase/seed.sql` from reference-only data into a full deterministic demo seed.
+- Seed now includes:
+  - 1 admin application profile.
+  - 7 teacher application profiles.
+  - 4 student application profiles.
+  - 7 teacher eligibility attempts.
+  - 7 teacher profiles, including 6 published profiles and 1 draft profile for admin/moderation cases.
+  - 15 teacher lesson mappings.
+  - 7 teacher listings, including 6 public listings and 1 unpublished draft listing.
+  - 13 lesson requests covering accepted, submitted, and rejected statuses.
+  - 13 lesson request contact rows.
+  - 11 lesson rows covering completed and scheduled statuses.
+  - 11 reviews covering published and pending statuses.
+  - 6 favorites.
+  - 4 notifications.
+  - 4 analytics events.
+  - 2 admin audit log rows.
+- Applied the expanded seed to remote project `hhddeqgvrnyxnwetetdc`.
+- Verified remote counts through Supabase service-role reads:
+  - `profiles`: 17 total rows at verification time, including existing profiles plus demo rows.
+  - `student_profiles`: 6 total rows at verification time.
+  - `locations`: 5 rows.
+  - `lesson_categories`: 8 rows.
+  - `teacher_eligibility_tests`: 1 row.
+  - `teacher_eligibility_attempts`: 7 rows.
+  - `teacher_profiles`: 7 rows.
+  - `teacher_lessons`: 15 rows.
+  - `teacher_listings`: 7 rows.
+  - `lesson_requests`: 13 rows.
+  - `lesson_request_contacts`: 13 rows.
+  - `lessons`: 11 rows.
+  - `reviews`: 11 rows.
+  - `favorites`: 6 rows.
+  - `notifications`: 4 rows.
+  - `analytics_events`: 4 rows.
+  - `admin_audit_logs`: 2 rows.
+- `supabase/seed.sql` remains idempotent by deleting deterministic demo profile IDs and demo analytics/audit records before re-inserting.
+- Seed does not create Supabase Auth users. Demo application profile rows exist for marketplace data; login-capable demo users require a separate Auth/admin API seed script.
+
+### 2026-06-04 - Teacher Eligibility QA Seed Shortcut
+
+- Updated `supabase/seed.sql` so every correct teacher eligibility choice has the label `THIS IS THE CORRECT ANSWER`.
+- The correct choices are still the score `1` choices; only their displayed labels changed for QA.
+- Applied the seed to remote Supabase project `hhddeqgvrnyxnwetetdc`.
+- Verified remote `teacher_eligibility_choices` has 3 score-1 rows and all 3 labels are `THIS IS THE CORRECT ANSWER`.
+
+### 2026-06-04 - Teacher Eligibility Submit Bug Fix
+
+- Fixed the teacher eligibility submission path after QA showed selected correct answers could still surface `Test cevapları eksik veya hatalı.`
+- Root cause: the seeded test ID `00000000-0000-0000-0000-000000000301` is valid for Postgres `uuid`, but it is not RFC-versioned, so Zod's strict `z.uuid()` rejected the request body before grading.
+- The submission schema now validates `testId` as a non-empty string because the database remains the source of truth for whether the test ID exists.
+- Server grading now accepts either the public `question_key` or the database question UUID as `questionId`, so cached or differently shaped clients do not fail valid submissions.
+- Teacher listing manager now:
+  - clears stale test messages when an answer changes.
+  - blocks incomplete answer payloads before posting.
+  - posts the validated payload directly to `/api/teacher-eligibility/submissions`.
+  - renders detected errors as error states instead of green success states.
+- Verification passed: direct schema repro with the seeded test ID, `bun run check:copy`, `bun run typecheck`, and `bun run lint`.
+
+### 2026-06-04 - Teacher Listing RLS Recursion Fix
+
+- Fixed `infinite recursion detected in policy for relation "teacher_profiles"` seen when creating an `ilan` after passing the teacher eligibility test.
+- Root cause: RLS policies on `teacher_profiles` and `teacher_listings` queried `profiles`, while `profiles` had a public-read policy that queried `teacher_profiles`; policy evaluation could re-enter itself.
+- Added remote migrations:
+  - `20260604075247_fix_admin_rls_recursion.sql`
+  - `20260604075353_fix_teacher_policy_role_recursion.sql`
+  - `20260604075530_fix_listing_policy_helpers.sql`
+- `public.is_admin()`, `public.has_app_role()`, `public.owns_teacher_profile()`, and `public.can_write_teacher_listing()` now isolate role/ownership checks from RLS recursion.
+- Applied all three migrations to remote project `hhddeqgvrnyxnwetetdc`.
+- Verified with rollback SQL as authenticated teacher users:
+  - teacher profile draft insert succeeds.
+  - teacher listing draft insert succeeds.
+  - teacher profile/listing published insert succeeds after a passed eligibility attempt.
+
+### 2026-06-04 - Latest Commit Review
+
+- Local latest completed merge: `3fe7261 Merge chore/prod-seed-and-remove-mocks`.
+- Local latest feature commit: `6a3e7d2 Remove homepage mocks and seed production references`.
+- Latest remote `origin/dev` commit at inspection time: `55ba07b Merge fix/final-design-and-mobile`.
+- Newer remote work to reconcile includes:
+  - final design and mobile pass: `314d9a0`.
+  - premium page upgrade for login, SSS, contact, blog, and lesson landing pages: `81d54a4`.
+  - custom `PremiumSelect` dropdown replacement: `12313b3`.
+  - premium visual polish and teacher profile overhaul: `60299c1`.
+  - design overhaul for homepage, register hub, login, and search filters: `472f286`.
+  - password reset callback page: `c4ba05b`.
+  - final placeholder/legal/footer/copy cleanup: `179920e`.
+  - SSS, contact, and lesson landing pages: `52c6f53`.
+
+### Completed
+
+- Supabase/Vercel prerender handling fixed so public auth/session reads can render signed-out when public Supabase env is absent.
+- `main` was ancestry-merged into `dev` with the `ours` strategy to keep `dev` from appearing behind while preserving the newer `dev` app flow.
+- Remote Supabase was seeded with a full demo marketplace dataset on 2026-06-04.
+- Remote Supabase migrations are current through `20260603130000_analytics_events.sql`.
+- Fake production profile IDs from the older seed were removed from production.
+- Runtime mock teacher/search seed files were removed locally in `6a3e7d2`.
+- Homepage teacher sections and search filters were moved toward Supabase-backed data locally in `6a3e7d2`.
+- Remote premium design/mobile work from `origin/dev` is merged and pushed.
+- Initial dashboard request management, dashboard reviews, favorites, profile/settings forms, and admin/moderation basics are now present in code.
+
+### Next Todos
+
+1. Review the newly merged dashboard/admin/favorites/reviews flows end to end and tighten gaps before adding larger new features.
+2. Re-check OpenAPI whenever search, request, review, favorite, profile, admin, or auth endpoint behavior changes further.
+3. Keep public marketplace pages free of runtime mock data while polishing empty states for databases with no published teachers.
+
 ## Implementation Progress
 
 - Public teacher profiles use `/ogretmen/[slug]`.
@@ -78,7 +251,14 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Student and teacher accounts are created through the normal `/kayit` registration flow; Supabase email confirmation must be disabled for MVP flows that expect an immediate session.
 - Unauthenticated visitors opening `/ders-talebi?teacher={slug}` are redirected to `/kayit?next=/ders-talebi?teacher={slug}`.
 - The request submission API is `POST /api/lesson-requests`.
+- Teacher request actions use `POST /api/lesson-requests/{id}/accept` and `POST /api/lesson-requests/{id}/reject`.
 - Global auth APIs are `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/auth/me`.
+- Password reset APIs/pages are present through `POST /api/auth/forgot-password`, `/sifremi-unuttum`, and `/sifremi-sifirla`.
+- Favorites APIs are `GET /api/favorites/check` and `POST /api/favorites/toggle`.
+- Review submission uses `POST /api/reviews`.
+- Account profile API is `GET/PATCH /api/profiles/me`.
+- Teacher profile settings API is `GET/PATCH /api/teacher-profiles/me`.
+- Admin moderation APIs are `POST /api/admin/teacher-profiles/{id}/status` and `POST /api/admin/reviews/{id}/status`.
 - Private dashboard foundation uses a shared shell in `src/features/dashboard`.
 - Student dashboard routes: `/ogrenci/panel`, `/ogrenci/panel/talepler`, `/ogrenci/panel/favoriler`, `/ogrenci/panel/profil`.
 - Teacher dashboard routes: `/ogretmen/panel`, `/ogretmen/panel/talepler`, `/ogretmen/panel/ilan`, `/ogretmen/panel/ogrenciler`, `/ogretmen/panel/yorumlar`, `/ogretmen/panel/profil`, `/ogretmen/panel/ayarlar`.
@@ -90,15 +270,20 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Teacher account/listing experiments from `a7b515a` and `f528c20` were cleaned up in `feat/account-flow-cleanup`.
 - The Supabase rollback migration for the teacher account/listing experiment was applied remotely.
 - `/ogretmen-ol` routes teachers into `/kayit?role=teacher`; teacher eligibility and listing creation continue inside `/ogretmen/panel/ilan`.
+- Student dashboard now has request and favorites views wired to services.
+- Teacher dashboard now has request, review, profile, and settings views wired to services.
+- Admin dashboard now has teacher/review moderation pages and an analytics shell.
+- Public content pages now include `/sss`, `/iletisim`, `/blog`, `/blog/[slug]`, `/sifremi-unuttum`, `/sifremi-sifirla`, and `/ozel-ders/[slug]`.
 - The active OpenAPI contract only documents implemented endpoints.
 - UTF-8 hygiene is being tracked in `chore/utf8-docs-and-copy-cleanup`.
 
 ## Remaining Feature Order
 
-1. Dashboard request management: teacher incoming requests, accept/reject actions, and student request status views.
-2. Dashboard reviews: allow reviews only after an accepted lesson request.
-3. Favorites behavior and profile/settings forms.
-4. Admin/moderation basics.
+1. Audit and harden the newly merged dashboard request-management, reviews, favorites, profile/settings, and admin flows against the actual Supabase schema/RLS.
+2. Tighten empty/loading/error states for public and dashboard pages when Supabase has no published marketplace data.
+3. Verify review eligibility: students should only review a teacher after that teacher accepts the student's lesson request.
+4. Verify accepted request contact-sharing behavior in teacher dashboards.
+5. Continue SEO/content polish for lesson landing pages and public profile pages.
 
 Deferred outside the next handoff scope:
 

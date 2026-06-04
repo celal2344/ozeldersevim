@@ -1,10 +1,11 @@
 import { searchTeachers } from "@/features/search/search-service";
 import type { TeacherSearchResult } from "@/features/search/types";
 import { getLessonCategoryOptions } from "@/features/teacher-listings/service";
+import type { LessonCategoryOption } from "@/features/teacher-listings/types";
 import { hasSupabasePublicEnv } from "@/shared/config/env";
 
 export type HomepageMarketplaceData = {
-  lessons: string[];
+  lessons: LessonCategoryOption[];
   teachers: TeacherSearchResult[];
 };
 
@@ -20,7 +21,7 @@ export async function getHomepageMarketplaceData(): Promise<HomepageMarketplaceD
     ]);
 
     return {
-      lessons: lessonOptions.map((lesson) => lesson.name).slice(0, 6),
+      lessons: lessonOptions.slice(0, 6),
       teachers: teacherResponse.data,
     };
   } catch {

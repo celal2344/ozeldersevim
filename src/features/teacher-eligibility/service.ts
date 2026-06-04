@@ -192,9 +192,14 @@ export async function submitTeacherEligibilityAnswers(
     throw new TeacherEligibilityError("Tüm soruları cevaplamalısın.", 400);
   }
 
-  const unknownQuestion = [...answerByQuestion.keys()].find(
-    (questionId) => !questions.some((question) => question.question_key === questionId)
-  );
+  const questionByClientId = new Map<string, (typeof questions)[number]>();
+
+  for (const question of questions) {
+    questionByClientId.set(question.question_key, question);
+    questionByClientId.set(question.id, question);
+  }
+
+  const unknownQuestion = [...answerByQuestion.keys()].find((questionId) => !questionByClientId.has(questionId));
 
   if (unknownQuestion) {
     throw new TeacherEligibilityError("Geçersiz soru cevabı gönderildi.", 400);
@@ -218,8 +223,9 @@ export async function submitTeacherEligibilityAnswers(
 
   for (const question of questions) {
     const questionChoices = choiceRows.filter((choice) => choice.question_id === question.id);
+    const selectedChoiceKey = answerByQuestion.get(question.question_key) ?? answerByQuestion.get(question.id);
     const selectedChoice = questionChoices.find(
-      (choice) => choice.choice_key === answerByQuestion.get(question.question_key)
+      (choice) => choice.choice_key === selectedChoiceKey
     );
 
     if (!selectedChoice) {

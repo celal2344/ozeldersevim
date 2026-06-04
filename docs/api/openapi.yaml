@@ -264,6 +264,365 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /favorites/check:
+    get:
+      summary: Check if the signed-in student has favorited a teacher listing
+      parameters:
+        - in: query
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Favorite state
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [isFavorited]
+                properties:
+                  isFavorited:
+                    type: boolean
+  /favorites/toggle:
+    post:
+      summary: Toggle favorite state for a teacher listing (student only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slug]
+              properties:
+                slug:
+                  type: string
+      responses:
+        "200":
+          description: New favorite state after toggle
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [isFavorited]
+                properties:
+                  isFavorited:
+                    type: boolean
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not a student account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Teacher listing not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /profiles/me:
+    patch:
+      summary: Update the signed-in user's basic profile (name and phone)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName, phone]
+              properties:
+                fullName:
+                  type: string
+                  minLength: 2
+                  maxLength: 120
+                phone:
+                  type: string
+                  minLength: 10
+                  maxLength: 30
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [fullName, phone]
+                properties:
+                  fullName:
+                    type: string
+                  phone:
+                    type: string
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /teacher-profiles/me:
+    patch:
+      summary: Update the signed-in teacher's listing profile fields
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [hourlyPrice, deliveryMode]
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                bio:
+                  type: string
+                  maxLength: 2000
+                education:
+                  type: string
+                  maxLength: 300
+                experienceYears:
+                  type: integer
+                  minimum: 0
+                  maximum: 60
+                hourlyPrice:
+                  type: number
+                  minimum: 0
+                deliveryMode:
+                  type: string
+                  enum: [online, face_to_face, both]
+      responses:
+        "200":
+          description: Teacher profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not a teacher account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Teacher profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/teacher-profiles/{id}/status:
+    post:
+      summary: Update a teacher profile status (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [published, suspended, draft]
+      responses:
+        "200":
+          description: Status updated
+        "403":
+          description: Not admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/reviews/{id}/status:
+    post:
+      summary: Update a review status (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [published, rejected]
+      responses:
+        "200":
+          description: Status updated
+        "403":
+          description: Not admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /reviews:
+    post:
+      summary: Submit a review for an accepted lesson request (student only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitReviewPayload"
+      responses:
+        "200":
+          description: Review submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmitReviewResponse"
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not a student account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Lesson request not found or not owned by student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Request not accepted or review already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /lesson-requests/{id}/accept:
+    post:
+      summary: Accept a lesson request (teacher only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Request accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonRequestStatusResponse"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not a teacher account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Lesson request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Request is not in submitted state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /lesson-requests/{id}/reject:
+    post:
+      summary: Reject a lesson request (teacher only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Request rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonRequestStatusResponse"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not a teacher account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Lesson request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Request is not in submitted state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /lesson-requests:
     post:
       summary: Submit a lesson request as the signed-in student
@@ -834,6 +1193,18 @@ components:
         privacyAccepted:
           type: boolean
           enum: [true]
+    LessonRequestStatus:
+      type: string
+      enum: [submitted, accepted, rejected, expired, cancelled]
+    LessonRequestStatusResponse:
+      type: object
+      required: [id, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/LessonRequestStatus"
     SubmitLessonRequestResponse:
       type: object
       required: [requestId, studentProfileId, status]
@@ -847,3 +1218,31 @@ components:
         status:
           type: string
           enum: [submitted]
+    SubmitReviewPayload:
+      type: object
+      required: [lessonRequestId, rating]
+      properties:
+        lessonRequestId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          maxLength: 1000
+    SubmitReviewResponse:
+      type: object
+      required: [reviewId, rating, status]
+      properties:
+        reviewId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        status:
+          type: string
+          enum: [pending, published, rejected, reported]

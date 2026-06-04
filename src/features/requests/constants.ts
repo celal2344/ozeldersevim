@@ -1,4 +1,27 @@
 import { z } from "zod";
+import type { LessonRequestStatus } from "@/features/requests/types";
+
+export const lessonRequestStatusLabels: Record<LessonRequestStatus, string> = {
+  submitted: "Bekliyor",
+  accepted: "Kabul Edildi",
+  rejected: "Reddedildi",
+  expired: "Süresi Doldu",
+  cancelled: "İptal",
+};
+
+export const lessonRequestStatusVariant: Record<LessonRequestStatus, "default" | "secondary" | "destructive" | "outline"> = {
+  submitted: "secondary",
+  accepted: "default",
+  rejected: "destructive",
+  expired: "outline",
+  cancelled: "outline",
+};
+
+export const deliveryModeLabels: Record<"online" | "face_to_face" | "both", string> = {
+  online: "Online",
+  face_to_face: "Yüz yüze",
+  both: "Online / Yüz yüze",
+};
 
 export const lessonRequestSteps = [
   { id: "lesson", title: "Ders" },

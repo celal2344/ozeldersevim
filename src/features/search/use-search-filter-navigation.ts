@@ -21,6 +21,21 @@ export function useSearchFilterNavigation() {
     router.push(`/ogretmen-bul?${params.toString()}`);
   }
 
+  function updateParams(updates: Record<string, string | null>) {
+    const params = new URLSearchParams(searchParams);
+    params.delete("page");
+
+    for (const [key, value] of Object.entries(updates)) {
+      if (!value) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    }
+
+    router.push(`/ogretmen-bul?${params.toString()}`);
+  }
+
   function useCurrentLocation() {
     if (!navigator.geolocation) return;
 
@@ -44,6 +59,7 @@ export function useSearchFilterNavigation() {
     locationPending,
     searchParams,
     updateParam,
+    updateParams,
     useCurrentLocation,
   };
 }

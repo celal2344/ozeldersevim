@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { trackEvent } from "@/features/analytics/track";
 import { TeacherProfileView } from "@/features/teachers/teacher-profile-view";
 import { getTeacherProfileBySlug } from "@/features/teachers/service";
 import { teacherProfileJsonLd } from "@/features/teachers/utils";
+import { createSupabaseServerClient } from "@/shared/db/supabase/server";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -35,6 +37,9 @@ export default async function TeacherProfilePage({ params }: PageProps) {
   const teacher = await getTeacherProfileBySlug(slug);
 
   if (!teacher) notFound();
+
+  const supabase = await createSupabaseServerClient();
+  await trackEvent(supabase, "teacher_profile_viewed", { slug, teacherName: teacher.fullName });
 
   return (
     <>
