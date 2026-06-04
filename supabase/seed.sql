@@ -89,15 +89,15 @@ select question_rows.id, seed.choice_key, seed.label, seed.score, seed.position
 from question_rows
 join (
   values
-    ('lesson_planning', 'a', 'Önce seviyeyi ölçer, hedefi sorar ve buna göre ders planı çıkarırım.', 1, 1),
+    ('lesson_planning', 'a', 'THIS IS THE CORRECT ANSWER', 1, 1),
     ('lesson_planning', 'b', 'Herkese aynı ders planını uygularım.', 0, 2),
     ('lesson_planning', 'c', 'Sadece öğrencinin istediği soruları çözerim, takip planı yapmam.', 0, 3),
     ('lesson_planning', 'd', 'Seviye ve hedef konuşmasını derslerden sonra yaparım.', 0, 4),
-    ('communication', 'a', 'Ders ilerlemesini düzenli, saygılı ve ölçülü şekilde paylaşırım.', 1, 1),
+    ('communication', 'a', 'THIS IS THE CORRECT ANSWER', 1, 1),
     ('communication', 'b', 'Her gün çok sık mesaj atarım.', 0, 2),
     ('communication', 'c', 'Veliyi hiç bilgilendirmem.', 0, 3),
     ('communication', 'd', 'Sadece ücret konularında iletişim kurarım.', 0, 4),
-    ('ethics', 'a', 'Bilgileri yalnızca ders talebi amacıyla kullanır, üçüncü kişilerle paylaşmam.', 1, 1),
+    ('ethics', 'a', 'THIS IS THE CORRECT ANSWER', 1, 1),
     ('ethics', 'b', 'Öğrenci bilgilerini başka öğretmenlerle paylaşabilirim.', 0, 2),
     ('ethics', 'c', 'İletişim bilgilerini reklam listesine eklerim.', 0, 3),
     ('ethics', 'd', 'Kişisel verileri korumak öğretmenin sorumluluğunda değildir.', 0, 4)

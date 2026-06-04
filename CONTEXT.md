@@ -172,6 +172,13 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - `supabase/seed.sql` remains idempotent by deleting deterministic demo profile IDs and demo analytics/audit records before re-inserting.
 - Seed does not create Supabase Auth users. Demo application profile rows exist for marketplace data; login-capable demo users require a separate Auth/admin API seed script.
 
+### 2026-06-04 - Teacher Eligibility QA Seed Shortcut
+
+- Updated `supabase/seed.sql` so every correct teacher eligibility choice has the label `THIS IS THE CORRECT ANSWER`.
+- The correct choices are still the score `1` choices; only their displayed labels changed for QA.
+- Applied the seed to remote Supabase project `hhddeqgvrnyxnwetetdc`.
+- Verified remote `teacher_eligibility_choices` has 3 score-1 rows and all 3 labels are `THIS IS THE CORRECT ANSWER`.
+
 ### 2026-06-04 - Latest Commit Review
 
 - Local latest completed merge: `3fe7261 Merge chore/prod-seed-and-remove-mocks`.
