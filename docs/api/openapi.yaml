@@ -241,7 +241,7 @@ paths:
         "404":
           description: Location or lesson category not found
         "409":
-          description: Publish blocked by missing eligibility or suspended listing
+          description: Listing write blocked by missing eligibility or suspended listing
   /teachers/{slug}:
     get:
       summary: Get a public teacher profile by slug

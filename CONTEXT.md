@@ -35,6 +35,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Institution accounts are later-phase scope.
 - Teacher listing model: one public teacher profile/listing per teacher for now.
 - Teacher publishing: no admin approval for MVP; eligible teachers can publish directly.
+- Teacher listing creation is fully gated by the Teacher Eligibility Test: a teacher can create an account without the test, but cannot view the listing form or save a draft/listing until the test is passed.
 - Communication: no in-site chat for MVP. When a teacher accepts a lesson request, the student's contact details are shared with the teacher.
 - Delivery modes: both online and face-to-face are supported. For online lessons, teachers/students manage their own meeting links externally.
 - Search location model: support both city/district filtering and location-based nearby search.
@@ -73,6 +74,14 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 ## Linear Progress Tracker
 
 This section is the canonical progress and todo tracker for agents. Keep it chronological and current.
+
+### 2026-06-04 - Teacher Listing Eligibility Gate Rework
+
+- Local branch: `dev`.
+- Reworked `/ogretmen/panel/ilan` so teachers who have not passed the Teacher Eligibility Test first see a gate card with `Teste Başla`.
+- The test interface now appears only after the teacher starts the test, and the listing form stays hidden until eligibility is `passed`.
+- Direct `PUT /api/teachers/me/listing` writes are now blocked before a passed eligibility state, including draft saves.
+- Updated this context to retire the old draft-before-test behavior.
 
 ### 2026-06-04 - Merge Resolution
 
@@ -263,7 +272,7 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Student dashboard routes: `/ogrenci/panel`, `/ogrenci/panel/talepler`, `/ogrenci/panel/favoriler`, `/ogrenci/panel/profil`.
 - Teacher dashboard routes: `/ogretmen/panel`, `/ogretmen/panel/talepler`, `/ogretmen/panel/ilan`, `/ogretmen/panel/ogrenciler`, `/ogretmen/panel/yorumlar`, `/ogretmen/panel/profil`, `/ogretmen/panel/ayarlar`.
 - Dashboard foundation routes are clickable empty states only for request management, reviews, students, favorites, and settings forms. Teacher listing creation is now wired into `/ogretmen/panel/ilan`.
-- Teacher listing creation is implemented in `feat/teacher-listing-eligibility-public-data`: teachers can save draft listing content before passing the test, but publishing is blocked until a passed eligibility attempt exists.
+- Teacher listing creation is implemented in `feat/teacher-listing-eligibility-public-data`: teachers must pass the Teacher Eligibility Test before the listing form is shown or any draft/published listing write is accepted.
 - Public teacher search/profile and homepage teacher sections read Supabase published listings directly; seed/mock data is not used as a runtime fallback for public teacher discovery.
 - Teacher eligibility test content is database-backed with questions and choices. Scores are read only by server-side grading through the service-role client.
 - New local migration for this branch: `supabase/migrations/20260524120000_teacher_listing_eligibility_public_data.sql`. Remote application is deferred and should not block backend/frontend feature work.
@@ -315,7 +324,7 @@ Deferred outside the next handoff scope:
 - Yorum yazma hakkı, öğretmenin o öğrencinin özel ders başvurusunu onaylamasından sonra verilecek.
 - SMS entegrasyonu şimdilik yok.
 - Öğretmen hesabı açmak için test gerekmiyor. Test, öğretmen özel ders ilanı oluşturmak istediğinde gösterilecek ve sadece testi geçen öğretmenler ilan yayınlayabilecek.
-- Öğretmen ilan taslağını testi geçmeden kaydedebilir; yayına alma adımı test sonucu geçmeden engellenir.
+- Öğretmen testi geçmeden ilan formunu göremez ve taslak/yayınlanmış ilan kaydedemez.
 - MVP öğretmenlik testi veritabanından gelir; 3 placeholder soru ve her soruda ilk seçenek doğru olacak şekilde başlatılır.
 - Test tekrarları MVP için sınırsızdır; test geçildikten sonra yeniden test gerekmez.
 - Öğretmen için zorunlu ilk alanlar: ad, soyad, fiyat, konum, telefon.
@@ -356,7 +365,7 @@ These files are design references only. Do not use them directly as website imag
 
 - Can register/login as a teacher.
 - Can create a teacher account without passing the teacher eligibility test.
-- Must pass the teacher eligibility test before publishing a tutoring ad/listing.
+- Must pass the teacher eligibility test before seeing the listing form or saving a draft/published tutoring ad/listing.
 - Can create and edit teacher profile.
 - Can publish one public teacher listing/profile for now.
 - Can receive lesson requests.
@@ -451,7 +460,7 @@ Potential additions: preferred date/time, student level, goal/need text field, a
 - One normal registration form supports student and teacher account creation.
 - Student account creation happens through `/kayit`; lesson request no longer creates the account.
 - Teacher account can be created before the teacher eligibility test.
-- Teacher eligibility test is required when the teacher creates a tutoring ad/listing.
+- Teacher eligibility test is required before the teacher can view the listing form or save a tutoring ad/listing.
 - Supabase Auth email/password.
 - Phone number collection for lesson requests.
 - Email verification.
@@ -504,8 +513,8 @@ Goal: launch an SEO-visible tutoring directory with searchable teachers and a wo
 - Student/teacher registration entry.
 - Authenticated lesson request submission.
 - Teacher account registration.
-- Teacher eligibility test gate before tutoring ad/listing creation.
-- Teacher listing creation form.
+- Teacher eligibility test gate before the listing form.
+- Teacher listing creation form after passed eligibility.
 - Basic teacher listing CRUD.
 - Backend filters with pagination.
 - OpenAPI spec for route handlers/server endpoints.
@@ -656,7 +665,7 @@ Server actions can be used internally, but API shape should still be documented 
 - Review integrity is partly defined: only accepted lesson requests can review. Still need anti-abuse rules and moderation behavior.
 - Contact ownership is defined for MVP: contact details are shared only after teacher acceptance.
 - Monetization is intentionally out of MVP. This is simpler, but future revenue model still needs a decision.
-- Teacher eligibility is required for tutoring ad/listing creation, but retake limits and anti-cheat rules are still undefined.
+- Teacher eligibility is required before tutoring ad/listing creation, but anti-cheat rules are still undefined.
 - Location search needs a data strategy. Nearest-location search requires coordinates, distance calculations, and privacy decisions.
 - SEO can create duplicate pages if filters are all indexable. Indexing rules must be explicit.
 - KVKK/privacy requirements are important because the funnel collects name, phone, email, location, and education needs.
@@ -701,7 +710,7 @@ Server actions can be used internally, but API shape should still be documented 
 - Teacher profiles are SEO-rendered and indexable.
 - Lesson request funnel requires a signed-in student and persists valid requests.
 - Teacher eligibility test gates tutoring ad/listing creation, not teacher account registration.
-- Teacher listing creation can create a draft/published teacher profile without admin approval.
+- Teacher listing creation can create a draft/published teacher profile without admin approval after passed eligibility.
 - Teachers can accept/reject lesson requests.
 - Student contact details become visible to the teacher only after request acceptance.
 - Supabase RLS protects private student/teacher data.
