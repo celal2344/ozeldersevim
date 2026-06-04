@@ -27,6 +27,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Server-side eligibility grading uses `SUPABASE_SERVICE_ROLE_KEY`; it must stay server-only and must never be exposed through `NEXT_PUBLIC_*`.
 - Remote Supabase MCP retargeting, QA, and test work are deferred operational/verification work. The next contributor should focus only on backend/frontend application code unless explicitly asked otherwise.
 - Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
+- Vercel Web Analytics and Speed Insights are installed through `@vercel/analytics` and `@vercel/speed-insights` and mounted in the root App Router layout.
 - SMS is not in MVP.
 - Architecture: feature-based architecture.
 - API documentation: OpenAPI should be maintained as backend endpoints evolve.
@@ -74,6 +75,13 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 ## Linear Progress Tracker
 
 This section is the canonical progress and todo tracker for agents. Keep it chronological and current.
+
+### 2026-06-04 - Vercel Observability Packages
+
+- Local branch: `dev`.
+- Installed `@vercel/analytics` and `@vercel/speed-insights` with Bun.
+- Added global `<Analytics />` and `<SpeedInsights />` components to the root App Router layout.
+- Vercel dashboard-side enablement is still required for data to appear in Web Analytics and Speed Insights.
 
 ### 2026-06-04 - Teacher Listing Eligibility Gate Rework
 
