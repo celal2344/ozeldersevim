@@ -25,7 +25,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Vercel must define `NEXT_PUBLIC_SUPABASE_URL=https://hhddeqgvrnyxnwetetdc.supabase.co` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` for real auth flows.
 - Public session reads render as signed-out and sitemap omits dynamic teacher URLs when Supabase public env is missing so Vercel prerender/build does not crash; mutating auth and database flows still require the Supabase env and should fail loudly if it is missing.
 - Server-side eligibility grading uses `SUPABASE_SERVICE_ROLE_KEY`; it must stay server-only and must never be exposed through `NEXT_PUBLIC_*`.
-- Remote Supabase setup, MCP retargeting, applying unapplied migrations, QA, and test work are deferred operational/verification work. The next contributor should focus only on backend/frontend application code unless explicitly asked otherwise.
+- Remote Supabase MCP retargeting, QA, and test work are deferred operational/verification work. The next contributor should focus only on backend/frontend application code unless explicitly asked otherwise.
 - Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
 - SMS is not in MVP.
 - Architecture: feature-based architecture.
@@ -114,6 +114,23 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Search UI now includes the premium filter layout with global pagination/sorting/filtering parameters, extra gender/price/fast-response filters, and Supabase-backed filter options.
 - Search analytics tracking was added for `/api/search/teachers`.
 
+### 2026-06-04 - Remote Supabase Seeded
+
+- Applied pending remote migrations to project `hhddeqgvrnyxnwetetdc`:
+  - `20260603120000_admin_write_policies.sql`
+  - `20260603130000_analytics_events.sql`
+- Fixed `supabase/seed.sql` Turkish seed text to valid UTF-8 before applying it remotely.
+- Ran the production-safe reference seed against the linked Supabase project.
+- Verified remote reference data through Supabase service-role reads:
+  - `locations`: 5 rows.
+  - `lesson_categories`: 8 rows.
+  - `teacher_eligibility_tests`: 1 row.
+  - `teacher_eligibility_questions`: 3 rows.
+  - `teacher_eligibility_choices`: 12 rows.
+  - `analytics_events`: 0 rows, expected immediately after migration.
+- Verified seeded Turkish text renders correctly for locations, lesson categories, and teacher eligibility prompts.
+- Do not add fake production users, teachers, listings, reviews, or marketplace stats to `supabase/seed.sql`.
+
 ### 2026-06-04 - Latest Commit Review
 
 - Local latest completed merge: `3fe7261 Merge chore/prod-seed-and-remove-mocks`.
@@ -134,6 +151,7 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Supabase/Vercel prerender handling fixed so public auth/session reads can render signed-out when public Supabase env is absent.
 - `main` was ancestry-merged into `dev` with the `ours` strategy to keep `dev` from appearing behind while preserving the newer `dev` app flow.
 - Production database was seeded with production-safe reference data only: locations, lesson categories, and teacher eligibility test content.
+- Remote Supabase migrations are current through `20260603130000_analytics_events.sql`.
 - Fake production profile IDs from the older seed were removed from production.
 - Runtime mock teacher/search seed files were removed locally in `6a3e7d2`.
 - Homepage teacher sections and search filters were moved toward Supabase-backed data locally in `6a3e7d2`.
