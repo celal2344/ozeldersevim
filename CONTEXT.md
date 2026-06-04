@@ -93,7 +93,8 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
   - `src/features/homepage/constants.ts`
   - `src/features/search/search-filters.tsx`
   - `src/features/search/search-service.ts`
-- Merge commit and push are still in progress.
+- Merge commit created locally: `6024cec Merge origin/dev into dev`.
+- Push to `origin/dev` is still in progress.
 
 ### 2026-06-04 - Latest Commit Review
 
@@ -121,9 +122,9 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 
 ### Next Todos
 
-1. Commit the resolved merge and push `dev` to `origin/dev`.
-2. Update this tracker again with the final merge resolution commit hash and the next real feature target.
-3. Re-check OpenAPI after the merge commit lands if search/request endpoint behavior changes further.
+1. Push `dev` to `origin/dev`.
+2. Re-check OpenAPI after the merge lands if search/request endpoint behavior changes further.
+3. Resume the next real feature target from the remaining feature order below.
 
 ## Implementation Progress
 
