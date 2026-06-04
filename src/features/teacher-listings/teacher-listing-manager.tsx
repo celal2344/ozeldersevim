@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2Icon, Loader2Icon, SaveIcon, SendIcon, XCircleIcon } from "lucide-react";
+import { CheckCircle2Icon, Loader2Icon, LockIcon, PlayCircleIcon, SaveIcon, SendIcon, XCircleIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, type UseFormRegister } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -20,6 +20,7 @@ import type {
 import {
   fetchJson,
   firstListingFormError,
+  isTeacherListingMessageError,
   listingInputFromResource,
   listingStatusLabel,
 } from "@/features/teacher-listings/utils";
@@ -34,22 +35,28 @@ export function TeacherListingManager() {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState<string | { text: string; isError?: boolean } | null>(null);
   const [testAnswers, setTestAnswers] = useState<Record<string, string>>({});
+  const [testStarted, setTestStarted] = useState(false);
   const resourceQuery = useQuery({
     queryKey: ["teacher-listing"],
     queryFn: () => fetchJson<TeacherListingResource>("/api/teachers/me/listing"),
   });
+  const eligibility = resourceQuery.data?.eligibility;
+  const listing = resourceQuery.data?.listing;
+  const canManageListing = eligibility?.status === "passed";
   const categoryQuery = useQuery({
     queryKey: ["lesson-categories"],
     queryFn: async () => (await fetchJson<{ categories: LessonCategoryOption[] }>("/api/lesson-categories")).categories,
+    enabled: canManageListing,
   });
   const locationQuery = useQuery({
     queryKey: ["locations"],
     queryFn: async () => (await fetchJson<{ locations: LocationOption[] }>("/api/locations")).locations,
+    enabled: canManageListing,
   });
   const testQuery = useQuery({
     queryKey: ["teacher-eligibility-test"],
     queryFn: async () => (await fetchJson<{ test: TeacherEligibilityTest }>("/api/teacher-eligibility/test")).test,
-    enabled: resourceQuery.data?.eligibility.status !== "passed",
+    enabled: !canManageListing && testStarted,
     retry: false,
   });
   const form = useForm<TeacherListingInput>({
@@ -57,16 +64,14 @@ export function TeacherListingManager() {
     defaultValues: emptyTeacherListingDefaults,
   });
   const selectedLessonSlugs = useWatch({ control: form.control, name: "lessonSlugs" }) ?? [];
-  const listing = resourceQuery.data?.listing;
-  const eligibility = resourceQuery.data?.eligibility;
-  const isLoading = resourceQuery.isLoading || categoryQuery.isLoading || locationQuery.isLoading;
-  const formError = firstListingFormError(form.formState.errors);
   const selectedLocationSlug = useWatch({ control: form.control, name: "locationSlug" }) ?? "";
+  const formError = firstListingFormError(form.formState.errors);
+  const isFormDataLoading = canManageListing && (categoryQuery.isLoading || locationQuery.isLoading);
 
   useEffect(() => {
-    if (!listing) return;
+    if (!listing || !canManageListing) return;
     form.reset(listingInputFromResource(listing));
-  }, [form, listing]);
+  }, [canManageListing, form, listing]);
 
   const saveMutation = useMutation({
     mutationFn: (input: TeacherListingInput) =>
@@ -91,23 +96,25 @@ export function TeacherListingManager() {
     onSuccess: async (result) => {
       setMessage(
         result.status === "passed"
-          ? `Test geçildi. Puan: ${result.score}. İlanı yayına alabilirsin.`
+          ? `Test geçildi. Puan: ${result.score}. Artık ilanını oluşturabilirsin.`
           : `Test geçilemedi. Puan: ${result.score}. Tekrar deneyebilirsin.`
       );
       await queryClient.invalidateQueries({ queryKey: ["teacher-listing"] });
       await queryClient.invalidateQueries({ queryKey: ["teacher-eligibility-test"] });
+      if (result.status === "failed") {
+        setTestAnswers({});
+      }
     },
     onError: (error) => setMessage(error instanceof Error ? error.message : "Test gönderilemedi."),
   });
   const selectedLocationLabel = useMemo(() => {
+    if (!canManageListing) return "Konum: testten sonra seçilecek";
     const selected = locationQuery.data?.find((location) => location.slug === selectedLocationSlug);
     return selected ? `${selected.city} / ${selected.district ?? "Merkez"}` : "Konum seçilmedi";
-  }, [locationQuery.data, selectedLocationSlug]);
+  }, [canManageListing, locationQuery.data, selectedLocationSlug]);
   const messageText = typeof message === "string" ? message : message?.text;
   const messageIsError =
-    typeof message === "string"
-      ? /eksik|hatal|geçilemedi|gecilemedi|gönderilemedi|gonderilemedi|kaydedilemedi|geçersiz|gecersiz/i.test(message)
-      : message?.isError;
+    typeof message === "string" ? isTeacherListingMessageError(message) : message?.isError;
 
   function toggleLesson(slug: string) {
     const current = form.getValues("lessonSlugs");
@@ -119,7 +126,22 @@ export function TeacherListingManager() {
     form.handleSubmit((values) => saveMutation.mutate({ ...values, status }))();
   }
 
-  if (isLoading) {
+  function submitTest() {
+    if (!testQuery.data) return;
+    const answers = testQuery.data.questions.flatMap((question) => {
+      const choiceId = testAnswers[question.id];
+      return choiceId ? [{ questionId: question.id, choiceId }] : [];
+    });
+
+    if (answers.length !== testQuery.data.questions.length) {
+      setMessage({ text: "Tüm soruları cevaplamalısın.", isError: true });
+      return;
+    }
+
+    testMutation.mutate({ testId: testQuery.data.id, answers });
+  }
+
+  if (resourceQuery.isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -140,8 +162,8 @@ export function TeacherListingManager() {
         <CardContent className="flex flex-col gap-5">
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary">İlan: {listingStatusLabel(listing?.status ?? "missing")}</Badge>
-            <Badge variant={eligibility?.status === "passed" ? "default" : "secondary"}>
-              Test: {eligibility?.status === "passed" ? "Geçildi" : "Bekliyor"}
+            <Badge variant={canManageListing ? "default" : "secondary"}>
+              Test: {canManageListing ? "Geçildi" : "Bekliyor"}
             </Badge>
             <Badge variant="secondary">{selectedLocationLabel}</Badge>
           </div>
@@ -152,145 +174,86 @@ export function TeacherListingManager() {
         </CardContent>
       </Card>
 
-      {eligibility?.status !== "passed" ? (
+      {!canManageListing && !testStarted ? (
+        <EligibilityGateCard
+          onStart={() => {
+            setMessage(null);
+            setTestStarted(true);
+          }}
+        />
+      ) : null}
+
+      {!canManageListing && testStarted ? (
         <EligibilityTestCard
           answers={testAnswers}
+          isLoading={testQuery.isLoading}
           isPending={testMutation.isPending}
           onAnswerChange={(questionId, choiceId) => {
             setMessage(null);
             setTestAnswers((current) => ({ ...current, [questionId]: choiceId }));
           }}
-          onSubmit={() => {
-            if (!testQuery.data) return;
-            const answers = testQuery.data.questions.flatMap((question) => {
-              const choiceId = testAnswers[question.id];
-              return choiceId ? [{ questionId: question.id, choiceId }] : [];
-            });
-
-            if (answers.length !== testQuery.data.questions.length) {
-              setMessage({ text: "Tüm soruları cevaplamalısın.", isError: true });
-              return;
-            }
-
-            testMutation.mutate({ testId: testQuery.data.id, answers });
-          }}
+          onSubmit={submitTest}
           test={testQuery.data}
         />
       ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardDescription>Profil ve ilan bilgileri</CardDescription>
-          <CardTitle className="text-brand-navy">Ders ilanı</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="flex flex-col gap-5">
-            {formError ? <StatusMessage message={formError} isError /> : null}
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-                İlan başlığı
-                <Input {...form.register("title")} placeholder="Matematik Öğretmeni" />
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-                Saatlik fiyat
-                <Input {...form.register("hourlyPrice", { valueAsNumber: true })} type="number" min={1} placeholder="650" />
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-                Deneyim yılı
-                <Input {...form.register("experienceYears", { valueAsNumber: true })} type="number" min={0} placeholder="5" />
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-                Eğitim
-                <Input {...form.register("education")} placeholder="Atatürk Üniversitesi" />
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-                Ders türü
-                <select
-                  {...form.register("deliveryMode")}
-                  className="h-10 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-brand-orange"
-                >
-                  {teacherListingDeliveryOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-                Konum
-                <select
-                  {...form.register("locationSlug")}
-                  className="h-10 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-brand-orange"
-                >
-                  <option value="">Konum seç</option>
-                  {(locationQuery.data ?? []).map((location) => (
-                    <option key={location.slug} value={location.slug}>
-                      {location.city} / {location.district ?? "Merkez"}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
-              Açıklama
-              <textarea
-                {...form.register("bio")}
-                className="min-h-32 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-brand-orange"
-                placeholder="Ders yaklaşımını, uzmanlık alanlarını ve öğrenciye sağlayacağın desteği yaz."
-              />
-            </label>
-            <div className="flex flex-col gap-3">
-              <p className="text-sm font-medium text-brand-navy">Verdiğin dersler</p>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {(categoryQuery.data ?? []).map((category) => (
-                  <label key={category.slug} className="flex items-center gap-3 rounded-lg border p-3 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={selectedLessonSlugs.includes(category.slug)}
-                      onChange={() => toggleLesson(category.slug)}
-                    />
-                    {category.name}
-                  </label>
-                ))}
-              </div>
-            </div>
-            <Separator />
-            <div className="flex flex-wrap gap-3">
-              <Button type="button" variant="outline" disabled={saveMutation.isPending} onClick={() => submitListing("draft")}>
-                {saveMutation.isPending ? <Loader2Icon data-icon="inline-start" aria-hidden="true" /> : <SaveIcon data-icon="inline-start" aria-hidden="true" />}
-                Taslak Kaydet
-              </Button>
-              <Button
-                type="button"
-                className="bg-brand-orange text-white hover:bg-brand-orange/90"
-                disabled={saveMutation.isPending}
-                onClick={() => submitListing("published")}
-              >
-                {saveMutation.isPending ? <Loader2Icon data-icon="inline-start" aria-hidden="true" /> : <SendIcon data-icon="inline-start" aria-hidden="true" />}
-                Yayına Al
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      {canManageListing ? (
+        <ListingFormCard
+          categoryQueryData={categoryQuery.data ?? []}
+          formError={formError}
+          isLoading={isFormDataLoading}
+          isPending={saveMutation.isPending}
+          locationQueryData={locationQuery.data ?? []}
+          onSubmit={submitListing}
+          onToggleLesson={toggleLesson}
+          selectedLessonSlugs={selectedLessonSlugs}
+          formRegister={form.register}
+        />
+      ) : null}
     </>
+  );
+}
+
+function EligibilityGateCard({ onStart }: { onStart: () => void }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardDescription>Öğretmenlik testi</CardDescription>
+        <CardTitle className="text-brand-navy">İlan oluşturmadan önce testi geçmelisin.</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-5">
+        <div className="flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-brand-navy">
+          <LockIcon data-icon="inline-start" aria-hidden="true" className="mt-0.5 text-brand-orange" />
+          <p>
+            Öğretmen hesabın hazır. Özel ders ilanı oluşturmak ve yayına almak için önce öğretmenlik uygunluk testini
+            tamamlaman gerekiyor.
+          </p>
+        </div>
+        <Button type="button" className="w-fit bg-brand-orange text-white hover:bg-brand-orange/90" onClick={onStart}>
+          <PlayCircleIcon data-icon="inline-start" aria-hidden="true" />
+          Teste Başla
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
 function EligibilityTestCard({
   answers,
+  isLoading,
   isPending,
   onAnswerChange,
   onSubmit,
   test,
 }: {
   answers: Record<string, string>;
+  isLoading: boolean;
   isPending: boolean;
   onAnswerChange: (questionId: string, choiceId: string) => void;
   onSubmit: () => void;
   test?: TeacherEligibilityTest;
 }) {
-  if (!test) {
+  if (isLoading || !test) {
     return (
       <Card>
         <CardHeader>
@@ -311,7 +274,8 @@ function EligibilityTestCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         <p className="text-sm text-muted-foreground">
-          İlanı yayına almak için testi geçmelisin. QA için her soruda ilk seçenek doğru olacak şekilde ayarlandı.
+          İlan oluşturma formuna geçmek için testi tamamlamalısın. QA için her soruda ilk seçenek doğru olacak şekilde
+          ayarlandı.
         </p>
         {test.questions.map((question) => (
           <div key={question.id} className="rounded-lg border p-4">
@@ -335,6 +299,137 @@ function EligibilityTestCard({
           {isPending ? <Loader2Icon data-icon="inline-start" aria-hidden="true" /> : <CheckCircle2Icon data-icon="inline-start" aria-hidden="true" />}
           Testi Gönder
         </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ListingFormCard({
+  categoryQueryData,
+  formError,
+  formRegister,
+  isLoading,
+  isPending,
+  locationQueryData,
+  onSubmit,
+  onToggleLesson,
+  selectedLessonSlugs,
+}: {
+  categoryQueryData: LessonCategoryOption[];
+  formError?: string;
+  formRegister: UseFormRegister<TeacherListingInput>;
+  isLoading: boolean;
+  isPending: boolean;
+  locationQueryData: LocationOption[];
+  onSubmit: (status: "draft" | "published") => void;
+  onToggleLesson: (slug: string) => void;
+  selectedLessonSlugs: string[];
+}) {
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardDescription>Profil ve ilan bilgileri</CardDescription>
+          <CardTitle className="text-brand-navy">Form verileri yükleniyor.</CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardDescription>Profil ve ilan bilgileri</CardDescription>
+        <CardTitle className="text-brand-navy">Ders ilanı</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form className="flex flex-col gap-5">
+          {formError ? <StatusMessage message={formError} isError /> : null}
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
+              İlan başlığı
+              <Input {...formRegister("title")} placeholder="Matematik Öğretmeni" />
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
+              Saatlik fiyat
+              <Input {...formRegister("hourlyPrice", { valueAsNumber: true })} type="number" min={1} placeholder="650" />
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
+              Deneyim yılı
+              <Input {...formRegister("experienceYears", { valueAsNumber: true })} type="number" min={0} placeholder="5" />
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
+              Eğitim
+              <Input {...formRegister("education")} placeholder="Atatürk Üniversitesi" />
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
+              Ders türü
+              <select
+                {...formRegister("deliveryMode")}
+                className="h-10 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-brand-orange"
+              >
+                {teacherListingDeliveryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
+              Konum
+              <select
+                {...formRegister("locationSlug")}
+                className="h-10 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-brand-orange"
+              >
+                <option value="">Konum seç</option>
+                {locationQueryData.map((location) => (
+                  <option key={location.slug} value={location.slug}>
+                    {location.city} / {location.district ?? "Merkez"}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
+            Açıklama
+            <textarea
+              {...formRegister("bio")}
+              className="min-h-32 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-brand-orange"
+              placeholder="Ders yaklaşımını, uzmanlık alanlarını ve öğrenciye sağlayacağın desteği yaz."
+            />
+          </label>
+          <div className="flex flex-col gap-3">
+            <p className="text-sm font-medium text-brand-navy">Verdiğin dersler</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {categoryQueryData.map((category) => (
+                <label key={category.slug} className="flex items-center gap-3 rounded-lg border p-3 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={selectedLessonSlugs.includes(category.slug)}
+                    onChange={() => onToggleLesson(category.slug)}
+                  />
+                  {category.name}
+                </label>
+              ))}
+            </div>
+          </div>
+          <Separator />
+          <div className="flex flex-wrap gap-3">
+            <Button type="button" variant="outline" disabled={isPending} onClick={() => onSubmit("draft")}>
+              {isPending ? <Loader2Icon data-icon="inline-start" aria-hidden="true" /> : <SaveIcon data-icon="inline-start" aria-hidden="true" />}
+              Taslak Kaydet
+            </Button>
+            <Button
+              type="button"
+              className="bg-brand-orange text-white hover:bg-brand-orange/90"
+              disabled={isPending}
+              onClick={() => onSubmit("published")}
+            >
+              {isPending ? <Loader2Icon data-icon="inline-start" aria-hidden="true" /> : <SendIcon data-icon="inline-start" aria-hidden="true" />}
+              Yayına Al
+            </Button>
+          </div>
+        </form>
       </CardContent>
     </Card>
   );

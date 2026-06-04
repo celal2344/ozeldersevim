@@ -82,9 +82,8 @@ export async function getTeacherListingResource(profileId: string): Promise<Teac
 export async function saveTeacherListing(profileId: string, input: TeacherListingInput): Promise<TeacherListingResource> {
   const supabase = await createSupabaseServerClient();
   const eligibility = await getTeacherEligibilityState(profileId);
-
-  if (input.status === "published" && eligibility.status !== "passed") {
-    throw new TeacherListingError("İlanı yayına almak için önce öğretmenlik testini geçmelisin.", 409);
+  if (eligibility.status !== "passed") {
+    throw new TeacherListingError("İlan oluşturmak için önce öğretmenlik testini geçmelisin.", 409);
   }
 
   const uniqueLessonSlugs = [...new Set(input.lessonSlugs)];

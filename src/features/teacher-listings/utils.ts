@@ -83,3 +83,7 @@ export function firstListingFormError(errors: FieldErrors<TeacherListingInput>) 
     errors.lessonSlugs?.message
   );
 }
+
+export function isTeacherListingMessageError(message: string) {
+  return /eksik|hatal|geçilemedi|gecilemedi|gönderilemedi|gonderilemedi|kaydedilemedi|geçersiz|gecersiz/i.test(message);
+}
