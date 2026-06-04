@@ -94,7 +94,25 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
   - `src/features/search/search-filters.tsx`
   - `src/features/search/search-service.ts`
 - Merge commit created locally: `6024cec Merge origin/dev into dev`.
-- Push to `origin/dev` is still in progress.
+- Merge was pushed to `origin/dev`; latest pushed docs tracker commit is `d035f52 docs: record dev merge resolution`.
+
+### 2026-06-04 - Origin Dev Work Integrated
+
+- Integrated `origin/dev` premium design and mobile pass through `55ba07b Merge fix/final-design-and-mobile`.
+- Public UI now includes premium layouts for homepage, login, register hub, teacher search, teacher profile, `ogretmen-ol`, SSS, contact, blog, password reset, legal pages, and lesson landing pages.
+- `PremiumSelect` is now the shared custom dropdown used instead of native selects in the polished public UI.
+- Public header/footer and mobile menu were upgraded, including mobile navigation support.
+- Lesson landing pages now live under `/ozel-ders/[slug]` with SEO metadata and real teacher-list sections when Supabase-backed published teachers exist.
+- Password reset flow was added with `/sifremi-unuttum` and `/sifremi-sifirla`.
+- Blog pages were added at `/blog` and `/blog/[slug]`.
+- Contact and SSS pages were added at `/iletisim` and `/sss`.
+- Admin foundation was added under `/admin`, including teacher moderation, review moderation, analytics shell, admin auth guard helpers, and admin write-policy/analytics migrations.
+- Dashboard request-management UI was added for student and teacher panels, including accept/reject API routes for lesson requests.
+- Dashboard reviews UI was added, including review submission API/service and teacher reviews view.
+- Favorites UI/API/service was added for student favorite teachers.
+- Account profile and teacher profile settings forms were added for dashboard profile management.
+- Search UI now includes the premium filter layout with global pagination/sorting/filtering parameters, extra gender/price/fast-response filters, and Supabase-backed filter options.
+- Search analytics tracking was added for `/api/search/teachers`.
 
 ### 2026-06-04 - Latest Commit Review
 
@@ -119,12 +137,14 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Fake production profile IDs from the older seed were removed from production.
 - Runtime mock teacher/search seed files were removed locally in `6a3e7d2`.
 - Homepage teacher sections and search filters were moved toward Supabase-backed data locally in `6a3e7d2`.
+- Remote premium design/mobile work from `origin/dev` is merged and pushed.
+- Initial dashboard request management, dashboard reviews, favorites, profile/settings forms, and admin/moderation basics are now present in code.
 
 ### Next Todos
 
-1. Push `dev` to `origin/dev`.
-2. Re-check OpenAPI after the merge lands if search/request endpoint behavior changes further.
-3. Resume the next real feature target from the remaining feature order below.
+1. Review the newly merged dashboard/admin/favorites/reviews flows end to end and tighten gaps before adding larger new features.
+2. Re-check OpenAPI whenever search, request, review, favorite, profile, admin, or auth endpoint behavior changes further.
+3. Keep public marketplace pages free of runtime mock data while polishing empty states for databases with no published teachers.
 
 ## Implementation Progress
 
@@ -137,7 +157,14 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Student and teacher accounts are created through the normal `/kayit` registration flow; Supabase email confirmation must be disabled for MVP flows that expect an immediate session.
 - Unauthenticated visitors opening `/ders-talebi?teacher={slug}` are redirected to `/kayit?next=/ders-talebi?teacher={slug}`.
 - The request submission API is `POST /api/lesson-requests`.
+- Teacher request actions use `POST /api/lesson-requests/{id}/accept` and `POST /api/lesson-requests/{id}/reject`.
 - Global auth APIs are `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/auth/me`.
+- Password reset APIs/pages are present through `POST /api/auth/forgot-password`, `/sifremi-unuttum`, and `/sifremi-sifirla`.
+- Favorites APIs are `GET /api/favorites/check` and `POST /api/favorites/toggle`.
+- Review submission uses `POST /api/reviews`.
+- Account profile API is `GET/PATCH /api/profiles/me`.
+- Teacher profile settings API is `GET/PATCH /api/teacher-profiles/me`.
+- Admin moderation APIs are `POST /api/admin/teacher-profiles/{id}/status` and `POST /api/admin/reviews/{id}/status`.
 - Private dashboard foundation uses a shared shell in `src/features/dashboard`.
 - Student dashboard routes: `/ogrenci/panel`, `/ogrenci/panel/talepler`, `/ogrenci/panel/favoriler`, `/ogrenci/panel/profil`.
 - Teacher dashboard routes: `/ogretmen/panel`, `/ogretmen/panel/talepler`, `/ogretmen/panel/ilan`, `/ogretmen/panel/ogrenciler`, `/ogretmen/panel/yorumlar`, `/ogretmen/panel/profil`, `/ogretmen/panel/ayarlar`.
@@ -149,15 +176,20 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Teacher account/listing experiments from `a7b515a` and `f528c20` were cleaned up in `feat/account-flow-cleanup`.
 - The Supabase rollback migration for the teacher account/listing experiment was applied remotely.
 - `/ogretmen-ol` routes teachers into `/kayit?role=teacher`; teacher eligibility and listing creation continue inside `/ogretmen/panel/ilan`.
+- Student dashboard now has request and favorites views wired to services.
+- Teacher dashboard now has request, review, profile, and settings views wired to services.
+- Admin dashboard now has teacher/review moderation pages and an analytics shell.
+- Public content pages now include `/sss`, `/iletisim`, `/blog`, `/blog/[slug]`, `/sifremi-unuttum`, `/sifremi-sifirla`, and `/ozel-ders/[slug]`.
 - The active OpenAPI contract only documents implemented endpoints.
 - UTF-8 hygiene is being tracked in `chore/utf8-docs-and-copy-cleanup`.
 
 ## Remaining Feature Order
 
-1. Dashboard request management: teacher incoming requests, accept/reject actions, and student request status views.
-2. Dashboard reviews: allow reviews only after an accepted lesson request.
-3. Favorites behavior and profile/settings forms.
-4. Admin/moderation basics.
+1. Audit and harden the newly merged dashboard request-management, reviews, favorites, profile/settings, and admin flows against the actual Supabase schema/RLS.
+2. Tighten empty/loading/error states for public and dashboard pages when Supabase has no published marketplace data.
+3. Verify review eligibility: students should only review a teacher after that teacher accepts the student's lesson request.
+4. Verify accepted request contact-sharing behavior in teacher dashboards.
+5. Continue SEO/content polish for lesson landing pages and public profile pages.
 
 Deferred outside the next handoff scope:
 
