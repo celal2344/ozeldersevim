@@ -179,6 +179,19 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Applied the seed to remote Supabase project `hhddeqgvrnyxnwetetdc`.
 - Verified remote `teacher_eligibility_choices` has 3 score-1 rows and all 3 labels are `THIS IS THE CORRECT ANSWER`.
 
+### 2026-06-04 - Teacher Eligibility Submit Bug Fix
+
+- Fixed the teacher eligibility submission path after QA showed selected correct answers could still surface `Test cevapları eksik veya hatalı.`
+- Root cause: the seeded test ID `00000000-0000-0000-0000-000000000301` is valid for Postgres `uuid`, but it is not RFC-versioned, so Zod's strict `z.uuid()` rejected the request body before grading.
+- The submission schema now validates `testId` as a non-empty string because the database remains the source of truth for whether the test ID exists.
+- Server grading now accepts either the public `question_key` or the database question UUID as `questionId`, so cached or differently shaped clients do not fail valid submissions.
+- Teacher listing manager now:
+  - clears stale test messages when an answer changes.
+  - blocks incomplete answer payloads before posting.
+  - posts the validated payload directly to `/api/teacher-eligibility/submissions`.
+  - renders detected errors as error states instead of green success states.
+- Verification passed: direct schema repro with the seeded test ID, `bun run check:copy`, `bun run typecheck`, and `bun run lint`.
+
 ### 2026-06-04 - Latest Commit Review
 
 - Local latest completed merge: `3fe7261 Merge chore/prod-seed-and-remove-mocks`.

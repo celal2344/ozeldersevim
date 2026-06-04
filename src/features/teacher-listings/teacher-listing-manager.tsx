@@ -32,7 +32,7 @@ import { Separator } from "@/shared/components/ui/separator";
 
 export function TeacherListingManager() {
   const queryClient = useQueryClient();
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | { text: string; isError?: boolean } | null>(null);
   const [testAnswers, setTestAnswers] = useState<Record<string, string>>({});
   const resourceQuery = useQuery({
     queryKey: ["teacher-listing"],
@@ -82,17 +82,11 @@ export function TeacherListingManager() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "İlan kaydedilemedi."),
   });
   const testMutation = useMutation({
-    mutationFn: (test: TeacherEligibilityTest) =>
+    mutationFn: (payload: { testId: string; answers: { questionId: string; choiceId: string }[] }) =>
       fetchJson<{ status: "passed" | "failed"; score: number }>("/api/teacher-eligibility/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          testId: test.id,
-          answers: test.questions.map((question) => ({
-            questionId: question.id,
-            choiceId: testAnswers[question.id],
-          })),
-        }),
+        body: JSON.stringify(payload),
       }),
     onSuccess: async (result) => {
       setMessage(
@@ -109,6 +103,11 @@ export function TeacherListingManager() {
     const selected = locationQuery.data?.find((location) => location.slug === selectedLocationSlug);
     return selected ? `${selected.city} / ${selected.district ?? "Merkez"}` : "Konum seçilmedi";
   }, [locationQuery.data, selectedLocationSlug]);
+  const messageText = typeof message === "string" ? message : message?.text;
+  const messageIsError =
+    typeof message === "string"
+      ? /eksik|hatal|geçilemedi|gecilemedi|gönderilemedi|gonderilemedi|kaydedilemedi|geçersiz|gecersiz/i.test(message)
+      : message?.isError;
 
   function toggleLesson(slug: string) {
     const current = form.getValues("lessonSlugs");
@@ -146,7 +145,7 @@ export function TeacherListingManager() {
             </Badge>
             <Badge variant="secondary">{selectedLocationLabel}</Badge>
           </div>
-          {message ? <StatusMessage message={message} /> : null}
+          {messageText ? <StatusMessage message={messageText} isError={messageIsError} /> : null}
           {resourceQuery.error || categoryQuery.error || locationQuery.error ? (
             <StatusMessage message="İlan ekranı için gerekli veriler alınamadı." isError />
           ) : null}
@@ -157,11 +156,23 @@ export function TeacherListingManager() {
         <EligibilityTestCard
           answers={testAnswers}
           isPending={testMutation.isPending}
-          onAnswerChange={(questionId, choiceId) =>
-            setTestAnswers((current) => ({ ...current, [questionId]: choiceId }))
-          }
+          onAnswerChange={(questionId, choiceId) => {
+            setMessage(null);
+            setTestAnswers((current) => ({ ...current, [questionId]: choiceId }));
+          }}
           onSubmit={() => {
-            if (testQuery.data) testMutation.mutate(testQuery.data);
+            if (!testQuery.data) return;
+            const answers = testQuery.data.questions.flatMap((question) => {
+              const choiceId = testAnswers[question.id];
+              return choiceId ? [{ questionId: question.id, choiceId }] : [];
+            });
+
+            if (answers.length !== testQuery.data.questions.length) {
+              setMessage({ text: "Tüm soruları cevaplamalısın.", isError: true });
+              return;
+            }
+
+            testMutation.mutate({ testId: testQuery.data.id, answers });
           }}
           test={testQuery.data}
         />

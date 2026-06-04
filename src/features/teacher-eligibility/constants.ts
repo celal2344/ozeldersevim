@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const teacherEligibilitySubmissionSchema = z.object({
-  testId: z.uuid("Geçerli bir test seçimi gerekli."),
+  testId: z.string().min(1, "Geçerli bir test seçimi gerekli."),
   answers: z
     .array(
       z.object({
