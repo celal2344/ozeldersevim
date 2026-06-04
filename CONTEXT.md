@@ -192,6 +192,21 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
   - renders detected errors as error states instead of green success states.
 - Verification passed: direct schema repro with the seeded test ID, `bun run check:copy`, `bun run typecheck`, and `bun run lint`.
 
+### 2026-06-04 - Teacher Listing RLS Recursion Fix
+
+- Fixed `infinite recursion detected in policy for relation "teacher_profiles"` seen when creating an `ilan` after passing the teacher eligibility test.
+- Root cause: RLS policies on `teacher_profiles` and `teacher_listings` queried `profiles`, while `profiles` had a public-read policy that queried `teacher_profiles`; policy evaluation could re-enter itself.
+- Added remote migrations:
+  - `20260604075247_fix_admin_rls_recursion.sql`
+  - `20260604075353_fix_teacher_policy_role_recursion.sql`
+  - `20260604075530_fix_listing_policy_helpers.sql`
+- `public.is_admin()`, `public.has_app_role()`, `public.owns_teacher_profile()`, and `public.can_write_teacher_listing()` now isolate role/ownership checks from RLS recursion.
+- Applied all three migrations to remote project `hhddeqgvrnyxnwetetdc`.
+- Verified with rollback SQL as authenticated teacher users:
+  - teacher profile draft insert succeeds.
+  - teacher listing draft insert succeeds.
+  - teacher profile/listing published insert succeeds after a passed eligibility attempt.
+
 ### 2026-06-04 - Latest Commit Review
 
 - Local latest completed merge: `3fe7261 Merge chore/prod-seed-and-remove-mocks`.
