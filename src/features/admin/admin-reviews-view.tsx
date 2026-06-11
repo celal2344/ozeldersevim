@@ -1,9 +1,10 @@
 import { StarIcon } from "lucide-react";
 
-import { createSupabaseServerClient } from "@/shared/db/supabase/server";
 import { AdminStatusButton } from "@/features/admin/admin-status-button";
+import { DashboardStateCard } from "@/features/dashboard/shared/dashboard-state-card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
+import { createSupabaseServerClient } from "@/shared/db/supabase/server";
 
 const statusVariant = {
   published: "default",
@@ -33,11 +34,22 @@ export async function AdminReviewsView() {
     .limit(100);
 
   if (error) {
-    return <p className="text-sm text-destructive">Yorumlar yüklenemedi: {error.message}</p>;
+    return (
+      <DashboardStateCard
+        description={error.message}
+        title="Yorumlar yüklenemedi."
+        tone="error"
+      />
+    );
   }
 
   if (!reviews || reviews.length === 0) {
-    return <p className="text-sm text-muted-foreground">Henüz yorum yok.</p>;
+    return (
+      <DashboardStateCard
+        description="Öğrenciler yorum yazdığında moderasyon listesinde görünecek."
+        title="Henüz yorum yok."
+      />
+    );
   }
 
   return (

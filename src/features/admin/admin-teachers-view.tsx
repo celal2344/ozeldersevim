@@ -1,7 +1,8 @@
-import { createSupabaseServerClient } from "@/shared/db/supabase/server";
 import { AdminStatusButton } from "@/features/admin/admin-status-button";
+import { DashboardStateCard } from "@/features/dashboard/shared/dashboard-state-card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Card, CardContent } from "@/shared/components/ui/card";
+import { createSupabaseServerClient } from "@/shared/db/supabase/server";
 
 const statusVariant = {
   published: "default",
@@ -30,11 +31,22 @@ export async function AdminTeachersView() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return <p className="text-sm text-destructive">Öğretmenler yüklenemedi: {error.message}</p>;
+    return (
+      <DashboardStateCard
+        description={error.message}
+        title="Öğretmenler yüklenemedi."
+        tone="error"
+      />
+    );
   }
 
   if (!profiles || profiles.length === 0) {
-    return <p className="text-sm text-muted-foreground">Henüz kayıtlı öğretmen yok.</p>;
+    return (
+      <DashboardStateCard
+        description="Öğretmen hesabı veya ilan oluşturulduğunda burada listelenecek."
+        title="Henüz kayıtlı öğretmen yok."
+      />
+    );
   }
 
   return (
@@ -58,7 +70,7 @@ export async function AdminTeachersView() {
                 <Badge variant={statusVariant[tp.status]}>{statusLabel[tp.status]}</Badge>
               </div>
               <span className="text-xs text-muted-foreground">
-                {tp.teacher_listings?.headline ?? "İlan yok"} · {tp.hourly_price.toLocaleString("tr-TR")} ₺/saat · {formatDate(tp.created_at)}
+                {tp.teacher_listings?.headline ?? "İlan yok"} · {tp.hourly_price.toLocaleString("tr-TR")} TL/saat · {formatDate(tp.created_at)}
               </span>
               {tp.profiles?.phone && (
                 <span className="text-xs text-muted-foreground">{tp.profiles.phone}</span>

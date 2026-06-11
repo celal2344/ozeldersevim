@@ -23,6 +23,7 @@ export async function GET(request: Request) {
     .from("teacher_listings")
     .select("teacher_profile_id")
     .eq("slug", slug)
+    .eq("is_published", true)
     .maybeSingle();
 
   if (!listing) {

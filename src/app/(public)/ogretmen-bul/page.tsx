@@ -37,6 +37,8 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
     }),
     getTeacherSearchFilterOptions(),
   ]);
+  const isMarketplaceEmpty = response.fallback?.reason === "marketplace_empty";
+  const isFiltersRelaxed = response.fallback?.reason === "filters_relaxed";
 
   return (
     <main>
@@ -55,7 +57,9 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
             Özel ders öğretmeni bul, puana göre karşılaştır.
           </h1>
           <p className="max-w-xl text-sm leading-6 text-white/55">
-            {response.meta.total > 0 ? `${response.meta.total} öğretmen listelendi.` : "Filtrelerinize uygun öğretmen bulunamadı."} Konum erişimine izin verirseniz yakındaki öğretmenleri mesafeye göre sıralayabilirsiniz.
+            {isMarketplaceEmpty
+              ? "Öğretmen ilanları bakımda. Yeni ilanlar yayına alındığında bu sayfa tekrar sonuç gösterecek."
+              : `${response.meta.total} öğretmen listelendi.`} Konum erişimine izin verirseniz yakındaki öğretmenleri mesafeye göre sıralayabilirsiniz.
           </p>
         </div>
       </section>
@@ -65,43 +69,59 @@ export default async function TeacherSearchPage({ searchParams }: PageProps) {
       >
         <div className="mx-auto flex max-w-7xl flex-col gap-6">
           <SearchFilters {...filterOptions} />
-          {response.data.length > 0 ? (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {response.data.map((teacher) => (
-                <TeacherResultCard key={teacher.id} teacher={teacher} />
-              ))}
+
+          {isMarketplaceEmpty ? (
+            <div className="rounded-2xl border border-orange-100 bg-white p-8 text-center shadow-sm">
+              <h2 className="text-xl font-semibold text-brand-navy">Öğretmen ilanları hazırlanıyor</h2>
+              <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                Marketplace şu anda yayına hazır öğretmen ilanı göstermiyor. Lütfen daha sonra tekrar kontrol edin veya
+                öğretmen hesabı açarak ilk ilanlardan birini oluşturun.
+              </p>
+              <Button
+                className="mt-5 bg-brand-orange text-white hover:bg-brand-orange/90"
+                nativeButton={false}
+                render={<Link href="/ogretmen-ol" />}
+              >
+                Öğretmen Ol
+              </Button>
             </div>
           ) : (
-            <div className="rounded-2xl border bg-white p-8 text-center shadow-sm">
-              <h2 className="text-xl font-semibold text-brand-navy">Sonuç bulunamadı</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Filtreleri azaltarak, yakın ilçeleri veya online ders seçeneğini deneyebilirsin.
-              </p>
-            </div>
+            <>
+              {isFiltersRelaxed ? (
+                <div className="rounded-2xl border border-orange-100 bg-orange-50 px-5 py-4 text-sm text-brand-navy">
+                  Seçtiğin filtrelerle tam eşleşme bulunamadı. Bunun yerine önerilen öğretmenleri gösteriyoruz.
+                </div>
+              ) : null}
+              <div className="grid gap-4 lg:grid-cols-2">
+                {response.data.map((teacher) => (
+                  <TeacherResultCard key={teacher.id} teacher={teacher} />
+                ))}
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant="outline"
+                  className="border-brand-navy/20 bg-white text-brand-navy hover:bg-brand-navy hover:text-white"
+                  disabled={response.meta.page <= 1}
+                  nativeButton={false}
+                  render={<Link href={searchPageHref(params, Math.max(1, response.meta.page - 1))} />}
+                >
+                  Önceki
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Sayfa {response.meta.page} / {response.meta.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  className="border-brand-navy/20 bg-white text-brand-navy hover:bg-brand-navy hover:text-white"
+                  disabled={response.meta.page >= response.meta.totalPages}
+                  nativeButton={false}
+                  render={<Link href={searchPageHref(params, Math.min(response.meta.totalPages, response.meta.page + 1))} />}
+                >
+                  Sonraki
+                </Button>
+              </div>
+            </>
           )}
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              variant="outline"
-              className="border-brand-navy/20 bg-white text-brand-navy hover:bg-brand-navy hover:text-white"
-              disabled={response.meta.page <= 1}
-              nativeButton={false}
-              render={<Link href={searchPageHref(params, Math.max(1, response.meta.page - 1))} />}
-            >
-              Önceki
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Sayfa {response.meta.page} / {response.meta.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              className="border-brand-navy/20 bg-white text-brand-navy hover:bg-brand-navy hover:text-white"
-              disabled={response.meta.page >= response.meta.totalPages}
-              nativeButton={false}
-              render={<Link href={searchPageHref(params, Math.min(response.meta.totalPages, response.meta.page + 1))} />}
-            >
-              Sonraki
-            </Button>
-          </div>
         </div>
       </section>
     </main>

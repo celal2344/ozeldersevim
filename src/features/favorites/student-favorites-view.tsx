@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { MapPinIcon, StarIcon } from "lucide-react";
 
-import { getStudentFavorites } from "@/features/favorites/service";
 import { FavoriteButton } from "@/features/favorites/favorite-button";
+import { getStudentFavorites } from "@/features/favorites/service";
+import { DashboardStateCard } from "@/features/dashboard/shared/dashboard-state-card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
@@ -19,33 +20,22 @@ export async function StudentFavoritesView() {
     favorites = await getStudentFavorites();
   } catch {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-sm text-destructive">Favoriler yüklenirken bir hata oluştu.</p>
-        </CardContent>
-      </Card>
+      <DashboardStateCard
+        description="Lütfen sayfayı yenileyip tekrar dene. Sorun devam ederse daha sonra kontrol et."
+        title="Favoriler yüklenirken bir hata oluştu."
+        tone="error"
+      />
     );
   }
 
   if (favorites.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg text-brand-navy">Henüz favori öğretmen eklemedin.</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Öğretmen profilinde &quot;Favorile&quot; butonuna tıklayarak kayıt edebilirsin.
-          </p>
-          <Button
-            className="mt-4 w-fit bg-brand-orange text-white hover:bg-brand-orange/90"
-            nativeButton={false}
-            render={<Link href="/ogretmen-bul" />}
-          >
-            Öğretmen Bul
-          </Button>
-        </CardContent>
-      </Card>
+      <DashboardStateCard
+        actionHref="/ogretmen-bul"
+        actionLabel="Öğretmen Bul"
+        description="Öğretmen profilinde Favorile butonuna tıklayarak kayıt edebilirsin."
+        title="Henüz favori öğretmen eklemedin."
+      />
     );
   }
 
@@ -88,7 +78,7 @@ export async function StudentFavoritesView() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-brand-orange">
-                  {profile.hourly_price.toLocaleString("tr-TR")} ₺/saat
+                  {profile.hourly_price.toLocaleString("tr-TR")} TL/saat
                 </span>
                 <Button
                   size="sm"

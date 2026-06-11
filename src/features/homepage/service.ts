@@ -6,12 +6,13 @@ import { hasSupabasePublicEnv } from "@/shared/config/env";
 
 export type HomepageMarketplaceData = {
   lessons: LessonCategoryOption[];
+  marketplaceStatus: "ready" | "empty";
   teachers: TeacherSearchResult[];
 };
 
 export async function getHomepageMarketplaceData(): Promise<HomepageMarketplaceData> {
   if (!hasSupabasePublicEnv()) {
-    return { lessons: [], teachers: [] };
+    return { lessons: [], marketplaceStatus: "empty", teachers: [] };
   }
 
   try {
@@ -22,9 +23,10 @@ export async function getHomepageMarketplaceData(): Promise<HomepageMarketplaceD
 
     return {
       lessons: lessonOptions.slice(0, 6),
+      marketplaceStatus: teacherResponse.fallback?.reason === "marketplace_empty" ? "empty" : "ready",
       teachers: teacherResponse.data,
     };
   } catch {
-    return { lessons: [], teachers: [] };
+    return { lessons: [], marketplaceStatus: "empty", teachers: [] };
   }
 }

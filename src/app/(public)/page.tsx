@@ -22,7 +22,8 @@ import { teacherDeliveryLabels } from "@/features/search/constants";
 import { reviewLabel } from "@/features/search/utils";
 
 export default async function HomePage() {
-  const { lessons, teachers } = await getHomepageMarketplaceData();
+  const { lessons, marketplaceStatus, teachers } = await getHomepageMarketplaceData();
+  const isMarketplaceEmpty = marketplaceStatus === "empty";
 
   return (
     <main>
@@ -48,8 +49,8 @@ export default async function HomePage() {
             bul, hemen başla.
           </h1>
           <p className="max-w-2xl text-lg leading-7 text-white/65">
-            Matematik&apos;ten yazılıma, İngilizce&apos;den TYT/AYT&apos;ye alanında uzman öğretmenlerle
-            online veya yüz yüze birebir ders al.
+            Matematik&apos;ten yazılıma, İngilizce&apos;den TYT/AYT&apos;ye alanında uzman öğretmenlerle online veya yüz
+            yüze birebir ders al.
           </p>
           <HomepageHeroSearch lessons={lessons} />
           <div className="flex flex-wrap justify-center gap-4 text-xs text-white/50">
@@ -130,6 +131,28 @@ export default async function HomePage() {
         </section>
       ) : null}
 
+      {isMarketplaceEmpty ? (
+        <section
+          className="relative px-4 py-16 sm:px-6 lg:px-8"
+          style={{ background: "linear-gradient(180deg, #ffffff 0%, #f8f9fe 100%)" }}
+        >
+          <div className="mx-auto max-w-4xl rounded-2xl border border-orange-100 bg-white p-8 text-center shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-orange">Marketplace</p>
+            <h2 className="mt-2 text-2xl font-extrabold text-brand-navy">Öğretmen ilanları hazırlanıyor</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+              Şu anda yayında öğretmen ilanı yok. İlanlar hazır olduğunda burada öne çıkan öğretmenleri ve arama
+              sonuçlarını göstereceğiz.
+            </p>
+            <Link
+              href="/ogretmen-ol"
+              className="mt-5 inline-flex h-11 items-center gap-2 rounded-xl bg-brand-orange px-6 text-sm font-semibold text-white transition-all hover:bg-orange-400"
+            >
+              Öğretmen Ol <ArrowRightIcon className="size-4" />
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
       {teachers.length > 0 ? (
         <section
           className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8"
@@ -184,7 +207,7 @@ export default async function HomePage() {
                       <StarIcon className="size-3.5 fill-amber-400" aria-hidden="true" />
                       {reviewLabel(teacher)}
                     </span>
-                    <span className="text-sm font-bold text-brand-orange">₺{teacher.hourlyPrice}</span>
+                    <span className="text-sm font-bold text-brand-orange">TL {teacher.hourlyPrice}</span>
                   </div>
                   <p className="mt-2 text-xs text-white/45">{teacherDeliveryLabels[teacher.deliveryMode]}</p>
                   <div className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-white/8 py-2 text-xs font-medium text-white/70 transition-all group-hover:bg-brand-orange group-hover:text-white">

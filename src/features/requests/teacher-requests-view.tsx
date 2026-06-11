@@ -7,11 +7,10 @@ import {
 } from "@/features/requests/constants";
 import { RequestActionButtons } from "@/features/requests/request-action-buttons";
 import { getTeacherLessonRequests } from "@/features/requests/service";
+import { DashboardStateCard } from "@/features/dashboard/shared/dashboard-state-card";
 import { Badge } from "@/shared/components/ui/badge";
-import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Separator } from "@/shared/components/ui/separator";
-import Link from "next/link";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
@@ -23,33 +22,22 @@ export async function TeacherRequestsView() {
     requests = await getTeacherLessonRequests();
   } catch {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-sm text-destructive">Talepler yüklenirken bir hata oluştu.</p>
-        </CardContent>
-      </Card>
+      <DashboardStateCard
+        description="Lütfen sayfayı yenileyip tekrar dene. Sorun devam ederse daha sonra kontrol et."
+        title="Talepler yüklenirken bir hata oluştu."
+        tone="error"
+      />
     );
   }
 
   if (requests.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg text-brand-navy">Henüz gelen talep yok.</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            İlanın yayınlandıktan sonra öğrenciler sana ders talebi gönderebilir.
-          </p>
-          <Button
-            className="mt-4 w-fit bg-brand-orange text-white hover:bg-brand-orange/90"
-            nativeButton={false}
-            render={<Link href="/ogretmen/panel/ilan" />}
-          >
-            İlanımı Gör
-          </Button>
-        </CardContent>
-      </Card>
+      <DashboardStateCard
+        actionHref="/ogretmen/panel/ilan"
+        actionLabel="İlanımı Gör"
+        description="İlanın yayına alındıktan sonra öğrenciler sana ders talebi gönderebilir."
+        title="Henüz gelen talep yok."
+      />
     );
   }
 

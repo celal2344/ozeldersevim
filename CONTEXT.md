@@ -1,6 +1,6 @@
 # Ozel Ders Evim - Project Context
 
-Last updated: 2026-06-04
+Last updated: 2026-06-11
 
 ## Product Summary
 
@@ -38,6 +38,9 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Teacher publishing: no admin approval for MVP; eligible teachers can publish directly.
 - Teacher listing creation is fully gated by the Teacher Eligibility Test: a teacher can create an account without the test, but cannot view the listing form or save a draft/listing until the test is passed.
 - Communication: no in-site chat for MVP. When a teacher accepts a lesson request, the student's contact details are shared with the teacher.
+- Admin moderation actions must write audit logs for teacher profile status changes and review status changes.
+- Public marketplace pages show a maintenance/not-ready state when there are no published Teacher Listings.
+- Teacher Search falls back to recommended published teachers when filters produce zero exact matches but published teachers exist.
 - Delivery modes: both online and face-to-face are supported. For online lessons, teachers/students manage their own meeting links externally.
 - Search location model: support both city/district filtering and location-based nearby search.
 - Seed data: `supabase/seed.sql` is now a full demo seed for the current Supabase project. It includes Erzurum plus varied demo cases across profiles, teachers, listings, lesson requests, lessons, reviews, favorites, notifications, analytics, and admin audit logs.
@@ -75,6 +78,20 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 ## Linear Progress Tracker
 
 This section is the canonical progress and todo tracker for agents. Keep it chronological and current.
+
+### 2026-06-11 - Dashboard Hardening And Marketplace Empty States
+
+- Local branch: `dev`.
+- Hardened Lesson Request dashboard flows so Student/Teacher list and accept/reject operations explicitly scope by the current account instead of relying only on RLS side effects.
+- Teacher contact details remain attached only for accepted Lesson Requests.
+- Hardened Favorites list/check/toggle behavior around signed-in Student ownership and published Teacher Listings.
+- Admin moderation now updates Teacher Listing visibility consistently with Teacher Profile status and writes audit logs for teacher/review status changes.
+- Added local migration `20260611103953_admin_audit_insert_policy.sql` so authenticated admins can insert `admin_audit_logs`.
+- Added shared dashboard state cards for empty/error dashboard states.
+- Teacher Search now returns fallback metadata: no published teachers yields a maintenance state; zero exact filter matches falls back to recommended published teachers.
+- Homepage now shows a marketplace maintenance state when no published teachers are available.
+- Updated OpenAPI for the search fallback metadata and admin moderation error modes.
+- Review pass completed before push: `bun run check:copy`, `bun run typecheck`, `bun run lint`, and `bun run build` pass.
 
 ### 2026-06-04 - Vercel Observability Packages
 
@@ -653,14 +670,17 @@ Currently implemented endpoints:
 - `POST /api/lesson-requests`
 - `GET /api/lesson-categories`
 - `GET /api/locations`
+- `POST /api/lesson-requests/{id}/accept`
+- `POST /api/lesson-requests/{id}/reject`
 - `GET /api/teacher-eligibility/test`
 - `POST /api/teacher-eligibility/submissions`
 - `GET /api/teachers/me/listing`
 - `PUT /api/teachers/me/listing`
+- `POST /api/admin/teacher-profiles/{id}/status`
+- `POST /api/admin/reviews/{id}/status`
 
 Planned endpoints:
 
-- `POST /api/lesson-requests/{id}/accept`
 - `PATCH /api/teachers/me`
 - `GET /api/student/requests`
 - `GET /api/teacher/requests`

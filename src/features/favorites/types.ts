@@ -9,6 +9,7 @@ export type FavoriteTeacher = {
       headline: string;
       rating_average: number;
       review_count: number;
+      is_published?: boolean;
     } | null;
   } | null;
 };

@@ -2,8 +2,9 @@ import { StarIcon } from "lucide-react";
 import Link from "next/link";
 
 import { getTeacherReviews } from "@/features/reviews/service";
+import { DashboardStateCard } from "@/features/dashboard/shared/dashboard-state-card";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -29,33 +30,22 @@ export async function TeacherReviewsView() {
     reviews = await getTeacherReviews();
   } catch {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-sm text-destructive">Yorumlar yüklenirken bir hata oluştu.</p>
-        </CardContent>
-      </Card>
+      <DashboardStateCard
+        description="Lütfen sayfayı yenileyip tekrar dene. Sorun devam ederse daha sonra kontrol et."
+        title="Yorumlar yüklenirken bir hata oluştu."
+        tone="error"
+      />
     );
   }
 
   if (reviews.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg text-brand-navy">Henüz yorum yok.</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Bir ders talebini kabul ettiğinde ve öğrenci yorum yazdığında buraya düşer.
-          </p>
-          <Button
-            className="mt-4 w-fit bg-brand-orange text-white hover:bg-brand-orange/90"
-            nativeButton={false}
-            render={<Link href="/ogretmen/panel/talepler" />}
-          >
-            Taleplere Git
-          </Button>
-        </CardContent>
-      </Card>
+      <DashboardStateCard
+        actionHref="/ogretmen/panel/talepler"
+        actionLabel="Taleplere Git"
+        description="Bir ders talebini kabul ettiğinde ve öğrenci yorum yazdığında buraya düşer."
+        title="Henüz yorum yok."
+      />
     );
   }
 
@@ -71,6 +61,14 @@ export async function TeacherReviewsView() {
             <StarRating rating={Math.round(avgRating)} />
             <span className="text-xs text-muted-foreground">{reviews.length} yorum</span>
           </div>
+          <Button
+            className="ml-auto hidden bg-brand-orange text-white hover:bg-brand-orange/90 sm:inline-flex"
+            nativeButton={false}
+            render={<Link href="/ogretmen/panel/talepler" />}
+            size="sm"
+          >
+            Taleplere Git
+          </Button>
         </CardContent>
       </Card>
 
