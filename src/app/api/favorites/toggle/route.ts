@@ -3,12 +3,23 @@ import { z } from "zod";
 
 import { getCurrentAccount } from "@/features/auth/service";
 import { createSupabaseServerClient } from "@/shared/db/supabase/server";
+import { rateLimitResponse } from "@/shared/rate-limit/response";
+import { assertRateLimit, RateLimitError } from "@/shared/rate-limit/service";
 
 const toggleFavoriteSchema = z.object({
   slug: z.string().min(1),
 });
 
 export async function POST(request: Request) {
+  try {
+    const rateLimit = await assertRateLimit(request, "favorites:toggle");
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
+  } catch (error) {
+    const status = error instanceof RateLimitError ? error.status : 500;
+    const message = error instanceof Error ? error.message : "Favori işlemi tamamlanamadı.";
+    return NextResponse.json({ message }, { status });
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = toggleFavoriteSchema.safeParse(body);
 

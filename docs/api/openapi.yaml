@@ -34,6 +34,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
   /auth/login:
     post:
       summary: Sign in with email and password
@@ -56,6 +58,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+  /auth/forgot-password:
+    post:
+      summary: Send a password reset email without revealing account existence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: Reset request accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+        "400":
+          description: Invalid email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
   /auth/logout:
     post:
       summary: Sign out the current account
@@ -177,6 +214,8 @@ paths:
           description: No active test found
         "409":
           description: Teacher already passed the test
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
   /teacher-eligibility/submissions:
     post:
       summary: Submit teacher eligibility test answers
@@ -326,6 +365,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
   /profiles/me:
     patch:
       summary: Update the signed-in user's basic profile (name and phone)
@@ -565,6 +606,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
   /lesson-requests/{id}/accept:
     post:
       summary: Accept a lesson request (teacher only)
@@ -687,7 +730,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
 components:
+  responses:
+    RateLimitExceeded:
+      description: Too many requests in the current time window
+      headers:
+        Retry-After:
+          schema:
+            type: string
+        X-RateLimit-Remaining:
+          schema:
+            type: string
+        X-RateLimit-Reset:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   parameters:
     PageParam:
       in: query

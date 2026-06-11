@@ -6,8 +6,19 @@ import { submitLessonRequestSchema } from "@/features/requests/constants";
 import { deliveryModeAllowedForTeacher, lessonSlugFromName, optionalNumber } from "@/features/requests/utils";
 import { getTeacherProfileBySlug } from "@/features/teachers/service";
 import { createSupabaseServerClient } from "@/shared/db/supabase/server";
+import { rateLimitResponse } from "@/shared/rate-limit/response";
+import { assertRateLimit, RateLimitError } from "@/shared/rate-limit/service";
 
 export async function POST(request: Request) {
+  try {
+    const rateLimit = await assertRateLimit(request, "lesson-requests:create");
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
+  } catch (error) {
+    const status = error instanceof RateLimitError ? error.status : 500;
+    const message = error instanceof Error ? error.message : "Ders talebi oluşturulamadı.";
+    return NextResponse.json({ message }, { status });
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = submitLessonRequestSchema.safeParse(body);
 
