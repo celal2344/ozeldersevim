@@ -58,71 +58,40 @@ export function parseTeacherSearchParams(searchParams: URLSearchParams): Teacher
   };
 }
 
-export async function searchTeachers(params: TeacherSearchParams): Promise<TeacherSearchResponse> {
+function teacherToSearchResult(teacher: Awaited<ReturnType<typeof getPublishedTeacherProfiles>>[number], params: TeacherSearchParams): TeacherSearchResult {
   const hasLocation = typeof params.lat === "number" && typeof params.lng === "number";
-  const query = params.q ? normalize(params.q) : "";
-  const lesson = params.lesson ? normalize(params.lesson) : "";
-  const city = params.city ? normalize(params.city) : "";
-  const district = params.district ? normalize(params.district) : "";
-  const teachers = await getPublishedTeacherProfiles();
 
-  const filtered = teachers
-    .filter((teacher) => {
-      const searchable = normalize(
-        [teacher.fullName, teacher.headline, teacher.shortBio, teacher.city, teacher.district, ...teacher.lessons].join(" ")
-      );
-      const lessonSearchable = teacher.lessons.some(
-        (item) => normalize(item).includes(lesson) || slugifyTurkish(item) === lesson
-      );
+  return {
+    id: teacher.id,
+    slug: teacher.slug,
+    fullName: teacher.fullName,
+    headline: teacher.headline,
+    shortBio: teacher.shortBio,
+    city: teacher.city,
+    district: teacher.district,
+    latitude: teacher.latitude,
+    longitude: teacher.longitude,
+    lessons: teacher.lessons,
+    deliveryMode: teacher.deliveryMode,
+    hourlyPrice: teacher.hourlyPrice,
+    ratingAverage: teacher.ratingAverage,
+    reviewCount: teacher.reviewCount,
+    experienceYears: teacher.experienceYears,
+    completedLessons: teacher.completedLessonCount,
+    activeStudents: teacher.activeStudentCount,
+    fastResponse: false,
+    distanceKm: hasLocation
+      ? getDistanceKm(
+          { lat: params.lat as number, lng: params.lng as number },
+          { lat: teacher.latitude, lng: teacher.longitude }
+        )
+      : undefined,
+  };
+}
 
-      if (query && !searchable.includes(query)) return false;
-      if (lesson && !lessonSearchable) return false;
-      if (city && normalize(teacher.city) !== city) return false;
-      if (district && normalize(teacher.district) !== district) return false;
-      if (
-        params.deliveryMode &&
-        params.deliveryMode !== "all" &&
-        teacher.deliveryMode !== params.deliveryMode &&
-        teacher.deliveryMode !== "both"
-      ) {
-        return false;
-      }
-      if (params.minPrice !== undefined && teacher.hourlyPrice < params.minPrice) return false;
-      if (params.maxPrice !== undefined && teacher.hourlyPrice > params.maxPrice) return false;
-      if (params.gender && params.gender !== "all") return false;
-      if (params.fastResponse) return false;
-
-      return true;
-    })
-    .map<TeacherSearchResult>((teacher) => ({
-      id: teacher.id,
-      slug: teacher.slug,
-      fullName: teacher.fullName,
-      headline: teacher.headline,
-      shortBio: teacher.shortBio,
-      city: teacher.city,
-      district: teacher.district,
-      latitude: teacher.latitude,
-      longitude: teacher.longitude,
-      lessons: teacher.lessons,
-      deliveryMode: teacher.deliveryMode,
-      hourlyPrice: teacher.hourlyPrice,
-      ratingAverage: teacher.ratingAverage,
-      reviewCount: teacher.reviewCount,
-      experienceYears: teacher.experienceYears,
-      completedLessons: teacher.completedLessonCount,
-      activeStudents: teacher.activeStudentCount,
-      fastResponse: false,
-      distanceKm: hasLocation
-        ? getDistanceKm(
-            { lat: params.lat as number, lng: params.lng as number },
-            { lat: teacher.latitude, lng: teacher.longitude }
-          )
-        : undefined,
-    }));
-
-  filtered.sort((a, b) => {
-    switch (params.sort) {
+function sortTeacherResults(results: TeacherSearchResult[], sort: TeacherSearchParams["sort"]) {
+  return [...results].sort((a, b) => {
+    switch (sort) {
       case "nearest":
         return (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER);
       case "highest_rated":
@@ -135,25 +104,82 @@ export async function searchTeachers(params: TeacherSearchParams): Promise<Teach
         return b.ratingAverage * 10 + b.reviewCount - (a.ratingAverage * 10 + a.reviewCount);
     }
   });
+}
 
-  return paginateItems(
-    filtered,
-    { page: params.page ?? 1, pageSize: params.pageSize ?? TEACHER_SEARCH_PAGE_SIZE },
-    {
-      sort: params.sort ?? "recommended",
-      filters: {
-        ...(params.q ? { q: params.q } : {}),
-        ...(params.lesson ? { lesson: params.lesson } : {}),
-        ...(params.city ? { city: params.city } : {}),
-        ...(params.district ? { district: params.district } : {}),
-        ...(params.deliveryMode && params.deliveryMode !== "all" ? { deliveryMode: params.deliveryMode } : {}),
-        ...(params.gender && params.gender !== "all" ? { gender: params.gender } : {}),
-        ...(params.minPrice !== undefined ? { minPrice: params.minPrice } : {}),
-        ...(params.maxPrice !== undefined ? { maxPrice: params.maxPrice } : {}),
-        ...(params.fastResponse ? { fastResponse: true } : {}),
-      },
+function searchMeta(params: TeacherSearchParams) {
+  return {
+    sort: params.sort ?? "recommended",
+    filters: {
+      ...(params.q ? { q: params.q } : {}),
+      ...(params.lesson ? { lesson: params.lesson } : {}),
+      ...(params.city ? { city: params.city } : {}),
+      ...(params.district ? { district: params.district } : {}),
+      ...(params.deliveryMode && params.deliveryMode !== "all" ? { deliveryMode: params.deliveryMode } : {}),
+      ...(params.gender && params.gender !== "all" ? { gender: params.gender } : {}),
+      ...(params.minPrice !== undefined ? { minPrice: params.minPrice } : {}),
+      ...(params.maxPrice !== undefined ? { maxPrice: params.maxPrice } : {}),
+      ...(params.fastResponse ? { fastResponse: true } : {}),
+    },
+  };
+}
+
+export async function searchTeachers(params: TeacherSearchParams): Promise<TeacherSearchResponse> {
+  const query = params.q ? normalize(params.q) : "";
+  const lesson = params.lesson ? normalize(params.lesson) : "";
+  const city = params.city ? normalize(params.city) : "";
+  const district = params.district ? normalize(params.district) : "";
+  const teachers = await getPublishedTeacherProfiles();
+  const allResults = teachers.map((teacher) => teacherToSearchResult(teacher, params));
+  const page = params.page ?? 1;
+  const pageSize = params.pageSize ?? TEACHER_SEARCH_PAGE_SIZE;
+  const meta = searchMeta(params);
+
+  if (allResults.length === 0) {
+    return {
+      ...paginateItems([], { page, pageSize }, meta),
+      fallback: { reason: "marketplace_empty", exactMatchTotal: 0, marketplaceTotal: 0 },
+    };
+  }
+
+  const filtered = allResults.filter((teacher) => {
+    const searchable = normalize(
+      [teacher.fullName, teacher.headline, teacher.shortBio, teacher.city, teacher.district, ...teacher.lessons].join(" ")
+    );
+    const lessonSearchable = teacher.lessons.some(
+      (item) => normalize(item).includes(lesson) || slugifyTurkish(item) === lesson
+    );
+
+    if (query && !searchable.includes(query)) return false;
+    if (lesson && !lessonSearchable) return false;
+    if (city && normalize(teacher.city) !== city) return false;
+    if (district && normalize(teacher.district) !== district) return false;
+    if (
+      params.deliveryMode &&
+      params.deliveryMode !== "all" &&
+      teacher.deliveryMode !== params.deliveryMode &&
+      teacher.deliveryMode !== "both"
+    ) {
+      return false;
     }
-  );
+    if (params.minPrice !== undefined && teacher.hourlyPrice < params.minPrice) return false;
+    if (params.maxPrice !== undefined && teacher.hourlyPrice > params.maxPrice) return false;
+    if (params.gender && params.gender !== "all") return false;
+    if (params.fastResponse) return false;
+
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    return {
+      ...paginateItems(sortTeacherResults(allResults, "recommended"), { page, pageSize }, meta),
+      fallback: { reason: "filters_relaxed", exactMatchTotal: 0, marketplaceTotal: allResults.length },
+    };
+  }
+
+  return {
+    ...paginateItems(sortTeacherResults(filtered, params.sort ?? "recommended"), { page, pageSize }, meta),
+    fallback: null,
+  };
 }
 
 export async function getTeacherSearchFilterOptions(): Promise<TeacherSearchFilterOptions> {

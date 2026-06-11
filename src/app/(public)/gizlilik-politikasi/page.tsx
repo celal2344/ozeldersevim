@@ -7,6 +7,10 @@ export default function PrivacyPage() {
     <main className="mx-auto w-full max-w-3xl px-4 py-14 sm:px-6">
       <h1 className="text-3xl font-bold tracking-tight text-brand-navy">Gizlilik Politikası</h1>
       <p className="mt-2 text-sm text-muted-foreground">Son güncelleme: Haziran 2026</p>
+      <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+        Bu metin ürün akışlarını açıklayan taslak bilgilendirme metnidir. Yayın öncesinde hukuk danışmanı tarafından
+        onaylanmalıdır.
+      </p>
 
       <div className="mt-8 flex flex-col gap-8 text-sm leading-7 text-foreground/80">
         <section>

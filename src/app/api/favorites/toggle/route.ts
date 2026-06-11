@@ -3,12 +3,23 @@ import { z } from "zod";
 
 import { getCurrentAccount } from "@/features/auth/service";
 import { createSupabaseServerClient } from "@/shared/db/supabase/server";
+import { rateLimitResponse } from "@/shared/rate-limit/response";
+import { assertRateLimit, RateLimitError } from "@/shared/rate-limit/service";
 
 const toggleFavoriteSchema = z.object({
   slug: z.string().min(1),
 });
 
 export async function POST(request: Request) {
+  try {
+    const rateLimit = await assertRateLimit(request, "favorites:toggle");
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
+  } catch (error) {
+    const status = error instanceof RateLimitError ? error.status : 500;
+    const message = error instanceof Error ? error.message : "Favori işlemi tamamlanamadı.";
+    return NextResponse.json({ message }, { status });
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = toggleFavoriteSchema.safeParse(body);
 
@@ -43,26 +54,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Öğretmen ilanı bulunamadı." }, { status: 404 });
   }
 
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("favorites")
     .select("teacher_profile_id")
     .eq("student_profile_id", account.id)
     .eq("teacher_profile_id", listing.teacher_profile_id)
     .maybeSingle();
 
+  if (existingError) {
+    return NextResponse.json({ message: existingError.message }, { status: 500 });
+  }
+
   if (existing) {
-    await supabase
+    const { error: deleteError } = await supabase
       .from("favorites")
       .delete()
       .eq("student_profile_id", account.id)
       .eq("teacher_profile_id", listing.teacher_profile_id);
 
+    if (deleteError) {
+      return NextResponse.json({ message: deleteError.message }, { status: 500 });
+    }
+
     return NextResponse.json({ isFavorited: false });
   }
 
-  await supabase
+  const { error: insertError } = await supabase
     .from("favorites")
     .insert({ student_profile_id: account.id, teacher_profile_id: listing.teacher_profile_id });
+
+  if (insertError) {
+    return NextResponse.json({ message: insertError.message }, { status: 500 });
+  }
 
   return NextResponse.json({ isFavorited: true });
 }

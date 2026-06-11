@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
       city: params.city ?? null,
       district: params.district ?? null,
       deliveryMode: params.deliveryMode ?? null,
+      fallbackReason: result.fallback?.reason ?? null,
+      exactMatchTotal: result.fallback?.exactMatchTotal ?? result.meta.total,
       page: params.page ?? 1,
       resultCount: result.meta.total,
     });

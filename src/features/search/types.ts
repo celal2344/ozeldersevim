@@ -44,4 +44,18 @@ export type TeacherSearchResult = {
   distanceKm?: number;
 };
 
-export type TeacherSearchResponse = ListResponse<TeacherSearchResult>;
+export type TeacherSearchFallback =
+  | {
+      reason: "filters_relaxed";
+      exactMatchTotal: number;
+      marketplaceTotal: number;
+    }
+  | {
+      reason: "marketplace_empty";
+      exactMatchTotal: number;
+      marketplaceTotal: number;
+    };
+
+export type TeacherSearchResponse = ListResponse<TeacherSearchResult> & {
+  fallback: TeacherSearchFallback | null;
+};

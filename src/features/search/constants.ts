@@ -22,11 +22,11 @@ export const sortFilterOptions = [
 
 export const priceFilterOptions = [
   { value: "", label: "Tüm fiyatlar" },
-  { value: "0-500", label: "₺0 - ₺500" },
-  { value: "500-750", label: "₺500 - ₺750" },
-  { value: "750-1000", label: "₺750 - ₺1000" },
-  { value: "1000-1500", label: "₺1000 - ₺1500" },
-  { value: "1500-", label: "₺1500+" },
+  { value: "0-500", label: "TL 0 - TL 500" },
+  { value: "500-750", label: "TL 500 - TL 750" },
+  { value: "750-1000", label: "TL 750 - TL 1000" },
+  { value: "1000-1500", label: "TL 1000 - TL 1500" },
+  { value: "1500-", label: "TL 1500+" },
 ];
 
 export const genderFilterOptions = [

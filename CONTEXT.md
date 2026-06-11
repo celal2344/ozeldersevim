@@ -1,6 +1,6 @@
 # Ozel Ders Evim - Project Context
 
-Last updated: 2026-06-04
+Last updated: 2026-06-11
 
 ## Product Summary
 
@@ -24,7 +24,7 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Local app env uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; do not commit `.env*` files or service-role/database credentials.
 - Vercel must define `NEXT_PUBLIC_SUPABASE_URL=https://hhddeqgvrnyxnwetetdc.supabase.co` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` for real auth flows.
 - Public session reads render as signed-out and sitemap omits dynamic teacher URLs when Supabase public env is missing so Vercel prerender/build does not crash; mutating auth and database flows still require the Supabase env and should fail loudly if it is missing.
-- Server-side eligibility grading uses `SUPABASE_SERVICE_ROLE_KEY`; it must stay server-only and must never be exposed through `NEXT_PUBLIC_*`.
+- Server-side eligibility grading and request rate limiting use `SUPABASE_SERVICE_ROLE_KEY`; it must stay server-only and must never be exposed through `NEXT_PUBLIC_*`.
 - Remote Supabase MCP retargeting, QA, and test work are deferred operational/verification work. The next contributor should focus only on backend/frontend application code unless explicitly asked otherwise.
 - Supabase Auth email/password signup is enabled and email confirmations are disabled for the MVP account-creation flows that expect an immediate session.
 - Vercel Web Analytics and Speed Insights are installed through `@vercel/analytics` and `@vercel/speed-insights` and mounted in the root App Router layout.
@@ -38,6 +38,9 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Teacher publishing: no admin approval for MVP; eligible teachers can publish directly.
 - Teacher listing creation is fully gated by the Teacher Eligibility Test: a teacher can create an account without the test, but cannot view the listing form or save a draft/listing until the test is passed.
 - Communication: no in-site chat for MVP. When a teacher accepts a lesson request, the student's contact details are shared with the teacher.
+- Admin moderation actions must write audit logs for teacher profile status changes and review status changes.
+- Public marketplace pages show a maintenance/not-ready state when there are no published Teacher Listings.
+- Teacher Search falls back to recommended published teachers when filters produce zero exact matches but published teachers exist.
 - Delivery modes: both online and face-to-face are supported. For online lessons, teachers/students manage their own meeting links externally.
 - Search location model: support both city/district filtering and location-based nearby search.
 - Seed data: `supabase/seed.sql` is now a full demo seed for the current Supabase project. It includes Erzurum plus varied demo cases across profiles, teachers, listings, lesson requests, lessons, reviews, favorites, notifications, analytics, and admin audit logs.
@@ -75,6 +78,40 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 ## Linear Progress Tracker
 
 This section is the canonical progress and todo tracker for agents. Keep it chronological and current.
+
+### 2026-06-11 - Pre-Feature Readiness Hardening
+
+- Local branch: `chore/pre-feature-readiness`.
+- Extracted Review submission ownership/status checks into the Review service so only the owning Student can review an accepted Lesson Request, once.
+- Confirmed Teacher dashboard contact sharing remains scoped through the Lesson Request service: `lesson_request_contacts` are returned only for accepted requests.
+- Added Supabase Postgres-backed rate limiting for high-risk mutating flows: auth register/login/forgot-password, Lesson Request creation, Review creation, Favorites toggle, and Teacher Eligibility submissions.
+- Added migration `20260611115650_request_rate_limits.sql`; the rate-limit table has RLS enabled and is accessed through server-only service-role code.
+- Applied pending remote migrations `20260611103953_admin_audit_insert_policy.sql` and `20260611115650_request_rate_limits.sql` to project `hhddeqgvrnyxnwetetdc`; verified `public.request_rate_limits` exists with RLS enabled.
+- Polished existing SEO/content pages without adding new dynamic route families: `/ozel-ders/[slug]` now has cleaner metadata, slug-based teacher matching, fallback/empty states, and clean UTF-8 copy; teacher profiles now include Open Graph metadata.
+- Removed unfinished public blog placeholder copy and added visible draft/legal-review notices to legal pages.
+- Dashboard request list APIs remain deferred: dashboard list data stays server-rendered through feature services until a mobile/external client needs documented GET endpoints.
+- Verification passed: `bun run check:copy`, `bun run typecheck`, `bun run lint`, `bun run build`, `git diff --check`, `supabase migration list`, and a linked DB query confirming `request_rate_limits` has RLS enabled.
+
+### 2026-06-11 - Premium Select Styling Cleanup
+
+- Local branch: `dev`.
+- Replaced native dropdowns in the Lesson Request form, account registration form, and teacher listing form with shared `PremiumSelect` controls so user-facing select inputs match the premium interface styling.
+- Updated `PremiumSelect` to accept readonly option arrays from domain constants without copying them.
+- Verification: no native `<select>` remains under `src`; `bun run check:copy` and `bun run typecheck` pass after clearing stale generated `.next/dev` types.
+
+### 2026-06-11 - Dashboard Hardening And Marketplace Empty States
+
+- Local branch: `dev`.
+- Hardened Lesson Request dashboard flows so Student/Teacher list and accept/reject operations explicitly scope by the current account instead of relying only on RLS side effects.
+- Teacher contact details remain attached only for accepted Lesson Requests.
+- Hardened Favorites list/check/toggle behavior around signed-in Student ownership and published Teacher Listings.
+- Admin moderation now updates Teacher Listing visibility consistently with Teacher Profile status and writes audit logs for teacher/review status changes.
+- Added local migration `20260611103953_admin_audit_insert_policy.sql` so authenticated admins can insert `admin_audit_logs`.
+- Added shared dashboard state cards for empty/error dashboard states.
+- Teacher Search now returns fallback metadata: no published teachers yields a maintenance state; zero exact filter matches falls back to recommended published teachers.
+- Homepage now shows a marketplace maintenance state when no published teachers are available.
+- Updated OpenAPI for the search fallback metadata and admin moderation error modes.
+- Review pass completed before push: `bun run check:copy`, `bun run typecheck`, `bun run lint`, and `bun run build` pass.
 
 ### 2026-06-04 - Vercel Observability Packages
 
@@ -244,7 +281,7 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Supabase/Vercel prerender handling fixed so public auth/session reads can render signed-out when public Supabase env is absent.
 - `main` was ancestry-merged into `dev` with the `ours` strategy to keep `dev` from appearing behind while preserving the newer `dev` app flow.
 - Remote Supabase was seeded with a full demo marketplace dataset on 2026-06-04.
-- Remote Supabase migrations are current through `20260603130000_analytics_events.sql`.
+- Remote Supabase migrations are current through `20260611115650_request_rate_limits.sql`.
 - Fake production profile IDs from the older seed were removed from production.
 - Runtime mock teacher/search seed files were removed locally in `6a3e7d2`.
 - Homepage teacher sections and search filters were moved toward Supabase-backed data locally in `6a3e7d2`.
@@ -253,9 +290,9 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 
 ### Next Todos
 
-1. Review the newly merged dashboard/admin/favorites/reviews flows end to end and tighten gaps before adding larger new features.
-2. Re-check OpenAPI whenever search, request, review, favorite, profile, admin, or auth endpoint behavior changes further.
-3. Keep public marketplace pages free of runtime mock data while polishing empty states for databases with no published teachers.
+1. Smoke-test the protected flows with real Supabase users: accepted Review creation, rejected/submitted Review blocking, accepted contact sharing, rate-limited auth/request/review behavior.
+2. Get legal approval for the draft privacy, terms, and KVKK pages before production launch.
+3. Keep public marketplace pages free of runtime mock data while adding future features.
 
 ## Implementation Progress
 
@@ -273,8 +310,8 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Password reset APIs/pages are present through `POST /api/auth/forgot-password`, `/sifremi-unuttum`, and `/sifremi-sifirla`.
 - Favorites APIs are `GET /api/favorites/check` and `POST /api/favorites/toggle`.
 - Review submission uses `POST /api/reviews`.
-- Account profile API is `GET/PATCH /api/profiles/me`.
-- Teacher profile settings API is `GET/PATCH /api/teacher-profiles/me`.
+- Account profile update API is `PATCH /api/profiles/me`.
+- Teacher profile settings update API is `PATCH /api/teacher-profiles/me`.
 - Admin moderation APIs are `POST /api/admin/teacher-profiles/{id}/status` and `POST /api/admin/reviews/{id}/status`.
 - Private dashboard foundation uses a shared shell in `src/features/dashboard`.
 - Student dashboard routes: `/ogrenci/panel`, `/ogrenci/panel/talepler`, `/ogrenci/panel/favoriler`, `/ogrenci/panel/profil`.
@@ -296,16 +333,14 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 
 ## Remaining Feature Order
 
-1. Audit and harden the newly merged dashboard request-management, reviews, favorites, profile/settings, and admin flows against the actual Supabase schema/RLS.
-2. Tighten empty/loading/error states for public and dashboard pages when Supabase has no published marketplace data.
-3. Verify review eligibility: students should only review a teacher after that teacher accepts the student's lesson request.
-4. Verify accepted request contact-sharing behavior in teacher dashboards.
-5. Continue SEO/content polish for lesson landing pages and public profile pages.
+1. Run a real-account smoke pass for Review eligibility, Teacher contact sharing, and rate-limited mutation behavior.
+2. Continue SEO/content expansion with a documented route order: lesson pages first, then lesson+city pages, then lesson+city+district only after canonical/index rules are explicit.
+3. Replace draft legal copy with lawyer-approved privacy, terms, and KVKK text before launch.
 
 Deferred outside the next handoff scope:
 
-- Remote Supabase target confirmation and migration application.
-- QA passes, manual test plans, and automated test expansion.
+- Automated test expansion.
+- New product features beyond the existing MVP flows.
 
 ## Documented Findings - 2026-05-24
 
@@ -314,7 +349,7 @@ Deferred outside the next handoff scope:
 - Teacher Search, Teacher Profile, and lesson request teacher validation now use Supabase published teacher listings as the single teacher read source.
 - Dashboard foundation exists as role-aware private shells and empty routes. Request actions, reviews, and listing creation should build on it.
 - Request acceptance and reviews belong in dashboard flows, not as isolated public features.
-- Legal pages are placeholder text and need proper legal review before launch.
+- Legal pages now contain product-specific draft copy and visible legal-review notices; they still need legal approval before launch.
 - No production image assets should be taken from `docs/design-references`; those files are reference-only.
 
 ## Netleşen Kararlar - 2026-05-21
@@ -633,6 +668,7 @@ Contact sharing rule:
 - Dynamic metadata per lesson, city, district, and teacher.
 - Canonical URLs for filtered pages.
 - Index only useful landing pages; avoid indexing every arbitrary filter combination.
+- Route expansion order: keep existing `/ozel-ders/[slug]` lesson pages polished first, then add lesson+city pages, then add lesson+city+district pages only after canonical/index rules are explicit.
 - Sitemap generation for public teacher profiles, lesson pages, city + lesson pages, and static pages.
 - JSON-LD for teacher profiles and breadcrumbs.
 - Internal linking from homepage to popular lessons, lesson pages to city pages, city pages to district pages, and teacher profiles to related lessons/locations.
@@ -648,22 +684,24 @@ Currently implemented endpoints:
 - `GET /api/teachers/{slug}`
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+- `POST /api/auth/forgot-password`
 - `POST /api/auth/logout`
 - `GET /api/auth/me`
 - `POST /api/lesson-requests`
 - `GET /api/lesson-categories`
 - `GET /api/locations`
+- `POST /api/lesson-requests/{id}/accept`
+- `POST /api/lesson-requests/{id}/reject`
 - `GET /api/teacher-eligibility/test`
 - `POST /api/teacher-eligibility/submissions`
 - `GET /api/teachers/me/listing`
 - `PUT /api/teachers/me/listing`
+- `POST /api/admin/teacher-profiles/{id}/status`
+- `POST /api/admin/reviews/{id}/status`
 
 Planned endpoints:
 
-- `POST /api/lesson-requests/{id}/accept`
-- `PATCH /api/teachers/me`
-- `GET /api/student/requests`
-- `GET /api/teacher/requests`
+- None currently planned. Dashboard list reads stay server-rendered through feature services until a mobile or external client requires documented GET endpoints.
 
 Server actions can be used internally, but API shape should still be documented for major backend behavior.
 

@@ -13,7 +13,7 @@ type SelectOption = {
 type PremiumSelectProps = {
   value: string;
   onChange: (value: string) => void;
-  options: SelectOption[];
+  options: readonly SelectOption[];
   variant?: "dark" | "light";
   className?: string;
 };

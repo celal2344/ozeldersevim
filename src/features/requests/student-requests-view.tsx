@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import {
   deliveryModeLabels,
   lessonRequestStatusLabels,
@@ -7,8 +5,8 @@ import {
 } from "@/features/requests/constants";
 import { getStudentLessonRequests } from "@/features/requests/service";
 import { ReviewForm } from "@/features/reviews/review-form";
+import { DashboardStateCard } from "@/features/dashboard/shared/dashboard-state-card";
 import { Badge } from "@/shared/components/ui/badge";
-import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Separator } from "@/shared/components/ui/separator";
 
@@ -22,33 +20,22 @@ export async function StudentRequestsView() {
     requests = await getStudentLessonRequests();
   } catch {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-sm text-destructive">Talepler yüklenirken bir hata oluştu.</p>
-        </CardContent>
-      </Card>
+      <DashboardStateCard
+        description="Lütfen sayfayı yenileyip tekrar dene. Sorun devam ederse daha sonra kontrol et."
+        title="Talepler yüklenirken bir hata oluştu."
+        tone="error"
+      />
     );
   }
 
   if (requests.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg text-brand-navy">Henüz ders talebi göndermedin.</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Bir öğretmenin profilinden ders talebi gönderdiğinde talebin burada görünecek.
-          </p>
-          <Button
-            className="mt-4 w-fit bg-brand-orange text-white hover:bg-brand-orange/90"
-            nativeButton={false}
-            render={<Link href="/ogretmen-bul" />}
-          >
-            Öğretmen Bul
-          </Button>
-        </CardContent>
-      </Card>
+      <DashboardStateCard
+        actionHref="/ogretmen-bul"
+        actionLabel="Öğretmen Bul"
+        description="Bir öğretmenin profilinden ders talebi gönderdiğinde talebin burada görünecek."
+        title="Henüz ders talebi göndermedin."
+      />
     );
   }
 
@@ -56,7 +43,7 @@ export async function StudentRequestsView() {
     <div className="flex flex-col gap-4">
       {requests.map((req) => {
         const isAccepted = req.status === "accepted";
-        const hasReview = Boolean(req.reviews);
+        const hasReview = Array.isArray(req.reviews) ? req.reviews.length > 0 : Boolean(req.reviews);
         const categoryName = req.lesson_categories?.name ?? "Bilinmiyor";
 
         return (
