@@ -29,6 +29,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical: `/ogretmen/${teacher.slug}`,
     },
+    openGraph: {
+      title: `${teacher.fullName} - ${teacher.headline}`,
+      description: teacher.shortBio,
+      type: "profile",
+      url: `/ogretmen/${teacher.slug}`,
+    },
   };
 }
 

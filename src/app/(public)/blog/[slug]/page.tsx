@@ -20,8 +20,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const post = blogPosts.find((p) => p.slug === slug);
   if (!post) return { title: "Yazı Bulunamadı" };
   return {
-    title: `${post.title} | ÖzelDersEvim Blog`,
+    title: `${post.title} | Özel Ders Evim Blog`,
     description: post.summary,
+    alternates: { canonical: `/blog/${post.slug}` },
   };
 }
 
@@ -69,15 +70,21 @@ export default async function BlogPostPage({ params }: PageProps) {
         <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
           <p className="text-lg font-medium leading-7 text-brand-navy">{post.summary}</p>
           <p className="mt-6 text-sm leading-7 text-muted-foreground">
-            Bu yazının tam içeriği yakında eklenecek. Özel ders, sınav hazırlığı ve eğitim hakkında
-            daha fazla rehber için blog sayfamızı takip edin.
+            Bu rehber, özel ders arayan öğrencilerin doğru öğretmeni seçerken dikkat etmesi gereken temel noktaları
+            özetler. Hedefini, seviyeni, ders türünü ve bütçeni netleştirerek öğretmen profillerini daha hızlı
+            karşılaştırabilir; uygun bulduğun öğretmene ders talebi gönderebilirsin.
+          </p>
+          <p className="mt-4 text-sm leading-7 text-muted-foreground">
+            Öğretmen seçerken yalnızca fiyatı değil; deneyim yılını, verdiği dersleri, ders türünü, konumunu ve
+            varsa önceki öğrenci yorumlarını birlikte değerlendir. Talep kabul edilene kadar iletişim bilgilerinin
+            öğretmenle paylaşılmadığını unutma.
           </p>
           <div className="mt-8 rounded-xl border border-brand-orange/20 bg-brand-orange/5 p-5">
             <p className="text-sm font-medium text-brand-navy">
               {post.category} konusunda öğretmen mi arıyorsunuz?
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Yüzlerce uzman öğretmen arasından size uygun olanı bulun ve ücretsiz ders talebi gönderin.
+              Yayındaki öğretmenleri inceleyin, profilleri karşılaştırın ve ücretsiz ders talebi gönderin.
             </p>
             <Button
               className="mt-4 bg-brand-orange text-white hover:bg-brand-orange/90"
@@ -99,10 +106,10 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <Link
                   key={related.slug}
                   href={`/blog/${related.slug}`}
-                  className="group rounded-xl border border-slate-200 bg-white p-4 hover:shadow-md transition-shadow"
+                  className="group rounded-xl border border-slate-200 bg-white p-4 transition-shadow hover:shadow-md"
                 >
                   <Badge variant="secondary" className="mb-2 text-xs">{related.category}</Badge>
-                  <p className="text-sm font-medium text-brand-navy group-hover:text-brand-orange transition-colors leading-snug">
+                  <p className="text-sm font-medium leading-snug text-brand-navy transition-colors group-hover:text-brand-orange">
                     {related.title}
                   </p>
                 </Link>
