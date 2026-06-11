@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftIcon, ArrowRightIcon, CheckCircle2Icon, SendIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { useForm, type FieldPath } from "react-hook-form";
+import { useForm, useWatch, type FieldPath } from "react-hook-form";
 
 import {
   contactPreferenceOptions,
@@ -26,6 +26,7 @@ import {
 } from "@/features/requests/utils";
 import type { TeacherProfile } from "@/features/teachers/types";
 import { Button } from "@/shared/components/ui/button";
+import { PremiumSelect } from "@/shared/components/ui/premium-select";
 
 type LessonRequestFormProps = {
   accountContact: {
@@ -63,6 +64,16 @@ export function LessonRequestForm({ accountContact, teacher }: LessonRequestForm
   const currentStep = lessonRequestSteps[stepIndex];
   const errors = form.formState.errors;
   const isLastStep = stepIndex === lessonRequestSteps.length - 1;
+  const lessonSlug = useWatch({ control: form.control, name: "lessonSlug" });
+  const locationSlug = useWatch({ control: form.control, name: "locationSlug" });
+  const deliveryMode = useWatch({ control: form.control, name: "deliveryMode" });
+  const studentLevel = useWatch({ control: form.control, name: "studentLevel" });
+  const contactPreference = useWatch({ control: form.control, name: "contactPreference" });
+  const deliveryModeOptions = deliveryOptionsForTeacher(teacher);
+
+  function setSelectValue(field: FieldPath<LessonRequestFormValues>, value: string) {
+    form.setValue(field, value, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
+  }
 
   async function goNext() {
     const fields = lessonRequestFormStepFields[currentStep.id] as readonly FieldPath<LessonRequestFormValues>[];
@@ -143,13 +154,12 @@ export function LessonRequestForm({ accountContact, teacher }: LessonRequestForm
               <p className="mt-2 text-sm text-muted-foreground">Seçim öğretmenin verdiği derslerle uyumlu olmalı.</p>
             </div>
             <FieldError message={errors.lessonSlug?.message} />
-            <select {...form.register("lessonSlug")} className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy">
-              {lessonRequestLessonOptions.map((lesson) => (
-                <option key={lesson.value} value={lesson.value}>
-                  {lesson.label}
-                </option>
-              ))}
-            </select>
+            <PremiumSelect
+              value={lessonSlug}
+              onChange={(value) => setSelectValue("lessonSlug", value)}
+              options={lessonRequestLessonOptions}
+              className="h-11 rounded-lg"
+            />
           </div>
         ) : null}
 
@@ -161,20 +171,18 @@ export function LessonRequestForm({ accountContact, teacher }: LessonRequestForm
             </div>
             <FieldError message={errors.locationSlug?.message ?? errors.deliveryMode?.message} />
             <div className="grid gap-4 md:grid-cols-2">
-              <select {...form.register("locationSlug")} className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy">
-                {lessonRequestLocationOptions.map((location) => (
-                  <option key={location.value} value={location.value}>
-                    {location.label}
-                  </option>
-                ))}
-              </select>
-              <select {...form.register("deliveryMode")} className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy">
-                {deliveryOptionsForTeacher(teacher).map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <PremiumSelect
+                value={locationSlug}
+                onChange={(value) => setSelectValue("locationSlug", value)}
+                options={lessonRequestLocationOptions}
+                className="h-11 rounded-lg"
+              />
+              <PremiumSelect
+                value={deliveryMode}
+                onChange={(value) => setSelectValue("deliveryMode", value)}
+                options={deliveryModeOptions}
+                className="h-11 rounded-lg"
+              />
             </div>
           </div>
         ) : null}
@@ -186,14 +194,12 @@ export function LessonRequestForm({ accountContact, teacher }: LessonRequestForm
               <p className="mt-2 text-sm text-muted-foreground">Öğretmenin talebi değerlendirmesi için kısa ve net bilgi ver.</p>
             </div>
             <FieldError message={errors.studentLevel?.message ?? errors.goal?.message ?? errors.budgetMin?.message ?? errors.budgetMax?.message} />
-            <select {...form.register("studentLevel")} className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy">
-              <option value="">Seviye seç</option>
-              {studentLevelOptions.map((level) => (
-                <option key={level.value} value={level.value}>
-                  {level.label}
-                </option>
-              ))}
-            </select>
+            <PremiumSelect
+              value={studentLevel}
+              onChange={(value) => setSelectValue("studentLevel", value)}
+              options={[{ value: "", label: "Seviye seç" }, ...studentLevelOptions]}
+              className="h-11 rounded-lg"
+            />
             <textarea
               {...form.register("goal")}
               rows={5}
@@ -218,13 +224,12 @@ export function LessonRequestForm({ accountContact, teacher }: LessonRequestForm
               <input {...form.register("studentName")} placeholder="Ad soyad" className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy" />
               <input {...form.register("email")} type="email" placeholder="Email" className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy" />
               <input {...form.register("phone")} placeholder="Telefon" className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy" />
-              <select {...form.register("contactPreference")} className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy">
-                {contactPreferenceOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <PremiumSelect
+                value={contactPreference}
+                onChange={(value) => setSelectValue("contactPreference", value)}
+                options={contactPreferenceOptions}
+                className="h-11 rounded-lg"
+              />
             </div>
             <label className="flex gap-3 rounded-xl border border-slate-200 p-4 text-sm text-brand-navy">
               <input type="checkbox" {...form.register("termsAccepted")} className="mt-1" />

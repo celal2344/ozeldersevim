@@ -3,13 +3,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPlusIcon } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { authRoleOptions, registerSchema } from "@/features/auth/constants";
 import type { AuthResponsePayload, RegisterInput } from "@/features/auth/types";
 import { authApiErrorMessage } from "@/features/auth/utils";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import { PremiumSelect } from "@/shared/components/ui/premium-select";
 
 export function RegisterForm({ initialRole = "student", next }: { initialRole?: RegisterInput["role"]; next?: string | null }) {
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -26,6 +27,7 @@ export function RegisterForm({ initialRole = "student", next }: { initialRole?: 
     },
   });
   const errors = form.formState.errors;
+  const selectedRole = useWatch({ control: form.control, name: "role" });
 
   async function submit(values: RegisterInput) {
     setSubmitError(null);
@@ -65,16 +67,18 @@ export function RegisterForm({ initialRole = "student", next }: { initialRole?: 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2 text-sm font-medium text-brand-navy">
           Hesap türü
-          <select
-            {...form.register("role")}
-            className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm text-brand-navy outline-none focus:border-brand-orange"
-          >
-            {authRoleOptions.map((role) => (
-              <option key={role.value} value={role.value}>
-                {role.label}
-              </option>
-            ))}
-          </select>
+          <PremiumSelect
+            value={selectedRole}
+            onChange={(value) =>
+              form.setValue("role", value as RegisterInput["role"], {
+                shouldDirty: true,
+                shouldTouch: true,
+                shouldValidate: true,
+              })
+            }
+            options={authRoleOptions}
+            className="h-11 rounded-lg"
+          />
         </label>
         <label className="grid gap-2 text-sm font-medium text-brand-navy">
           Ad soyad

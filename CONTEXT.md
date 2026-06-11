@@ -79,6 +79,13 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 
 This section is the canonical progress and todo tracker for agents. Keep it chronological and current.
 
+### 2026-06-11 - Premium Select Styling Cleanup
+
+- Local branch: `dev`.
+- Replaced native dropdowns in the Lesson Request form, account registration form, and teacher listing form with shared `PremiumSelect` controls so user-facing select inputs match the premium interface styling.
+- Updated `PremiumSelect` to accept readonly option arrays from domain constants without copying them.
+- Verification: no native `<select>` remains under `src`; `bun run check:copy` and `bun run typecheck` pass after clearing stale generated `.next/dev` types.
+
 ### 2026-06-11 - Dashboard Hardening And Marketplace Empty States
 
 - Local branch: `dev`.

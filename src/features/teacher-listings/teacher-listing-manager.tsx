@@ -29,6 +29,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
+import { PremiumSelect } from "@/shared/components/ui/premium-select";
 import { Separator } from "@/shared/components/ui/separator";
 
 export function TeacherListingManager() {
@@ -65,6 +66,7 @@ export function TeacherListingManager() {
   });
   const selectedLessonSlugs = useWatch({ control: form.control, name: "lessonSlugs" }) ?? [];
   const selectedLocationSlug = useWatch({ control: form.control, name: "locationSlug" }) ?? "";
+  const selectedDeliveryMode = useWatch({ control: form.control, name: "deliveryMode" }) ?? "both";
   const formError = firstListingFormError(form.formState.errors);
   const isFormDataLoading = canManageListing && (categoryQuery.isLoading || locationQuery.isLoading);
 
@@ -120,6 +122,14 @@ export function TeacherListingManager() {
     const current = form.getValues("lessonSlugs");
     const next = current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug];
     form.setValue("lessonSlugs", next, { shouldDirty: true, shouldValidate: true });
+  }
+
+  function setListingSelectValue(field: "deliveryMode" | "locationSlug", value: string) {
+    form.setValue(field, value as TeacherListingInput[typeof field], {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
   }
 
   function submitListing(status: "draft" | "published") {
@@ -205,8 +215,11 @@ export function TeacherListingManager() {
           isPending={saveMutation.isPending}
           locationQueryData={locationQuery.data ?? []}
           onSubmit={submitListing}
+          onSelectValue={setListingSelectValue}
           onToggleLesson={toggleLesson}
+          selectedDeliveryMode={selectedDeliveryMode}
           selectedLessonSlugs={selectedLessonSlugs}
+          selectedLocationSlug={selectedLocationSlug}
           formRegister={form.register}
         />
       ) : null}
@@ -312,8 +325,11 @@ function ListingFormCard({
   isPending,
   locationQueryData,
   onSubmit,
+  onSelectValue,
   onToggleLesson,
+  selectedDeliveryMode,
   selectedLessonSlugs,
+  selectedLocationSlug,
 }: {
   categoryQueryData: LessonCategoryOption[];
   formError?: string;
@@ -322,9 +338,20 @@ function ListingFormCard({
   isPending: boolean;
   locationQueryData: LocationOption[];
   onSubmit: (status: "draft" | "published") => void;
+  onSelectValue: (field: "deliveryMode" | "locationSlug", value: string) => void;
   onToggleLesson: (slug: string) => void;
+  selectedDeliveryMode: TeacherListingInput["deliveryMode"];
   selectedLessonSlugs: string[];
+  selectedLocationSlug: string;
 }) {
+  const locationOptions = [
+    { value: "", label: "Konum seç" },
+    ...locationQueryData.map((location) => ({
+      value: location.slug,
+      label: `${location.city} / ${location.district ?? "Merkez"}`,
+    })),
+  ];
+
   if (isLoading) {
     return (
       <Card>
@@ -364,30 +391,19 @@ function ListingFormCard({
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
               Ders türü
-              <select
-                {...formRegister("deliveryMode")}
-                className="h-10 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-brand-orange"
-              >
-                {teacherListingDeliveryOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <PremiumSelect
+                value={selectedDeliveryMode}
+                onChange={(value) => onSelectValue("deliveryMode", value)}
+                options={teacherListingDeliveryOptions}
+              />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
               Konum
-              <select
-                {...formRegister("locationSlug")}
-                className="h-10 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-brand-orange"
-              >
-                <option value="">Konum seç</option>
-                {locationQueryData.map((location) => (
-                  <option key={location.slug} value={location.slug}>
-                    {location.city} / {location.district ?? "Merkez"}
-                  </option>
-                ))}
-              </select>
+              <PremiumSelect
+                value={selectedLocationSlug}
+                onChange={(value) => onSelectValue("locationSlug", value)}
+                options={locationOptions}
+              />
             </label>
           </div>
           <label className="flex flex-col gap-2 text-sm font-medium text-brand-navy">
