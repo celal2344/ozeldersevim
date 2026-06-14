@@ -1,6 +1,6 @@
 # Ozel Ders Evim - Project Context
 
-Last updated: 2026-06-11
+Last updated: 2026-06-14
 
 ## Product Summary
 
@@ -37,6 +37,16 @@ The first release should focus on SEO-visible public pages, teacher search, teac
 - Teacher listing model: one public teacher profile/listing per teacher for now.
 - Teacher publishing: no admin approval for MVP; eligible teachers can publish directly.
 - Teacher listing creation is fully gated by the Teacher Eligibility Test: a teacher can create an account without the test, but cannot view the listing form or save a draft/listing until the test is passed.
+- Teacher Availability is owned by the app profile/user, not by the Teacher Listing. Teachers can edit weekly recurring availability before or after publishing a listing.
+- Teacher Availability is recommended for listing quality but is not required before publishing a Teacher Listing.
+- Teacher Availability uses hourly recurring weekday slots plus dated exceptions. Exceptions can either block normal availability or add extra one-off availability.
+- Public teacher cards and profiles should show a compact weekly availability preview. The monthly calendar view is private to the Teacher dashboard.
+- Search can filter teachers by availability using weekday plus optional start/end hour overlap. This is a discovery filter, not a booking lock.
+- Lesson Requests can capture a preferred weekday/hour, but this does not reserve the teacher's availability. Teachers may later adjust the accepted lesson schedule manually.
+- Teacher Calendar uses a hybrid model: accepting a Lesson Request creates a private Teacher Student relationship and, when preferred weekday/hour exists, creates the first scheduled Lesson Session automatically.
+- Teachers can also create manual Lesson Sessions for any named student from their dashboard calendar. Manual students are private teacher-owned records, not full platform Student accounts.
+- Cancelling a Lesson Session cancels only that session. It does not cancel the accepted Lesson Request or the Teacher Student relationship.
+- Calendar income is an estimate, not payment collection. Each Lesson Session snapshots `price_amount`, `duration_minutes`, and `currency` at scheduling time.
 - Communication: no in-site chat for MVP. When a teacher accepts a lesson request, the student's contact details are shared with the teacher.
 - Admin moderation actions must write audit logs for teacher profile status changes and review status changes.
 - Public marketplace pages show a maintenance/not-ready state when there are no published Teacher Listings.
@@ -91,6 +101,39 @@ This section is the canonical progress and todo tracker for agents. Keep it chro
 - Removed unfinished public blog placeholder copy and added visible draft/legal-review notices to legal pages.
 - Dashboard request list APIs remain deferred: dashboard list data stays server-rendered through feature services until a mobile/external client needs documented GET endpoints.
 - Verification passed: `bun run check:copy`, `bun run typecheck`, `bun run lint`, `bun run build`, `git diff --check`, `supabase migration list`, and a linked DB query confirming `request_rate_limits` has RLS enabled.
+
+### 2026-06-14 - Teacher Availability And Calendar Foundation
+
+- Local branch: `dev`.
+- Added Teacher Availability data model with weekly hourly slots and dated exceptions through local migration `20260614082142_teacher_availability_calendar_foundation.sql`.
+- Availability is stored against `profiles.id` so Teacher accounts can edit it independently from Teacher Listing creation and publication.
+- Added private Teacher dashboard calendar page at `/ogretmen/panel/takvim`.
+- Added `GET /api/teachers/me/availability` and `PUT /api/teachers/me/availability` for the signed-in Teacher's own availability.
+- Added reusable availability editor, compact weekly preview, and private monthly calendar preview under `src/features/availability`.
+- Public Teacher read models now include availability, and teacher search/profile surfaces can display compact weekly availability.
+- Teacher search supports availability filters: `availabilityWeekday`, `availabilityStartHour`, and `availabilityEndHour`.
+- Lesson Request submission now stores optional preferred weekday/hour fields for the student's requested lesson time. This is only a preference and does not reserve a slot.
+- Future todo: implement actual scheduled lesson-session events on the same monthly calendar after accepted Lesson Requests exist.
+- Verification passed: `bun run check:copy`, `bun run typecheck`, `bun run lint`, `bun run build`, and `git diff --check`.
+
+### 2026-06-14 - Teacher Lesson Calendar And Dashboard Metrics
+
+- Local branch: `feat/teacher-calendar-lessons`.
+- Built on the Teacher Availability foundation to add actual Teacher lesson scheduling.
+- Added local migration `20260614105552_teacher_calendar_lessons.sql`:
+  - New `teacher_students` table for teacher-owned accepted/manual students.
+  - Expanded `lessons` from one accepted request record into reusable scheduled Lesson Sessions.
+  - Added RLS policies and authenticated Data API grants for new calendar tables/operations.
+- Accepting a Lesson Request now upserts the Teacher Student record and automatically creates the first Lesson Session when the request has preferred weekday/hour.
+- Added Teacher Calendar APIs:
+  - `GET /api/teachers/me/calendar`
+  - `POST /api/teachers/me/calendar/lessons`
+  - `PATCH /api/teachers/me/calendar/lessons/{id}`
+- Reworked `/ogretmen/panel/takvim` into a tabbed workspace for Lesson Calendar and Availability.
+- Teacher dashboard home now shows future lesson count, active student count, this-month estimated income, future projected income, next lessons, and unscheduled accepted requests.
+- Teacher students page now lists teacher-owned students from accepted requests and manual lesson creation.
+- Updated `supabase/seed.sql` with teacher-student/session data so fresh seeded databases match the new schema.
+- Verification passed: `bun run check:copy`, `bun run typecheck`, `bun run lint`, `bun run build`, and `git diff --check`.
 
 ### 2026-06-11 - Premium Select Styling Cleanup
 
@@ -696,6 +739,11 @@ Currently implemented endpoints:
 - `POST /api/teacher-eligibility/submissions`
 - `GET /api/teachers/me/listing`
 - `PUT /api/teachers/me/listing`
+- `GET /api/teachers/me/availability`
+- `PUT /api/teachers/me/availability`
+- `GET /api/teachers/me/calendar`
+- `POST /api/teachers/me/calendar/lessons`
+- `PATCH /api/teachers/me/calendar/lessons/{id}`
 - `POST /api/admin/teacher-profiles/{id}/status`
 - `POST /api/admin/reviews/{id}/status`
 
@@ -765,3 +813,28 @@ Server actions can be used internally, but API shape should still be documented 
 - OpenAPI document covers implemented API endpoints.
 - Seed data exists for local development, including Erzurum.
 - Core flows have focused tests.
+
+## Linear Progress Tracker
+
+Latest completed slice: teacher availability and calendar flow integration.
+
+- Teacher availability is managed from the teacher calendar area and stored as weekly slots plus dated exceptions.
+- Public teacher search, teacher profile pages, and lesson request flow can display teacher availability.
+- Teacher search supports availability filtering by weekday and hour range.
+- Lesson request creation lets the student pick a preferred weekday/start hour from the selected teacher's available slots when availability exists.
+- If the selected teacher has no availability, the request flow shows a warning and still allows the student to submit a request.
+- Teacher listing creation shows a reusable availability preview before the listing form and warns when availability is empty.
+- Teacher calendar shows scheduled/completed/cancelled lessons, future lesson count, income summary, and student/contact context.
+- Calendar shows an empty-state warning when the selected month has no lessons.
+- Accepted lesson requests are converted into lesson calendar rows by the accept-request backend flow.
+- Seed data now includes weekly availability slots, availability exceptions, preferred request times, and future lessons for QA.
+- Supabase remote project `hhddeqgvrnyxnwetetdc` has received migrations `20260614082142_teacher_availability_calendar_foundation` and `20260614105552_teacher_calendar_lessons`.
+- Supabase MCP migration calls timed out for this project during this slice; the linked Supabase CLI was used for remote migration/seed application.
+- Remote seed verification after reseed: 14 weekly slots, 2 availability exceptions, 12 lesson requests with preferred times, 4 future teacher lessons, and 14 published listing-to-slot links.
+
+Next cleanup before adding major new product features:
+
+- Replace remaining placeholder/legal copy before launch.
+- Review Supabase RLS for the new availability/calendar tables after real auth QA.
+- Decide whether teacher dashboard list data should remain server-rendered or get documented API endpoints.
+- Add rate limiting/spam prevention for public request/auth flows.

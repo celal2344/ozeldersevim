@@ -1,4 +1,5 @@
 import {
+  CalendarDaysIcon,
   ClipboardCheckIcon,
   GraduationCapIcon,
   ListChecksIcon,
@@ -18,6 +19,7 @@ export const teacherDashboardConfig: DashboardRoleConfig = {
     { href: "/ogretmen/panel", icon: GraduationCapIcon, label: "Genel Bakış", pageId: "teacher-home" },
     { href: "/ogretmen/panel/talepler", icon: ClipboardCheckIcon, label: "Ders Talepleri", pageId: "teacher-requests" },
     { href: "/ogretmen/panel/ilan", icon: ListChecksIcon, label: "İlanım", pageId: "teacher-listing" },
+    { href: "/ogretmen/panel/takvim", icon: CalendarDaysIcon, label: "Takvim", pageId: "teacher-calendar" },
     { href: "/ogretmen/panel/ogrenciler", icon: UserIcon, label: "Öğrenciler", pageId: "teacher-students" },
     { href: "/ogretmen/panel/yorumlar", icon: StarIcon, label: "Yorumlar", pageId: "teacher-reviews" },
     { href: "/ogretmen/panel/profil", icon: MessageSquareTextIcon, label: "Profil", pageId: "teacher-profile" },
@@ -30,7 +32,7 @@ export const teacherDashboardPages: Record<string, DashboardPageContent> = {
     id: "teacher-home",
     eyebrow: "Öğretmen Paneli",
     title: "Hoş geldin!",
-    description: "Sol menüden ders taleplerini, ilanını, öğrencilerini ve yorumlarını yönetebilirsin.",
+    description: "Sol menüden ders taleplerini, ilanını, takvimini, öğrencilerini ve yorumlarını yönetebilirsin.",
     ctaHref: "/ogretmen/panel/talepler",
     ctaLabel: "Ders Taleplerine Git",
   },
@@ -47,6 +49,12 @@ export const teacherDashboardPages: Record<string, DashboardPageContent> = {
     description: "Öğretmenlik testini geçtikten sonra ilan oluşturabilir ve yayına alabilirsin.",
     ctaHref: "/ogretmen/panel/profil",
     ctaLabel: "Profil Bilgilerini Düzenle",
+  },
+  "teacher-calendar": {
+    id: "teacher-calendar",
+    eyebrow: "Takvim",
+    title: "Müsaitlik Takvimi",
+    description: "Haftalık müsaitlik saatlerini ve tek seferlik takvim istisnalarını buradan yönetebilirsin.",
   },
   "teacher-students": {
     id: "teacher-students",

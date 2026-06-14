@@ -1,3 +1,4 @@
+import { TeacherStudentsView } from "@/features/calendar/teacher-students-view";
 import { DashboardRoute } from "@/features/dashboard/shared/dashboard-route";
 
 export const dynamic = "force-dynamic";
@@ -7,5 +8,9 @@ export const metadata = {
 };
 
 export default function TeacherStudentsPage() {
-  return <DashboardRoute activePath="/ogretmen/panel/ogrenciler" pageId="teacher-students" role="teacher" />;
+  return (
+    <DashboardRoute activePath="/ogretmen/panel/ogrenciler" pageId="teacher-students" role="teacher">
+      <TeacherStudentsView />
+    </DashboardRoute>
+  );
 }

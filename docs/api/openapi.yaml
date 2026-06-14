@@ -146,6 +146,24 @@ paths:
         - $ref: "#/components/parameters/DistrictFilterParam"
         - $ref: "#/components/parameters/DeliveryModeFilterParam"
         - in: query
+          name: availabilityWeekday
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 7
+        - in: query
+          name: availabilityStartHour
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 23
+        - in: query
+          name: availabilityEndHour
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 24
+        - in: query
           name: lat
           schema:
             type: number
@@ -367,6 +385,157 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "429":
           $ref: "#/components/responses/RateLimitExceeded"
+  /teachers/me/availability:
+    get:
+      summary: Get the signed-in teacher's weekly availability and exceptions
+      responses:
+        "200":
+          description: Teacher availability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherAvailability"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not a teacher account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      summary: Replace the signed-in teacher's weekly availability and exceptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeacherAvailability"
+      responses:
+        "200":
+          description: Teacher availability saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherAvailability"
+        "400":
+          description: Invalid availability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not a teacher account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /teachers/me/calendar:
+    get:
+      summary: Get the signed-in teacher's lesson calendar
+      parameters:
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Teacher calendar resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherCalendarResource"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not a teacher account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /teachers/me/calendar/lessons:
+    post:
+      summary: Create a manual lesson session for the signed-in teacher
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCalendarLessonPayload"
+      responses:
+        "201":
+          description: Lesson created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /teachers/me/calendar/lessons/{id}:
+    patch:
+      summary: Update, reschedule, complete, or cancel a teacher lesson session
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCalendarLessonPayload"
+      responses:
+        "200":
+          description: Lesson updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /profiles/me:
     patch:
       summary: Update the signed-in user's basic profile (name and phone)
@@ -1156,6 +1325,7 @@ components:
         - ratingAverage
         - reviewCount
         - experienceYears
+        - availability
       properties:
         id:
           type: string
@@ -1193,6 +1363,253 @@ components:
           type: integer
         distanceKm:
           type: number
+        availability:
+          $ref: "#/components/schemas/TeacherAvailability"
+    AvailabilitySlot:
+      type: object
+      required: [weekday, startHour, endHour]
+      properties:
+        weekday:
+          type: integer
+          minimum: 1
+          maximum: 7
+        startHour:
+          type: integer
+          minimum: 0
+          maximum: 23
+        endHour:
+          type: integer
+          minimum: 1
+          maximum: 24
+    AvailabilityException:
+      type: object
+      required: [date, type, startHour, endHour]
+      properties:
+        date:
+          type: string
+          format: date
+        type:
+          type: string
+          enum: [available, unavailable]
+        startHour:
+          type: integer
+          minimum: 0
+          maximum: 23
+        endHour:
+          type: integer
+          minimum: 1
+          maximum: 24
+        note:
+          type: string
+          nullable: true
+    TeacherAvailability:
+      type: object
+      required: [weeklySlots, exceptions]
+      properties:
+        weeklySlots:
+          type: array
+          items:
+            $ref: "#/components/schemas/AvailabilitySlot"
+        exceptions:
+          type: array
+          items:
+            $ref: "#/components/schemas/AvailabilityException"
+    TeacherStudent:
+      type: object
+      required: [id, name, email, phone, notes, sourceLessonRequestId]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type:
+            - string
+            - "null"
+        phone:
+          type:
+            - string
+            - "null"
+        notes:
+          type:
+            - string
+            - "null"
+        sourceLessonRequestId:
+          type:
+            - string
+            - "null"
+          format: uuid
+    CalendarLesson:
+      type: object
+      required: [id, lessonRequestId, teacherStudentId, studentName, studentEmail, studentPhone, lessonName, deliveryMode, status, scheduledAt, durationMinutes, priceAmount, currency, notes, cancellationReason]
+      properties:
+        id:
+          type: string
+          format: uuid
+        lessonRequestId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        teacherStudentId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        studentName:
+          type: string
+        studentEmail:
+          type:
+            - string
+            - "null"
+        studentPhone:
+          type:
+            - string
+            - "null"
+        lessonName:
+          type: string
+        deliveryMode:
+          type: string
+          enum: [online, face_to_face, both]
+        status:
+          type: string
+          enum: [scheduled, completed, cancelled, no_show]
+        scheduledAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        durationMinutes:
+          type: integer
+        priceAmount:
+          type: number
+        currency:
+          type: string
+        notes:
+          type:
+            - string
+            - "null"
+        cancellationReason:
+          type:
+            - string
+            - "null"
+    UnscheduledLessonRequest:
+      type: object
+      required: [id, studentName, studentEmail, studentPhone, lessonName, goal, studentLevel, acceptedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentName:
+          type: string
+        studentEmail:
+          type: string
+        studentPhone:
+          type: string
+        lessonName:
+          type: string
+        goal:
+          type:
+            - string
+            - "null"
+        studentLevel:
+          type:
+            - string
+            - "null"
+        acceptedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+    TeacherCalendarSummary:
+      type: object
+      required: [futureLessonCount, activeStudentCount, thisMonthIncome, futureProjectedIncome]
+      properties:
+        futureLessonCount:
+          type: integer
+        activeStudentCount:
+          type: integer
+        thisMonthIncome:
+          type: number
+        futureProjectedIncome:
+          type: number
+    TeacherCalendarResource:
+      type: object
+      required: [lessons, students, unscheduledRequests, summary]
+      properties:
+        lessons:
+          type: array
+          items:
+            $ref: "#/components/schemas/CalendarLesson"
+        students:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeacherStudent"
+        unscheduledRequests:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnscheduledLessonRequest"
+        summary:
+          $ref: "#/components/schemas/TeacherCalendarSummary"
+    CreateCalendarLessonPayload:
+      type: object
+      required: [lessonSlug, scheduledAt]
+      properties:
+        teacherStudentId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        studentName:
+          type: string
+        studentEmail:
+          type: string
+          format: email
+        studentPhone:
+          type: string
+        lessonSlug:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+        priceAmount:
+          type: number
+        deliveryMode:
+          type: string
+          enum: [online, face_to_face, both]
+        notes:
+          type:
+            - string
+            - "null"
+    UpdateCalendarLessonPayload:
+      type: object
+      properties:
+        scheduledAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        durationMinutes:
+          type: integer
+        priceAmount:
+          type: number
+        deliveryMode:
+          type: string
+          enum: [online, face_to_face, both]
+        status:
+          type: string
+          enum: [scheduled, completed, cancelled, no_show]
+        notes:
+          type:
+            - string
+            - "null"
+        cancellationReason:
+          type:
+            - string
+            - "null"
     TeacherProfileReview:
       type: object
       required: [id, studentName, rating, comment, createdAt]
@@ -1279,6 +1696,12 @@ components:
           type: string
         budgetMax:
           type: string
+        preferredWeekday:
+          type: string
+          description: Optional preferred weekday, 1-7.
+        preferredStartHour:
+          type: string
+          description: Optional preferred starting hour, 0-23.
         studentName:
           type: string
         email:

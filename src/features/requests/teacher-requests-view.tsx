@@ -7,6 +7,7 @@ import {
 } from "@/features/requests/constants";
 import { RequestActionButtons } from "@/features/requests/request-action-buttons";
 import { getTeacherLessonRequests } from "@/features/requests/service";
+import { formatHour, weekdayLabel } from "@/features/availability/utils";
 import { DashboardStateCard } from "@/features/dashboard/shared/dashboard-state-card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
@@ -71,6 +72,11 @@ export async function TeacherRequestsView() {
             {req.goal && (
               <CardContent className="pb-3 pt-0">
                 <p className="text-sm leading-relaxed text-foreground/80">{req.goal}</p>
+                {req.preferred_weekday && req.preferred_start_hour !== null ? (
+                  <p className="mt-2 text-xs font-medium text-brand-orange">
+                    Tercih edilen zaman: {weekdayLabel(req.preferred_weekday as 1 | 2 | 3 | 4 | 5 | 6 | 7)} {formatHour(req.preferred_start_hour)}
+                  </p>
+                ) : null}
               </CardContent>
             )}
 

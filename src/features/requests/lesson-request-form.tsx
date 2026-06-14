@@ -6,6 +6,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { useForm, useWatch, type FieldPath } from "react-hook-form";
 
+import { AvailabilityPreview } from "@/features/availability/availability-preview";
+import {
+  availabilityStartHourOptions,
+  availabilityWeekdayOptions,
+  hasWeeklyAvailability,
+} from "@/features/availability/utils";
 import {
   contactPreferenceOptions,
   lessonRequestFormSchema,
@@ -13,6 +19,8 @@ import {
   lessonRequestLessonOptions,
   lessonRequestLocationOptions,
   lessonRequestSteps,
+  preferredStartHourOptions,
+  preferredWeekdayOptions,
   studentLevelOptions,
 } from "@/features/requests/constants";
 import type { LessonRequestFormValues, SubmitLessonRequestResponse } from "@/features/requests/types";
@@ -52,6 +60,8 @@ export function LessonRequestForm({ accountContact, teacher }: LessonRequestForm
       goal: "",
       budgetMin: "",
       budgetMax: "",
+      preferredWeekday: "",
+      preferredStartHour: "",
       studentName: accountContact.fullName,
       email: accountContact.email,
       phone: accountContact.phone,
@@ -69,7 +79,16 @@ export function LessonRequestForm({ accountContact, teacher }: LessonRequestForm
   const deliveryMode = useWatch({ control: form.control, name: "deliveryMode" });
   const studentLevel = useWatch({ control: form.control, name: "studentLevel" });
   const contactPreference = useWatch({ control: form.control, name: "contactPreference" });
+  const preferredWeekday = useWatch({ control: form.control, name: "preferredWeekday" });
+  const preferredStartHour = useWatch({ control: form.control, name: "preferredStartHour" });
   const deliveryModeOptions = deliveryOptionsForTeacher(teacher);
+  const hasTeacherAvailability = hasWeeklyAvailability(teacher.availability);
+  const weekdayOptionsForTeacher = hasTeacherAvailability
+    ? [{ value: "", label: "Öğretmenin müsait olduğu günler" }, ...availabilityWeekdayOptions(teacher.availability)]
+    : preferredWeekdayOptions;
+  const startHourOptionsForTeacher = hasTeacherAvailability
+    ? [{ value: "", label: "Öğretmenin müsait olduğu saatler" }, ...availabilityStartHourOptions(teacher.availability, preferredWeekday ?? "")]
+    : preferredStartHourOptions;
 
   function setSelectValue(field: FieldPath<LessonRequestFormValues>, value: string) {
     form.setValue(field, value, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
@@ -209,6 +228,37 @@ export function LessonRequestForm({ accountContact, teacher }: LessonRequestForm
             <div className="grid gap-4 md:grid-cols-2">
               <input {...form.register("budgetMin")} inputMode="numeric" placeholder="Minimum bütçe" className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy" />
               <input {...form.register("budgetMax")} inputMode="numeric" placeholder="Maksimum bütçe" className="h-11 rounded-lg border border-slate-200 px-3 text-sm text-brand-navy" />
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-3">
+                <p className="text-sm font-semibold text-brand-navy">Öğretmenin müsaitlik takvimi</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Tercih ettiğin gün ve saat öğretmene iletilir. Ders saati öğretmen kabul ettikten sonra netleşir.
+                </p>
+              </div>
+              <AvailabilityPreview availability={teacher.availability} compact />
+              {!hasTeacherAvailability ? (
+                <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+                  Bu öğretmen henüz müsaitlik eklememiş. Talep gönderebilirsin, saat bilgisini öğretmen seninle iletişime geçince netleştirir.
+                </p>
+              ) : null}
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <PremiumSelect
+                value={preferredWeekday ?? ""}
+                onChange={(value) => {
+                  setSelectValue("preferredWeekday", value);
+                  setSelectValue("preferredStartHour", "");
+                }}
+                options={weekdayOptionsForTeacher}
+                className="h-11 rounded-lg"
+              />
+              <PremiumSelect
+                value={preferredStartHour ?? ""}
+                onChange={(value) => setSelectValue("preferredStartHour", value)}
+                options={startHourOptionsForTeacher}
+                className="h-11 rounded-lg"
+              />
             </div>
           </div>
         ) : null}

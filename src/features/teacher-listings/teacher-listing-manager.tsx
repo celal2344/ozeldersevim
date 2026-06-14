@@ -5,7 +5,11 @@ import { CheckCircle2Icon, Loader2Icon, LockIcon, PlayCircleIcon, SaveIcon, Send
 import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch, type UseFormRegister } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 
+import { AvailabilityPreview } from "@/features/availability/availability-preview";
+import type { TeacherAvailability } from "@/features/availability/types";
+import { hasWeeklyAvailability } from "@/features/availability/utils";
 import {
   emptyTeacherListingDefaults,
   teacherListingDeliveryOptions,
@@ -59,6 +63,11 @@ export function TeacherListingManager() {
     queryFn: async () => (await fetchJson<{ test: TeacherEligibilityTest }>("/api/teacher-eligibility/test")).test,
     enabled: !canManageListing && testStarted,
     retry: false,
+  });
+  const availabilityQuery = useQuery({
+    queryKey: ["teacher-availability"],
+    queryFn: () => fetchJson<TeacherAvailability>("/api/teachers/me/availability"),
+    enabled: canManageListing,
   });
   const form = useForm<TeacherListingInput>({
     resolver: zodResolver(teacherListingSchema),
@@ -208,22 +217,55 @@ export function TeacherListingManager() {
       ) : null}
 
       {canManageListing ? (
-        <ListingFormCard
-          categoryQueryData={categoryQuery.data ?? []}
-          formError={formError}
-          isLoading={isFormDataLoading}
-          isPending={saveMutation.isPending}
-          locationQueryData={locationQuery.data ?? []}
-          onSubmit={submitListing}
-          onSelectValue={setListingSelectValue}
-          onToggleLesson={toggleLesson}
-          selectedDeliveryMode={selectedDeliveryMode}
-          selectedLessonSlugs={selectedLessonSlugs}
-          selectedLocationSlug={selectedLocationSlug}
-          formRegister={form.register}
-        />
+        <>
+          <ListingAvailabilityCard availability={availabilityQuery.data ?? { weeklySlots: [], exceptions: [] }} />
+          <ListingFormCard
+            categoryQueryData={categoryQuery.data ?? []}
+            formError={formError}
+            isLoading={isFormDataLoading}
+            isPending={saveMutation.isPending}
+            locationQueryData={locationQuery.data ?? []}
+            onSubmit={submitListing}
+            onSelectValue={setListingSelectValue}
+            onToggleLesson={toggleLesson}
+            selectedDeliveryMode={selectedDeliveryMode}
+            selectedLessonSlugs={selectedLessonSlugs}
+            selectedLocationSlug={selectedLocationSlug}
+            formRegister={form.register}
+          />
+        </>
       ) : null}
     </>
+  );
+}
+
+function ListingAvailabilityCard({ availability }: { availability: TeacherAvailability }) {
+  const hasAvailability = hasWeeklyAvailability(availability);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardDescription>Takvim</CardDescription>
+        <CardTitle className="text-brand-navy">Müsaitlik önizlemesi</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <AvailabilityPreview availability={availability} compact />
+        {!hasAvailability ? (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            Müsaitlik eklemeden ilan yayınlayabilirsin, ancak öğrenciler ders talebi oluştururken uygun saatlerini göremez. Yayına almadan önce takvime en az birkaç saat eklemen önerilir.
+          </div>
+        ) : null}
+        <Button
+          type="button"
+          variant="outline"
+          className="w-fit"
+          nativeButton={false}
+          render={<Link href="/ogretmen/panel/takvim" />}
+        >
+          Takvimi Düzenle
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
