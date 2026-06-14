@@ -4,6 +4,7 @@ import Link from "next/link";
 import { teacherDeliveryLabels } from "@/features/search/constants";
 import type { TeacherSearchResult } from "@/features/search/types";
 import { distanceLabel, initialsFromTeacherName, reviewLabel } from "@/features/search/utils";
+import { AvailabilityPreview } from "@/features/availability/availability-preview";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/shared/components/ui/card";
@@ -87,6 +88,7 @@ export function TeacherResultCard({ teacher }: { teacher: TeacherSearchResult })
             {teacher.shortBio}
           </p>
         ) : null}
+        <AvailabilityPreview availability={teacher.availability} compact />
       </CardContent>
 
       <CardFooter className="grid grid-cols-2 gap-2 border-t bg-slate-50/60 pt-3">

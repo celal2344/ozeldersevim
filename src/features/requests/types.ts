@@ -22,6 +22,8 @@ export type TeacherLessonRequest = {
   goal: string | null;
   budget_min: number | null;
   budget_max: number | null;
+  preferred_weekday: number | null;
+  preferred_start_hour: number | null;
   created_at: string;
   accepted_at: string | null;
   rejected_at: string | null;
@@ -36,6 +38,8 @@ export type StudentLessonRequest = {
   delivery_mode: "online" | "face_to_face" | "both";
   student_level: string | null;
   goal: string | null;
+  preferred_weekday: number | null;
+  preferred_start_hour: number | null;
   created_at: string;
   accepted_at: string | null;
   rejected_at: string | null;

@@ -261,6 +261,26 @@ set profile_id = excluded.profile_id,
     latitude = excluded.latitude,
     longitude = excluded.longitude;
 
+insert into public.teacher_availability_weekly_slots (profile_id, weekday, start_hour, end_hour) values
+  ('00000000-0000-0000-0000-000000000401', 1, 10, 12),
+  ('00000000-0000-0000-0000-000000000401', 3, 14, 17),
+  ('00000000-0000-0000-0000-000000000401', 6, 11, 13),
+  ('00000000-0000-0000-0000-000000000402', 2, 16, 19),
+  ('00000000-0000-0000-0000-000000000402', 4, 10, 12),
+  ('00000000-0000-0000-0000-000000000402', 7, 13, 15),
+  ('00000000-0000-0000-0000-000000000403', 1, 18, 21),
+  ('00000000-0000-0000-0000-000000000403', 5, 15, 18),
+  ('00000000-0000-0000-0000-000000000404', 3, 19, 22),
+  ('00000000-0000-0000-0000-000000000404', 6, 10, 14),
+  ('00000000-0000-0000-0000-000000000405', 2, 11, 13),
+  ('00000000-0000-0000-0000-000000000405', 5, 16, 19),
+  ('00000000-0000-0000-0000-000000000406', 1, 9, 11),
+  ('00000000-0000-0000-0000-000000000406', 4, 20, 22);
+
+insert into public.teacher_availability_exceptions (profile_id, exception_date, exception_type, start_hour, end_hour, note) values
+  ('00000000-0000-0000-0000-000000000401', current_date + interval '3 days', 'available', 18, 20, 'Demo ekstra akşam dersi'),
+  ('00000000-0000-0000-0000-000000000402', current_date + interval '5 days', 'unavailable', 10, 12, 'Demo kapalı saat');
+
 insert into public.teacher_lessons (teacher_profile_id, lesson_category_id) values
   ('00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000201'),
   ('00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000207'),
@@ -295,21 +315,21 @@ set headline = excluded.headline,
 insert into public.lesson_requests (
   id, student_profile_id, teacher_profile_id, lesson_category_id, location_id, status, delivery_mode,
   student_level, goal, budget_min, budget_max, contact_preference,
-  consent_terms_at, consent_privacy_at, accepted_at, rejected_at, created_at
+  consent_terms_at, consent_privacy_at, accepted_at, rejected_at, preferred_weekday, preferred_start_hour, created_at
 ) values
-  ('00000000-0000-0000-0000-000000000801', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000101', 'accepted', 'both', '8. sınıf', 'LGS matematik netlerini yükseltmek istiyorum.', 350, 500, 'both', now() - interval '25 days', now() - interval '25 days', now() - interval '24 days', null, now() - interval '25 days'),
-  ('00000000-0000-0000-0000-000000000802', '00000000-0000-0000-0000-000000000502', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000207', '00000000-0000-0000-0000-000000000101', 'accepted', 'face_to_face', '7. sınıf', 'Düzenli okul desteği almak istiyorum.', 350, 550, 'phone', now() - interval '21 days', now() - interval '21 days', now() - interval '20 days', null, now() - interval '21 days'),
-  ('00000000-0000-0000-0000-000000000803', '00000000-0000-0000-0000-000000000503', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000208', '00000000-0000-0000-0000-000000000102', 'accepted', 'online', '11. sınıf', 'TYT temel matematikte eksiklerim var.', 400, 600, 'site', now() - interval '17 days', now() - interval '17 days', now() - interval '16 days', null, now() - interval '17 days'),
-  ('00000000-0000-0000-0000-000000000804', '00000000-0000-0000-0000-000000000504', '00000000-0000-0000-0000-000000000602', '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000102', 'accepted', 'both', '12. sınıf', 'AYT fizik konu tekrarı ve soru çözümü.', 450, 650, 'both', now() - interval '19 days', now() - interval '19 days', now() - interval '18 days', null, now() - interval '19 days'),
-  ('00000000-0000-0000-0000-000000000805', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000602', '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000101', 'accepted', 'online', '10. sınıf', 'Kimya yazılısı için hazırlık gerekiyor.', 400, 600, 'phone', now() - interval '15 days', now() - interval '15 days', now() - interval '14 days', null, now() - interval '15 days'),
-  ('00000000-0000-0000-0000-000000000806', '00000000-0000-0000-0000-000000000502', '00000000-0000-0000-0000-000000000603', '00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000103', 'accepted', 'online', 'A2', 'Konuşma pratiği ve kelime çalışması istiyorum.', 500, 700, 'site', now() - interval '14 days', now() - interval '14 days', now() - interval '13 days', null, now() - interval '14 days'),
-  ('00000000-0000-0000-0000-000000000807', '00000000-0000-0000-0000-000000000503', '00000000-0000-0000-0000-000000000603', '00000000-0000-0000-0000-000000000205', '00000000-0000-0000-0000-000000000103', 'accepted', 'online', '6. sınıf', 'Türkçe paragraf ve dil bilgisi desteği.', 450, 650, 'both', now() - interval '12 days', now() - interval '12 days', now() - interval '11 days', null, now() - interval '12 days'),
-  ('00000000-0000-0000-0000-000000000808', '00000000-0000-0000-0000-000000000504', '00000000-0000-0000-0000-000000000604', '00000000-0000-0000-0000-000000000206', '00000000-0000-0000-0000-000000000104', 'accepted', 'online', 'başlangıç', 'Python ve algoritma temelleri öğrenmek istiyorum.', 600, 800, 'both', now() - interval '10 days', now() - interval '10 days', now() - interval '9 days', null, now() - interval '10 days'),
-  ('00000000-0000-0000-0000-000000000809', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000604', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000104', 'accepted', 'online', '9. sınıf', 'Matematik temelini güçlendirmek istiyorum.', 500, 750, 'phone', now() - interval '8 days', now() - interval '8 days', now() - interval '7 days', null, now() - interval '8 days'),
-  ('00000000-0000-0000-0000-000000000810', '00000000-0000-0000-0000-000000000502', '00000000-0000-0000-0000-000000000605', '00000000-0000-0000-0000-000000000208', '00000000-0000-0000-0000-000000000105', 'accepted', 'face_to_face', '12. sınıf', 'TYT/AYT çalışma planı ve deneme analizi.', 450, 650, 'both', now() - interval '6 days', now() - interval '6 days', now() - interval '5 days', null, now() - interval '6 days'),
-  ('00000000-0000-0000-0000-000000000811', '00000000-0000-0000-0000-000000000503', '00000000-0000-0000-0000-000000000606', '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000101', 'accepted', 'online', '11. sınıf', 'Fizik konu eksiği ve soru çözümü.', 300, 450, 'site', now() - interval '5 days', now() - interval '5 days', now() - interval '4 days', null, now() - interval '5 days'),
-  ('00000000-0000-0000-0000-000000000812', '00000000-0000-0000-0000-000000000504', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000101', 'submitted', 'face_to_face', '5. sınıf', 'Haftalık matematik desteği arıyorum.', 300, 450, 'phone', now() - interval '2 days', now() - interval '2 days', null, null, now() - interval '2 days'),
-  ('00000000-0000-0000-0000-000000000813', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000607', '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000102', 'rejected', 'face_to_face', '10. sınıf', 'Kimya özel ders talebi.', 300, 450, 'both', now() - interval '3 days', now() - interval '3 days', null, now() - interval '2 days', now() - interval '3 days')
+  ('00000000-0000-0000-0000-000000000801', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000101', 'accepted', 'both', '8. sınıf', 'LGS matematik netlerini yükseltmek istiyorum.', 350, 500, 'both', now() - interval '25 days', now() - interval '25 days', now() - interval '24 days', null, 1, 10, now() - interval '25 days'),
+  ('00000000-0000-0000-0000-000000000802', '00000000-0000-0000-0000-000000000502', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000207', '00000000-0000-0000-0000-000000000101', 'accepted', 'face_to_face', '7. sınıf', 'Düzenli okul desteği almak istiyorum.', 350, 550, 'phone', now() - interval '21 days', now() - interval '21 days', now() - interval '20 days', null, 3, 14, now() - interval '21 days'),
+  ('00000000-0000-0000-0000-000000000803', '00000000-0000-0000-0000-000000000503', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000208', '00000000-0000-0000-0000-000000000102', 'accepted', 'online', '11. sınıf', 'TYT temel matematikte eksiklerim var.', 400, 600, 'site', now() - interval '17 days', now() - interval '17 days', now() - interval '16 days', null, 6, 11, now() - interval '17 days'),
+  ('00000000-0000-0000-0000-000000000804', '00000000-0000-0000-0000-000000000504', '00000000-0000-0000-0000-000000000602', '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000102', 'accepted', 'both', '12. sınıf', 'AYT fizik konu tekrarı ve soru çözümü.', 450, 650, 'both', now() - interval '19 days', now() - interval '19 days', now() - interval '18 days', null, 2, 16, now() - interval '19 days'),
+  ('00000000-0000-0000-0000-000000000805', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000602', '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000101', 'accepted', 'online', '10. sınıf', 'Kimya yazılısı için hazırlık gerekiyor.', 400, 600, 'phone', now() - interval '15 days', now() - interval '15 days', now() - interval '14 days', null, 4, 10, now() - interval '15 days'),
+  ('00000000-0000-0000-0000-000000000806', '00000000-0000-0000-0000-000000000502', '00000000-0000-0000-0000-000000000603', '00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000103', 'accepted', 'online', 'A2', 'Konuşma pratiği ve kelime çalışması istiyorum.', 500, 700, 'site', now() - interval '14 days', now() - interval '14 days', now() - interval '13 days', null, 1, 18, now() - interval '14 days'),
+  ('00000000-0000-0000-0000-000000000807', '00000000-0000-0000-0000-000000000503', '00000000-0000-0000-0000-000000000603', '00000000-0000-0000-0000-000000000205', '00000000-0000-0000-0000-000000000103', 'accepted', 'online', '6. sınıf', 'Türkçe paragraf ve dil bilgisi desteği.', 450, 650, 'both', now() - interval '12 days', now() - interval '12 days', now() - interval '11 days', null, 5, 15, now() - interval '12 days'),
+  ('00000000-0000-0000-0000-000000000808', '00000000-0000-0000-0000-000000000504', '00000000-0000-0000-0000-000000000604', '00000000-0000-0000-0000-000000000206', '00000000-0000-0000-0000-000000000104', 'accepted', 'online', 'başlangıç', 'Python ve algoritma temelleri öğrenmek istiyorum.', 600, 800, 'both', now() - interval '10 days', now() - interval '10 days', now() - interval '9 days', null, 3, 19, now() - interval '10 days'),
+  ('00000000-0000-0000-0000-000000000809', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000604', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000104', 'accepted', 'online', '9. sınıf', 'Matematik temelini güçlendirmek istiyorum.', 500, 750, 'phone', now() - interval '8 days', now() - interval '8 days', now() - interval '7 days', null, 6, 10, now() - interval '8 days'),
+  ('00000000-0000-0000-0000-000000000810', '00000000-0000-0000-0000-000000000502', '00000000-0000-0000-0000-000000000605', '00000000-0000-0000-0000-000000000208', '00000000-0000-0000-0000-000000000105', 'accepted', 'face_to_face', '12. sınıf', 'TYT/AYT çalışma planı ve deneme analizi.', 450, 650, 'both', now() - interval '6 days', now() - interval '6 days', now() - interval '5 days', null, 2, 11, now() - interval '6 days'),
+  ('00000000-0000-0000-0000-000000000811', '00000000-0000-0000-0000-000000000503', '00000000-0000-0000-0000-000000000606', '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000101', 'accepted', 'online', '11. sınıf', 'Fizik konu eksiği ve soru çözümü.', 300, 450, 'site', now() - interval '5 days', now() - interval '5 days', now() - interval '4 days', null, 1, 9, now() - interval '5 days'),
+  ('00000000-0000-0000-0000-000000000812', '00000000-0000-0000-0000-000000000504', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000101', 'submitted', 'face_to_face', '5. sınıf', 'Haftalık matematik desteği arıyorum.', 300, 450, 'phone', now() - interval '2 days', now() - interval '2 days', null, null, 1, 10, now() - interval '2 days'),
+  ('00000000-0000-0000-0000-000000000813', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000607', '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000102', 'rejected', 'face_to_face', '10. sınıf', 'Kimya özel ders talebi.', 300, 450, 'both', now() - interval '3 days', now() - interval '3 days', null, now() - interval '2 days', null, null, now() - interval '3 days')
 on conflict (id) do update
 set status = excluded.status,
     delivery_mode = excluded.delivery_mode,
@@ -317,6 +337,8 @@ set status = excluded.status,
     goal = excluded.goal,
     budget_min = excluded.budget_min,
     budget_max = excluded.budget_max,
+    preferred_weekday = excluded.preferred_weekday,
+    preferred_start_hour = excluded.preferred_start_hour,
     accepted_at = excluded.accepted_at,
     rejected_at = excluded.rejected_at;
 
@@ -339,21 +361,52 @@ set student_name = excluded.student_name,
     email = excluded.email,
     phone = excluded.phone;
 
-insert into public.lessons (id, lesson_request_id, status, scheduled_at) values
-  ('00000000-0000-0000-0000-000000000901', '00000000-0000-0000-0000-000000000801', 'completed', now() - interval '22 days'),
-  ('00000000-0000-0000-0000-000000000902', '00000000-0000-0000-0000-000000000802', 'completed', now() - interval '18 days'),
-  ('00000000-0000-0000-0000-000000000903', '00000000-0000-0000-0000-000000000803', 'scheduled', now() + interval '2 days'),
-  ('00000000-0000-0000-0000-000000000904', '00000000-0000-0000-0000-000000000804', 'completed', now() - interval '15 days'),
-  ('00000000-0000-0000-0000-000000000905', '00000000-0000-0000-0000-000000000805', 'completed', now() - interval '11 days'),
-  ('00000000-0000-0000-0000-000000000906', '00000000-0000-0000-0000-000000000806', 'completed', now() - interval '9 days'),
-  ('00000000-0000-0000-0000-000000000907', '00000000-0000-0000-0000-000000000807', 'completed', now() - interval '7 days'),
-  ('00000000-0000-0000-0000-000000000908', '00000000-0000-0000-0000-000000000808', 'scheduled', now() + interval '3 days'),
-  ('00000000-0000-0000-0000-000000000909', '00000000-0000-0000-0000-000000000809', 'completed', now() - interval '3 days'),
-  ('00000000-0000-0000-0000-000000000910', '00000000-0000-0000-0000-000000000810', 'scheduled', now() + interval '4 days'),
-  ('00000000-0000-0000-0000-000000000911', '00000000-0000-0000-0000-000000000811', 'scheduled', now() + interval '5 days')
-on conflict (lesson_request_id) do update
+insert into public.teacher_students (
+  id, teacher_profile_id, student_profile_id, source_lesson_request_id, name, email, phone
+) values
+  ('00000000-0000-0000-0000-000000001201', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000801', 'Ali YÄ±ldÄ±z', 'ali.yildiz@example.com', '+90 533 501 00 01'),
+  ('00000000-0000-0000-0000-000000001202', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000502', '00000000-0000-0000-0000-000000000802', 'Ece Arslan', 'ece.arslan@example.com', '+90 533 502 00 02'),
+  ('00000000-0000-0000-0000-000000001203', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000000503', '00000000-0000-0000-0000-000000000803', 'Mehmet Ak', 'mehmet.ak@example.com', '+90 533 503 00 03'),
+  ('00000000-0000-0000-0000-000000001204', '00000000-0000-0000-0000-000000000602', '00000000-0000-0000-0000-000000000504', '00000000-0000-0000-0000-000000000804', 'Deniz Ã‡elik', 'deniz.celik@example.com', '+90 533 504 00 04'),
+  ('00000000-0000-0000-0000-000000001205', '00000000-0000-0000-0000-000000000602', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000805', 'Ali YÄ±ldÄ±z', 'ali.yildiz@example.com', '+90 533 501 00 01'),
+  ('00000000-0000-0000-0000-000000001206', '00000000-0000-0000-0000-000000000603', '00000000-0000-0000-0000-000000000502', '00000000-0000-0000-0000-000000000806', 'Ece Arslan', 'ece.arslan@example.com', '+90 533 502 00 02'),
+  ('00000000-0000-0000-0000-000000001207', '00000000-0000-0000-0000-000000000603', '00000000-0000-0000-0000-000000000503', '00000000-0000-0000-0000-000000000807', 'Mehmet Ak', 'mehmet.ak@example.com', '+90 533 503 00 03'),
+  ('00000000-0000-0000-0000-000000001208', '00000000-0000-0000-0000-000000000604', '00000000-0000-0000-0000-000000000504', '00000000-0000-0000-0000-000000000808', 'Deniz Ã‡elik', 'deniz.celik@example.com', '+90 533 504 00 04'),
+  ('00000000-0000-0000-0000-000000001209', '00000000-0000-0000-0000-000000000604', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000809', 'Ali YÄ±ldÄ±z', 'ali.yildiz@example.com', '+90 533 501 00 01'),
+  ('00000000-0000-0000-0000-000000001210', '00000000-0000-0000-0000-000000000605', '00000000-0000-0000-0000-000000000502', '00000000-0000-0000-0000-000000000810', 'Ece Arslan', 'ece.arslan@example.com', '+90 533 502 00 02'),
+  ('00000000-0000-0000-0000-000000001211', '00000000-0000-0000-0000-000000000606', '00000000-0000-0000-0000-000000000503', '00000000-0000-0000-0000-000000000811', 'Mehmet Ak', 'mehmet.ak@example.com', '+90 533 503 00 03')
+on conflict (teacher_profile_id, student_profile_id) do update
+set name = excluded.name,
+    email = excluded.email,
+    phone = excluded.phone,
+    source_lesson_request_id = coalesce(teacher_students.source_lesson_request_id, excluded.source_lesson_request_id);
+
+insert into public.lessons (
+  id, lesson_request_id, teacher_profile_id, teacher_student_id, lesson_category_id, delivery_mode,
+  status, scheduled_at, duration_minutes, price_amount, currency, completed_at
+) values
+  ('00000000-0000-0000-0000-000000000901', '00000000-0000-0000-0000-000000000801', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000001201', '00000000-0000-0000-0000-000000000201', 'both', 'completed', now() - interval '22 days', 60, 450, 'TRY', now() - interval '22 days'),
+  ('00000000-0000-0000-0000-000000000902', '00000000-0000-0000-0000-000000000802', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000001202', '00000000-0000-0000-0000-000000000207', 'face_to_face', 'completed', now() - interval '18 days', 60, 450, 'TRY', now() - interval '18 days'),
+  ('00000000-0000-0000-0000-000000000903', '00000000-0000-0000-0000-000000000803', '00000000-0000-0000-0000-000000000601', '00000000-0000-0000-0000-000000001203', '00000000-0000-0000-0000-000000000208', 'online', 'scheduled', now() + interval '2 days', 60, 450, 'TRY', null),
+  ('00000000-0000-0000-0000-000000000904', '00000000-0000-0000-0000-000000000804', '00000000-0000-0000-0000-000000000602', '00000000-0000-0000-0000-000000001204', '00000000-0000-0000-0000-000000000202', 'both', 'completed', now() - interval '15 days', 60, 500, 'TRY', now() - interval '15 days'),
+  ('00000000-0000-0000-0000-000000000905', '00000000-0000-0000-0000-000000000805', '00000000-0000-0000-0000-000000000602', '00000000-0000-0000-0000-000000001205', '00000000-0000-0000-0000-000000000203', 'online', 'completed', now() - interval '11 days', 60, 500, 'TRY', now() - interval '11 days'),
+  ('00000000-0000-0000-0000-000000000906', '00000000-0000-0000-0000-000000000806', '00000000-0000-0000-0000-000000000603', '00000000-0000-0000-0000-000000001206', '00000000-0000-0000-0000-000000000204', 'online', 'completed', now() - interval '9 days', 60, 400, 'TRY', now() - interval '9 days'),
+  ('00000000-0000-0000-0000-000000000907', '00000000-0000-0000-0000-000000000807', '00000000-0000-0000-0000-000000000603', '00000000-0000-0000-0000-000000001207', '00000000-0000-0000-0000-000000000205', 'online', 'completed', now() - interval '7 days', 60, 400, 'TRY', now() - interval '7 days'),
+  ('00000000-0000-0000-0000-000000000908', '00000000-0000-0000-0000-000000000808', '00000000-0000-0000-0000-000000000604', '00000000-0000-0000-0000-000000001208', '00000000-0000-0000-0000-000000000206', 'online', 'scheduled', now() + interval '3 days', 60, 650, 'TRY', null),
+  ('00000000-0000-0000-0000-000000000909', '00000000-0000-0000-0000-000000000809', '00000000-0000-0000-0000-000000000604', '00000000-0000-0000-0000-000000001209', '00000000-0000-0000-0000-000000000201', 'online', 'completed', now() - interval '3 days', 60, 650, 'TRY', now() - interval '3 days'),
+  ('00000000-0000-0000-0000-000000000910', '00000000-0000-0000-0000-000000000810', '00000000-0000-0000-0000-000000000605', '00000000-0000-0000-0000-000000001210', '00000000-0000-0000-0000-000000000208', 'face_to_face', 'scheduled', now() + interval '4 days', 60, 550, 'TRY', null),
+  ('00000000-0000-0000-0000-000000000911', '00000000-0000-0000-0000-000000000811', '00000000-0000-0000-0000-000000000606', '00000000-0000-0000-0000-000000001211', '00000000-0000-0000-0000-000000000202', 'online', 'scheduled', now() + interval '5 days', 60, 300, 'TRY', null)
+on conflict (id) do update
 set status = excluded.status,
-    scheduled_at = excluded.scheduled_at;
+    scheduled_at = excluded.scheduled_at,
+    teacher_profile_id = excluded.teacher_profile_id,
+    teacher_student_id = excluded.teacher_student_id,
+    lesson_category_id = excluded.lesson_category_id,
+    delivery_mode = excluded.delivery_mode,
+    duration_minutes = excluded.duration_minutes,
+    price_amount = excluded.price_amount,
+    currency = excluded.currency,
+    completed_at = excluded.completed_at;
 
 insert into public.reviews (id, lesson_request_id, student_profile_id, teacher_profile_id, rating, comment, status, created_at) values
   ('00000000-0000-0000-0000-000000001001', '00000000-0000-0000-0000-000000000801', '00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000601', 5, 'Elif öğretmen konuları çok düzenli anlattı. Haftalık ödev takibi çok faydalı oldu.', 'published', now() - interval '21 days'),

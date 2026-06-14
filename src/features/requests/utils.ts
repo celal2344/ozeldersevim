@@ -48,6 +48,8 @@ export function formValuesToSubmitPayload(values: LessonRequestFormValues): Subm
     goal: values.goal,
     budgetMin: values.budgetMin,
     budgetMax: values.budgetMax,
+    preferredWeekday: values.preferredWeekday,
+    preferredStartHour: values.preferredStartHour,
     studentName: values.studentName,
     email: values.email,
     phone: values.phone,
@@ -74,4 +76,10 @@ export function optionalNumber(value: string | undefined) {
   if (!value) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+export function optionalInteger(value: string | undefined) {
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) ? parsed : null;
 }

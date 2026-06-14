@@ -9,6 +9,7 @@ import {
   priceFilterOptions,
   sortFilterOptions,
 } from "@/features/search/constants";
+import { endHourOptions, hourOptions, weekdayOptions } from "@/features/availability/constants";
 import type { TeacherSearchFilterOptions } from "@/features/search/search-service";
 import { currentPriceOption, optionValue, parsePriceRange } from "@/features/search/utils";
 import { useSearchFilterNavigation } from "@/features/search/use-search-filter-navigation";
@@ -37,13 +38,17 @@ export function SearchFilters({ lessonOptions, cityOptions, districtOptions }: T
   const currentMax = searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined;
   const fastResponse = searchParams.get("fastResponse") === "1";
   const currentGender = searchParams.get("gender") ?? "all";
+  const availabilityWeekdayOptions = [{ value: "", label: "Tüm günler" }, ...weekdayOptions];
+  const availabilityStartOptions = [{ value: "", label: "Başlangıç" }, ...hourOptions];
+  const availabilityEndOptions = [{ value: "", label: "Bitiş" }, ...endHourOptions];
   const hasAdvancedFilters = Boolean(
     searchParams.get("district") ||
       (searchParams.get("deliveryMode") && searchParams.get("deliveryMode") !== "all") ||
       (searchParams.get("sort") && searchParams.get("sort") !== "recommended") ||
       searchParams.get("gender") ||
       searchParams.get("minPrice") ||
-      searchParams.get("fastResponse")
+      searchParams.get("fastResponse") ||
+      searchParams.get("availabilityWeekday")
   );
 
   function handlePriceChange(value: string) {
@@ -111,6 +116,24 @@ export function SearchFilters({ lessonOptions, cityOptions, districtOptions }: T
             <LocateFixedIcon data-icon="inline-start" aria-hidden="true" />
             Konumumu Kullan
           </Button>
+        </div>
+
+        <div className="mt-3 grid gap-2 border-t border-slate-100 pt-3 md:grid-cols-3">
+          <PremiumSelect
+            value={searchParams.get("availabilityWeekday") ?? ""}
+            onChange={(value) => updateParam("availabilityWeekday", value)}
+            options={availabilityWeekdayOptions}
+          />
+          <PremiumSelect
+            value={searchParams.get("availabilityStartHour") ?? ""}
+            onChange={(value) => updateParam("availabilityStartHour", value)}
+            options={availabilityStartOptions}
+          />
+          <PremiumSelect
+            value={searchParams.get("availabilityEndHour") ?? ""}
+            onChange={(value) => updateParam("availabilityEndHour", value)}
+            options={availabilityEndOptions}
+          />
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
