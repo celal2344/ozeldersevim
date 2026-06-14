@@ -12,6 +12,7 @@ export type DashboardPageId =
   | "teacher-home"
   | "teacher-requests"
   | "teacher-listing"
+  | "teacher-calendar"
   | "teacher-students"
   | "teacher-reviews"
   | "teacher-profile"

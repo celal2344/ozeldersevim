@@ -1,4 +1,6 @@
 import { z } from "zod";
+
+import { hourOptions, weekdayOptions } from "@/features/availability/constants";
 import type { LessonRequestStatus } from "@/features/requests/types";
 
 export const lessonRequestStatusLabels: Record<LessonRequestStatus, string> = {
@@ -68,10 +70,13 @@ export const deliveryPreferenceOptions = [
   { value: "face_to_face", label: "Yüz yüze" },
 ] as const;
 
+export const preferredWeekdayOptions = [{ value: "", label: "Gün tercihi yok" }, ...weekdayOptions] as const;
+export const preferredStartHourOptions = [{ value: "", label: "Saat tercihi yok" }, ...hourOptions] as const;
+
 export const lessonRequestFormStepFields = {
   lesson: ["lessonSlug"],
   location: ["locationSlug", "deliveryMode"],
-  details: ["studentLevel", "goal", "budgetMin", "budgetMax"],
+  details: ["studentLevel", "goal", "budgetMin", "budgetMax", "preferredWeekday", "preferredStartHour"],
   contact: ["studentName", "email", "phone", "contactPreference", "termsAccepted", "privacyAccepted"],
 } as const;
 
@@ -86,6 +91,12 @@ export const submitLessonRequestSchema = z.object({
   goal: z.string().min(10, "İhtiyacını en az 10 karakterle açıkla.").max(600, "İhtiyaç açıklaması 600 karakteri geçemez."),
   budgetMin: z.string().optional(),
   budgetMax: z.string().optional(),
+  preferredWeekday: z.string().optional().refine((value) => !value || ["1", "2", "3", "4", "5", "6", "7"].includes(value), {
+    message: "Gün tercihi geçersiz.",
+  }),
+  preferredStartHour: z.string().optional().refine((value) => !value || (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 23), {
+    message: "Saat tercihi geçersiz.",
+  }),
   studentName: z.string().min(2, "Ad soyad zorunlu."),
   email: z.email("Geçerli bir email gir."),
   phone: z.string().min(10, "Telefon zorunlu."),

@@ -220,6 +220,8 @@ export type Database = {
           goal: string | null;
           budget_min: number | null;
           budget_max: number | null;
+          preferred_weekday: number | null;
+          preferred_start_hour: number | null;
           contact_preference: "phone" | "site" | "both";
           consent_terms_at: string;
           consent_privacy_at: string;
@@ -256,6 +258,63 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["lesson_request_contacts"]["Insert"]>;
+      };
+      teacher_students: {
+        Row: {
+          id: string;
+          teacher_profile_id: string;
+          student_profile_id: string | null;
+          source_lesson_request_id: string | null;
+          name: string;
+          email: string | null;
+          phone: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["teacher_students"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["teacher_students"]["Insert"]>;
+      };
+      lessons: {
+        Row: {
+          id: string;
+          lesson_request_id: string | null;
+          teacher_profile_id: string;
+          teacher_student_id: string | null;
+          lesson_category_id: string;
+          delivery_mode: "online" | "face_to_face" | "both";
+          status: "scheduled" | "completed" | "cancelled" | "no_show";
+          scheduled_at: string | null;
+          duration_minutes: number;
+          price_amount: number;
+          currency: string;
+          notes: string | null;
+          cancelled_at: string | null;
+          cancellation_reason: string | null;
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["lessons"]["Row"],
+          "id" | "status" | "duration_minutes" | "price_amount" | "currency" | "created_at" | "updated_at"
+        > & {
+          id?: string;
+          status?: Database["public"]["Tables"]["lessons"]["Row"]["status"];
+          duration_minutes?: number;
+          price_amount?: number;
+          currency?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["lessons"]["Insert"]>;
       };
       reviews: {
         Row: {

@@ -1,4 +1,5 @@
 import type { ListResponse } from "@/shared/api/list-query";
+import type { TeacherAvailability, Weekday } from "@/features/availability/types";
 
 export type DeliveryModeFilter = "all" | "online" | "face_to_face" | "both";
 export type TeacherSort = "recommended" | "nearest" | "highest_rated" | "lowest_price" | "most_reviewed";
@@ -15,6 +16,9 @@ export type TeacherSearchParams = {
   minPrice?: number;
   maxPrice?: number;
   fastResponse?: boolean;
+  availabilityWeekday?: Weekday;
+  availabilityStartHour?: number;
+  availabilityEndHour?: number;
   page?: number;
   lat?: number;
   lng?: number;
@@ -41,6 +45,7 @@ export type TeacherSearchResult = {
   activeStudents?: number;
   gender?: "male" | "female";
   fastResponse?: boolean;
+  availability: TeacherAvailability;
   distanceKm?: number;
 };
 

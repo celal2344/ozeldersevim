@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getCurrentAccount } from "@/features/auth/service";
 import { trackEvent } from "@/features/analytics/track";
 import { submitLessonRequestSchema } from "@/features/requests/constants";
-import { deliveryModeAllowedForTeacher, lessonSlugFromName, optionalNumber } from "@/features/requests/utils";
+import { deliveryModeAllowedForTeacher, lessonSlugFromName, optionalInteger, optionalNumber } from "@/features/requests/utils";
 import { getTeacherProfileBySlug } from "@/features/teachers/service";
 import { createSupabaseServerClient } from "@/shared/db/supabase/server";
 import { rateLimitResponse } from "@/shared/rate-limit/response";
@@ -113,6 +113,8 @@ export async function POST(request: Request) {
         goal: input.goal,
         budget_min: optionalNumber(input.budgetMin),
         budget_max: optionalNumber(input.budgetMax),
+        preferred_weekday: optionalInteger(input.preferredWeekday),
+        preferred_start_hour: optionalInteger(input.preferredStartHour),
         contact_preference: input.contactPreference,
         consent_terms_at: now,
         consent_privacy_at: now,

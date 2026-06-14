@@ -1,3 +1,4 @@
+import { getTeacherAvailabilityByProfileIds } from "@/features/availability/service";
 import type { TeacherProfile, TeacherProfileReview } from "@/features/teachers/types";
 import { createSupabaseServerClient } from "@/shared/db/supabase/server";
 
@@ -94,9 +95,10 @@ async function getPublishedTeacherData(slug?: string): Promise<PublishedTeacherD
     throw new Error(locationError.message);
   }
 
-  const [lessonData, reviewsByTeacherProfileId] = await Promise.all([
+  const [lessonData, reviewsByTeacherProfileId, availabilityByProfileId] = await Promise.all([
     getLessonsForTeacherProfiles(teacherProfileIds),
     getReviewsForTeacherProfiles(teacherProfileIds),
+    getTeacherAvailabilityByProfileIds(profileIds),
   ]);
 
   const profileById = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
@@ -141,6 +143,7 @@ async function getPublishedTeacherData(slug?: string): Promise<PublishedTeacherD
           activeStudentCount: 0,
           completedLessonCount: 0,
           isVerified: false,
+          availability: availabilityByProfileId.get(teacher.profile_id) ?? { weeklySlots: [], exceptions: [] },
           reviews: reviewsByTeacherProfileId.get(teacher.id) ?? [],
         };
       })

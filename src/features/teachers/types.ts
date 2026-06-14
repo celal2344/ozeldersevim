@@ -1,3 +1,5 @@
+import type { TeacherAvailability } from "@/features/availability/types";
+
 export type TeacherProfileReview = {
   id: string;
   studentName: string;
@@ -32,5 +34,6 @@ export type TeacherProfile = {
   isVerified: boolean;
   gender?: "male" | "female";
   fastResponse?: boolean;
+  availability: TeacherAvailability;
   reviews: TeacherProfileReview[];
 };

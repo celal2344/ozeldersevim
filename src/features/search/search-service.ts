@@ -1,10 +1,12 @@
 import { getLessonCategoryOptions, getLocationOptions } from "@/features/teacher-listings/service";
 import { slugifyTurkish } from "@/features/teacher-listings/utils";
 import { getPublishedTeacherProfiles } from "@/features/teachers/service";
+import { availabilityMatchesFilter } from "@/features/availability/utils";
 import { paginateItems, parsePaginationParams } from "@/shared/api/list-query";
 import { hasSupabasePublicEnv } from "@/shared/config/env";
 
 import type { TeacherSearchParams, TeacherSearchResponse, TeacherSearchResult } from "./types";
+import type { Weekday } from "@/features/availability/types";
 
 const TEACHER_SEARCH_PAGE_SIZE = 6;
 
@@ -22,6 +24,11 @@ function toNumber(value: string | null) {
   if (!value) return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function toWeekday(value: string | null): Weekday | undefined {
+  const parsed = toNumber(value);
+  return parsed && parsed >= 1 && parsed <= 7 ? (parsed as Weekday) : undefined;
 }
 
 function getDistanceKm(
@@ -52,6 +59,9 @@ export function parseTeacherSearchParams(searchParams: URLSearchParams): Teacher
     minPrice: toNumber(searchParams.get("minPrice")),
     maxPrice: toNumber(searchParams.get("maxPrice")),
     fastResponse: searchParams.get("fastResponse") === "1",
+    availabilityWeekday: toWeekday(searchParams.get("availabilityWeekday")),
+    availabilityStartHour: toNumber(searchParams.get("availabilityStartHour")),
+    availabilityEndHour: toNumber(searchParams.get("availabilityEndHour")),
     ...parsePaginationParams(searchParams, { pageSize: TEACHER_SEARCH_PAGE_SIZE }),
     lat: toNumber(searchParams.get("lat")),
     lng: toNumber(searchParams.get("lng")),
@@ -80,6 +90,7 @@ function teacherToSearchResult(teacher: Awaited<ReturnType<typeof getPublishedTe
     completedLessons: teacher.completedLessonCount,
     activeStudents: teacher.activeStudentCount,
     fastResponse: false,
+    availability: teacher.availability,
     distanceKm: hasLocation
       ? getDistanceKm(
           { lat: params.lat as number, lng: params.lng as number },
@@ -119,6 +130,9 @@ function searchMeta(params: TeacherSearchParams) {
       ...(params.minPrice !== undefined ? { minPrice: params.minPrice } : {}),
       ...(params.maxPrice !== undefined ? { maxPrice: params.maxPrice } : {}),
       ...(params.fastResponse ? { fastResponse: true } : {}),
+      ...(params.availabilityWeekday ? { availabilityWeekday: params.availabilityWeekday } : {}),
+      ...(params.availabilityStartHour !== undefined ? { availabilityStartHour: params.availabilityStartHour } : {}),
+      ...(params.availabilityEndHour !== undefined ? { availabilityEndHour: params.availabilityEndHour } : {}),
     },
   };
 }
@@ -165,6 +179,16 @@ export async function searchTeachers(params: TeacherSearchParams): Promise<Teach
     if (params.maxPrice !== undefined && teacher.hourlyPrice > params.maxPrice) return false;
     if (params.gender && params.gender !== "all") return false;
     if (params.fastResponse) return false;
+    if (
+      params.availabilityWeekday &&
+      !availabilityMatchesFilter(teacher.availability, {
+        weekday: params.availabilityWeekday,
+        startHour: params.availabilityStartHour,
+        endHour: params.availabilityEndHour,
+      })
+    ) {
+      return false;
+    }
 
     return true;
   });

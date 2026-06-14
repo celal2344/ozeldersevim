@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import type { TeacherProfile } from "@/features/teachers/types";
+import { AvailabilityPreview } from "@/features/availability/availability-preview";
 import {
   teacherDeliveryLabel,
   teacherInitials,
@@ -159,6 +160,14 @@ export function TeacherProfileView({ teacher }: { teacher: TeacherProfile }) {
                 </span>
               ))}
             </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-100 bg-white p-7 shadow-sm">
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-brand-navy">
+              <span className="h-5 w-1 rounded-full bg-emerald-500" />
+              Haftalık Müsaitlik
+            </h2>
+            <AvailabilityPreview availability={teacher.availability} />
           </div>
 
           {/* Reviews */}
